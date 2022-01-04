@@ -1,3 +1,2 @@
 # Sobok-Server
---------------------------------------
-소복소복 귀요미 둘:snowman::pill:
+:snowman:소복소복 귀요미 둘:snowman::pill:
