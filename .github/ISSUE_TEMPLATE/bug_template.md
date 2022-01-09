@@ -1,12 +1,3 @@
----
-name: BUG_TEMPLATE
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: ''
-
----
-
 <!-- 소복소복 Bug 템플릿 -->
 
 ### 🚨 에러 및 버그 요약
