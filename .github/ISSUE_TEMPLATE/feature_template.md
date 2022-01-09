@@ -1,12 +1,3 @@
----
-name: FEATURE_TEMPLATE
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: ''
-
----
-
 <!-- 소복소복 Feature 템플릿 -->
 
 ### 💊 이슈 요약
