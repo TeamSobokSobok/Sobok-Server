@@ -9,9 +9,9 @@ const { firebaseAuth } = require('../../../config/firebaseClient');
 const jwtHandlers = require('../../../lib/jwtHandlers');
 
 module.exports = async (req, res) => {
-  const { email, password, uid } = req.body;
+  const { email, password } = req.body;
 
-  if (!email || !password || !uid) {
+  if (!email || !password) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
 
@@ -39,14 +39,14 @@ module.exports = async (req, res) => {
       }
     }
 
-    // const {
-    //   user: { uid: idFirebase },
-    // } = userFirebase;
+    const {
+      user: { uid: idFirebase },
+    } = userFirebase;
     // const idFirebase = userFirebase.user.uid; 랑 같음
 
-    const findUser = await userDB.getUserByUid(client, uid);
+    //const findUser = await userDB.getUserByUid(client, uid);
 
-    //const user = await userDB.getUserByIdFirebase(client, idFirebase);
+    const findUser = await userDB.getUserByUid(client, idFirebase);
 
     //const { accesstoken } = jwtHandlers.sign(user);
 
