@@ -27,4 +27,17 @@ const getUserByUid = async (client, uid) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
-module.exports = { addUser, getUserByUid };
+
+const getUserById = async (client, userId) => {
+  const { rows } = await client.query(
+    `
+    SELETE * FROM "user"
+    WHERE id = $1
+
+    `,
+    [userId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
+module.exports = { addUser, getUserByUid, getUserById };
