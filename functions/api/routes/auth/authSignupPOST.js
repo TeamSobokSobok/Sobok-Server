@@ -9,9 +9,9 @@ const { userDB } = require('../../../db');
 const jwtHandlers = require('../../../lib/jwtHandlers');
 
 module.exports = async (req, res) => {
-  const { email, nickname, password } = req.body;
+  const { email, name, password } = req.body;
 
-  if (!email || !nickname || !password) {
+  if (!email || !name || !password) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
 
@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
 
     const userFirebase = await admin
       .auth()
-      .createUser({ email, password, nickname })
+      .createUser({ email, password, name })
       .then((user) => user)
       .catch((e) => {
         console.log(e);
@@ -41,14 +41,13 @@ module.exports = async (req, res) => {
 
     const idFirebase = userFirebase.uid;
 
-    const user = (email, nickname, idFirebase);
+    const user = await userDB.addUser(client, email, name, idFirebase);
     const { accesstoken } = jwtHandlers.sign(user);
+    await userDB.setUserToken(client, user, accesstoken);
 
-    const newUser = await userDB.addUser(client, email, nickname, idFirebase, accesstoken);
+    console.log(user);
 
-    //console.log(user);
-
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.CREATED_USER, newUser));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.CREATED_USER, { user, accesstoken }));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
