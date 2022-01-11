@@ -46,9 +46,9 @@ module.exports = async (req, res) => {
 
     //const findUser = await userDB.getUserByUid(client, uid);
 
-    const findUser = await userDB.getUserByUid(client, idFirebase);
+    const findUser = await userDB.findUserByIdFirebase(client, idFirebase);
 
-    //const { accesstoken } = jwtHandlers.sign(user);
+    //const { accesstoken } = jwtHandlers.sign(findUser);
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.LOGIN_SUCCESS, findUser));
   } catch (error) {
