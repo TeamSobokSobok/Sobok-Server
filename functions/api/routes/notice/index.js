@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/:pillId', require('./pillInfoGET'));
+router.get('/', require('./pillInfoGET'));
 
 module.exports = router;
