@@ -91,12 +91,21 @@ module.exports = async (req, res) => {
         }
       }
 
-      let newSendPill = await sendPillDB.addSendSchedule(client, newPill[0].id, user.id, receiverId);
+      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, receiverId);
       sendPillInfo.push(newSendPill);
     }
 
+    const receiverName = await sendPillDB.getReceiverNameById(client, receiverId);
+
     // 성공
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_TRANSMIT_SUCCESS, sendPillInfo));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_TRANSMIT_SUCCESS,
+      {
+        "senderId" : user.id,
+        "senderName" : user.username,
+        "receiverId" : receiverId,
+        "receiverName" : receiverName.username,
+        "sendPillInfo" : sendPillInfo
+      }));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
