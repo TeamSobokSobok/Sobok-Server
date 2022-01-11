@@ -21,6 +21,9 @@ module.exports = {
   TOKEN_INVALID: '토큰이 유효하지 않습니다.',
   TOKEN_EMPTY: '토큰이 없습니다.',
 
+  // 그룹
+  READ_ALL_GROUP: '그룹 정보 불러오기 성공',
+
   // 약추가
   PILL_ADDITION_SUCCESS: '약 추가 성공',
   PILL_COUNT_OVER: '약 추가 가능 개수 초과'
