@@ -6,7 +6,7 @@ const db = require('../../../db/db');
 const { groupDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  let user = req.header.user;
+  const user = req.header.user;
   let client;
 
   try {
@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
 
     const member = await groupDB.findMember(client, user.id);
 
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_MENU_SUCCESS, member));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_GROUP, member));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
