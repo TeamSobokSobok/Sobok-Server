@@ -4,4 +4,5 @@ module.exports = {
   groupDB: require('./group'),
   pillDB: require('./pill'),
   scheduleDB: require('./schedule'),
+  sendPillDB: require('./sendPill'),
 };
