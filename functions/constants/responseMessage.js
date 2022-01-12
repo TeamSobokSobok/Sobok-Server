@@ -24,6 +24,9 @@ module.exports = {
   // 그룹
   READ_ALL_GROUP: '그룹 정보 불러오기 성공',
 
+  // 스케줄
+  READ_MEMBER_CALENDAR: '멤버 캘린더 조회 성공',
+
   // 약추가
   PILL_ADDITION_SUCCESS: '약 추가 성공',
   PILL_COUNT_OVER: '약 추가 가능 개수 초과',

@@ -4,6 +4,8 @@ const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 
+const { sendPillDB } = require('../../../db');
+
 module.exports = async (req, res) => {
   let senderId = req.param('senderId');
   let receiverId = req.param('receiverId');
@@ -12,6 +14,8 @@ module.exports = async (req, res) => {
 
   try {
     client = await db.connect(req);
+
+    const pillId = await sendPillDB.getReceiverNameById(client, )
     
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
