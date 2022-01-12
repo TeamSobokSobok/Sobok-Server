@@ -87,10 +87,18 @@
  2. 함수에 대한 주석
   ```javascript
     /**
-    * api get /group/:member
-    * 그룹 멤버 가져오기
-
+    * api get /travel/:groupNumber
+    * 그룹 여행 정보 가져오기
+  ```
+ 3. Bracket 사용 시 내부에 주석을 작성한다.
+  ```javascript
+    if (a == 5) {
+	  // 주석
+    }
+  ```
+ 
 </div>
+</details>
       
 ## 💬 Commit Message Rules
 | 태그 이름  |                             설명                             |
