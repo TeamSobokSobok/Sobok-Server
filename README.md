@@ -56,6 +56,39 @@
 ```
 
 ## 💻 Code Convention
+<details>
+<summary>변수명</summary>   
+<div markdown="1">       
+      
+ 
+ 1. Camel Case 사용 
+   - lower Camel Case
+ 2. 함수의 경우 동사+명사 사용 
+   - ex) getCalender()
+ 3. flag로 사용 되는 변수는 조동사 + flag 종류로 구성 
+   - ex) isNum
+ 4. 약어는 되도록 사용하지 않는다.
+ 
+</div>
+</details>
+
+<details>
+<summary>주석</summary>
+<div markdown="1">       
+
+ 1. 한줄 주석은 // 를 사용한다.
+  ```javascript
+    // 한줄 주석일 때
+    /**
+    * 여러줄
+    * 주석일 때
+    */
+  ```
+ 2. 함수에 대한 주석
+  ```javascript
+    /**
+    * api get /group/:member
+    * 그룹 멤버 가져오기
 
 ## 💬 Commit Message Rules
 | 태그 이름  |                             설명                             |
