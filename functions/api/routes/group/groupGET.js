@@ -7,12 +7,11 @@ const { groupDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const user = req.header.user;
+
   let client;
 
   try {
     client = await db.connect(req);
-
-    console.log(user.id);
 
     const member = await groupDB.findMember(client, user.id);
 
