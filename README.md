@@ -1,5 +1,7 @@
 
 ## 프로젝트
+![image](![Group 1336 (1)](https://user-images.githubusercontent.com/68781598/149136415-fe9f88d3-0eca-4727-ba0c-8d32e0dce712.png)
+)
 > 소복소복, 소중한 사람과 함께하는 복약 체크서비스:pill:
 
 ## 개발 담당
