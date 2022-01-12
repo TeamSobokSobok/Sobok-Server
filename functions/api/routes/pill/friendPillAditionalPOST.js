@@ -7,8 +7,10 @@ const db = require('../../../db/db');
 
 const { pillDB } = require('../../../db');
 const { scheduleDB } = require('../../../db');
+const { sendPillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
+  const { receiverId } = req.params;
   const { pillList } = req.body;
   const { user } = req.header;
   const week = new Array('일', '월', '화', '수', '목', '금', '토');
@@ -23,19 +25,19 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     // 사용자가 추가 가능한 약 개수 확인
-    const pillCount = await pillDB.getPillCountById(client, user.id);
+    const pillCount = await pillDB.getPillCountById(client, receiverId);
     const possiblePillCount = 5 - pillCount[0].count;
 
     if (possiblePillCount < pillList.length) {
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
     }
-    
+
     let pill;
+    let sendPillInfo = [];
     // 약 리스트에서 약 하나씩 순회, 약 정보 db에 저장 ()
     for (index = 0; index < pillList.length; index++) {
       pill = pillList[index];
-      newPill = await pillDB.addPill(client, pill.pillName, user.id, pill.color, false);
-
+      newPill = await pillDB.addPill(client, pill.pillName, null, pill.color, false);
 
       // 약 주기 정보 날짜별로 db에 저장
       let startDate = new Date(pill.start);
@@ -45,7 +47,7 @@ module.exports = async (req, res) => {
       if (pill.cycle === "1") {
         for (day = 0; day < term; day++) {
           for(t = 0; t < pill.time.length; t++) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
           }
           startDate.setDate(startDate.getDate() + 1);
         }
@@ -58,7 +60,7 @@ module.exports = async (req, res) => {
           for (d = 0; d < dayList.length; d++) {
             if (week[startDate.getDay()] === dayList[d]) {
               for(t = 0; t < pill.time.length; t++) {
-                newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+                newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
               }
               break;
             }
@@ -74,7 +76,7 @@ module.exports = async (req, res) => {
         if (specificCycle === 'day') {
           while (startDate < endDate) {
             for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber));
           }
@@ -83,7 +85,7 @@ module.exports = async (req, res) => {
         if (specificCycle === 'week') {
           while (startDate < endDate) {
             for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber) * 7);
           }
@@ -92,16 +94,28 @@ module.exports = async (req, res) => {
         if (specificCycle === 'month') {
           while (startDate < endDate) {
             for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setMonth(startDate.getMonth() + Number(specificNumber));
           }
         }
       }
+
+      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, receiverId);
+      sendPillInfo.push(newSendPill);
     }
 
+    const receiverName = await sendPillDB.getReceiverNameById(client, receiverId);
+
     // 성공
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_ADDITION_SUCCESS));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_TRANSMIT_SUCCESS,
+      {
+        "senderId" : user.id,
+        "senderName" : user.username,
+        "receiverId" : receiverId,
+        "receiverName" : receiverName.username,
+        "sendPillInfo" : sendPillInfo
+      }));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);

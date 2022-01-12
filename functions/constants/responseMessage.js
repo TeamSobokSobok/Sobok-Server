@@ -26,5 +26,7 @@ module.exports = {
 
   // 약추가
   PILL_ADDITION_SUCCESS: '약 추가 성공',
-  PILL_COUNT_OVER: '약 추가 가능 개수 초과'
+  PILL_COUNT_OVER: '약 추가 가능 개수 초과',
+  PILL_TRANSMIT_SUCCESS: '약 전송 성공',
+  PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공'
 };
