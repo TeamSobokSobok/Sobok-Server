@@ -5,5 +5,6 @@ const router = express.Router();
 router.use('/auth', require('./auth'));
 router.use('/group', require('./group'));
 router.use('/pill', require('./pill'));
+router.use('/schedule', require('./schedule'));
 
 module.exports = router;
