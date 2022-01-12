@@ -44,7 +44,9 @@ module.exports = async (req, res) => {
       const term = Math.abs(endDate - startDate) / (1000 * 3600 * 24) + 1;
       if (pill.cycle === "1") {
         for (day = 0; day < term; day++) {
-          newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time);
+          for(t = 0; t < pill.time.length; t++) {
+            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+          }
           startDate.setDate(startDate.getDate() + 1);
         }
       }
@@ -55,7 +57,9 @@ module.exports = async (req, res) => {
         for (day = 0; day < term; day++) {
           for (d = 0; d < dayList.length; d++) {
             if (week[startDate.getDay()] === dayList[d]) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time);
+              for(t = 0; t < pill.time.length; t++) {
+                newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              }
               break;
             }
           }
@@ -69,21 +73,27 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'day') {
           while (startDate < endDate) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time);
+            for(t = 0; t < pill.time.length; t++) {
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            }
             startDate.setDate(startDate.getDate() + Number(specificNumber));
           }
         }
 
         if (specificCycle === 'week') {
           while (startDate < endDate) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time);
+            for(t = 0; t < pill.time.length; t++) {
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            }
             startDate.setDate(startDate.getDate() + Number(specificNumber) * 7);
           }
         }
 
         if (specificCycle === 'month') {
           while (startDate < endDate) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time);
+            for(t = 0; t < pill.time.length; t++) {
+              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            }
             startDate.setMonth(startDate.getMonth() + Number(specificNumber));
           }
         }
