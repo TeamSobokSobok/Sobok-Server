@@ -15,7 +15,7 @@ const addSchedule = async (client, pillId, userId, start, end, cycle, date, spec
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const findScheduleByMemberId = async (client, memberId, startDate, endDate) => {
+const findCalendarByMemberId = async (client, memberId, startDate, endDate) => {
   const { rows } = await client.query(
     `
     SELECT schedule_date
@@ -30,4 +30,32 @@ const findScheduleByMemberId = async (client, memberId, startDate, endDate) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
-module.exports = { addSchedule, findScheduleByMemberId };
+
+const findScheduleByMemberId = async (client, memberId, date, scheduleTime) => {
+  const { rows } = await client.query(
+    `
+    SELECT schedule.id as schedule_id, pill_id, pill_name, schedule_time, is_check, color, sticker_img
+    FROM schedule
+    LEFT JOIN pill ON schedule.pill_id = pill.id
+    LEFT JOIN like_schedule on schedule.id = like_schedule.schedule_id
+    LEFT JOIN sticker on sticker_id = sticker.id
+    WHERE schedule.user_id = $1 AND schedule_date = $2 AND schedule_time = $3
+
+  `,
+    [memberId, date, scheduleTime],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+const findScheduleTime = async (client, memberId, date) => {
+  const { rows } = await client.query(
+    `
+    SELECT schedule_time FROM schedule
+    WHERE user_id = $1 AND schedule_date = $2
+    GROUP BY schedule_time;
+    `,
+    [memberId, date],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+module.exports = { addSchedule, findCalendarByMemberId, findScheduleByMemberId, findScheduleTime };
