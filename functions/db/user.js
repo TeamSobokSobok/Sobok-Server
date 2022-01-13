@@ -78,6 +78,18 @@ const setUserToken = async (client, user, accessToken) => {
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
+const findUserByName = async (client, username) => {
+  const { rows } = await client.query(
+    `
+    SELECT id as user_id, username FROM "user"
+    WHERE username = $1
+
+    `,
+    [username],
+   );
+  return convertSnakeToCamel.keysToCamel(rows);
+};  
+    
 const findUserNameById = async (client, userId) => {
   const { rows } = await client.query(
     `
@@ -89,4 +101,4 @@ const findUserNameById = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addUser, findUserById, findUserByIdFirebase, findUserByEmail, setUserToken, findUserNameById };
+module.exports = { addUser, findUserById, findUserByIdFirebase, findUserByEmail, setUserToken, findUserByName, findUserNameById };
