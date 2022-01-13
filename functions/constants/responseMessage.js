@@ -27,6 +27,7 @@ module.exports = {
   UPDATE_MEMBER_NAME: '그룹 멤버 이름 수정 성공',
 
   // 스케줄
+  READ_MY_CALENDAR: '내 캘린더 조회 성공',
   READ_MEMBER_CALENDAR: '멤버 캘린더 조회 성공',
   READ_MEMBER_SCHEDULE: '멤버 약 스케줄 조회 성공',
 
