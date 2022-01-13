@@ -38,9 +38,9 @@ module.exports = async (req, res) => {
     let sendPillInfo = [];
 
     // 약 리스트에서 약 하나씩 순회, 약 정보 db에 저장 ()
-    for (index = 0; index < pillList.length; index++) {
+    for (let index = 0; index < pillList.length; index++) {
       pill = pillList[index];
-      newPill = await pillDB.addPill(client, pill.pillName, null, pill.color, false);
+      let newPill = await pillDB.addPill(client, pill.pillName, null, pill.color, false);
 
       // 약 주기 정보 날짜별로 db에 저장
       let startDate = new Date(pill.start);
@@ -48,9 +48,9 @@ module.exports = async (req, res) => {
 
       const term = Math.abs(endDate - startDate) / (1000 * 3600 * 24) + 1;
       if (pill.cycle === '1') {
-        for (day = 0; day < term; day++) {
-          for (t = 0; t < pill.time.length; t++) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+        for (let day = 0; day < term; day++) {
+          for (let t = 0; t < pill.time.length; t++) {
+            let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
           }
           startDate.setDate(startDate.getDate() + 1);
         }
@@ -59,11 +59,11 @@ module.exports = async (req, res) => {
       if (pill.cycle === '2') {
         let dayList = pill.day.split(', ');
 
-        for (day = 0; day < term; day++) {
-          for (d = 0; d < dayList.length; d++) {
+        for (let day = 0; day < term; day++) {
+          for (let d = 0; d < dayList.length; d++) {
             if (week[startDate.getDay()] === dayList[d]) {
-              for (t = 0; t < pill.time.length; t++) {
-                newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              for (let t = 0; t < pill.time.length; t++) {
+                let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
               }
               break;
             }
@@ -78,8 +78,8 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'day') {
           while (startDate < endDate) {
-            for (t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber));
           }
@@ -87,8 +87,8 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'week') {
           while (startDate < endDate) {
-            for (t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber) * 7);
           }
@@ -96,8 +96,8 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'month') {
           while (startDate < endDate) {
-            for (t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, null, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setMonth(startDate.getMonth() + Number(specificNumber));
           }

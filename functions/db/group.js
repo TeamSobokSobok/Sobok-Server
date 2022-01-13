@@ -14,6 +14,16 @@ const findMember = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findAllMemberByUserId = async (client, userId) => {
+  const { rows } = await client.query(
+    `
+    SELECT s.id as group_id, s.user_id, u.username, s.is_okay, s.is_send, s.created_at
+    FROM send_group as s
+    left join "user" u on u.id = s.user_id
+    WHERE s.member_id = $1
+    `,
+    [userId],
+
 const updateMemberName = async (client, memberName, groupId) => {
   const { rows } = await client.query(
     `
@@ -28,4 +38,4 @@ const updateMemberName = async (client, memberName, groupId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { findMember, updateMemberName };
+module.exports = { findMember, findAllMemberByUserId, updateMemberName };
