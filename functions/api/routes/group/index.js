@@ -3,6 +3,6 @@ const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
 router.get('/', checkUser, require('./groupGET'));
-router.put('/name/:groupId', checkUser, require('./groupNamePUT'));
+router.put('/:groupId/name', checkUser, require('./groupByGroupIdNamePUT'));
 
 module.exports = router;
