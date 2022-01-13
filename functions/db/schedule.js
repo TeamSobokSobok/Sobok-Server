@@ -15,6 +15,34 @@ const addSchedule = async (client, pillId, userId, start, end, cycle, date, spec
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const addLikeSchedule = async (client, scheduleId, senderId, stickerId) => {
+  const { rows } = await client.query(
+    `
+      INSERT INTO "like_schedule"
+      (schedule_id, sender_id, sticker_id)
+      VALUES
+      ($1, $2, $3)
+      RETURNING *
+      `,
+    [scheduleId, senderId, stickerId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
+const updateSticker = async (client, likeScheduleId, stickerId) => {
+  const { rows } = await client.query(
+    `
+    UPDATE like_schedule
+    SET sticker_id = $1, updated_at = now()
+    WHERE id = $2
+    RETURNING id as likeSchedule_id, schedule_id, sender_id, sticker_id, created_at, updated_at 
+    
+    `,
+    [stickerId, likeScheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 const findCalendarByMemberId = async (client, memberId, startDate, endDate) => {
   const { rows } = await client.query(
     `
@@ -120,6 +148,18 @@ const findUserLikeScheduleList = async (client, userId) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
+
+const findLikeScheduleById = async (client, likeScheduleId) => {
+  const { rows } = await client.query(
+    `
+    SELECT * FROM like_schedule
+    WHERE id = $1
+    `,
+    [likeScheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
 const isLikedSchedule = async (client, likeScheduleList, userLikeScheduleList) => {
   const isContainSchedule = (userLikeScheduleList) => userLikeScheduleList === likeScheduleList;
   return userLikeScheduleList.some(isContainSchedule);
@@ -127,6 +167,8 @@ const isLikedSchedule = async (client, likeScheduleList, userLikeScheduleList) =
 
 module.exports = {
   addSchedule,
+  addLikeSchedule,
+  updateSticker,
   findCalendarByMemberId,
   findScheduleByMemberId,
   findScheduleTime,
@@ -135,5 +177,6 @@ module.exports = {
   acceptPillByPillId,
   findLikeSchedule,
   findUserLikeScheduleList,
+  findLikeScheduleById,
   isLikedSchedule,
 };

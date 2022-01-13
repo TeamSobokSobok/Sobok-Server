@@ -1,6 +1,7 @@
 module.exports = {
   NULL_VALUE: '필요한 값이 없습니다',
   OUT_OF_VALUE: '파라미터 값이 잘못되었습니다',
+  NO_AUTHENTICATED: '접근 권한이 없습니다',
 
   // 회원가입
   CREATED_USER: '회원 가입 성공',
@@ -46,4 +47,6 @@ module.exports = {
   // 스티커
   READ_ALL_STICKER: '스티커 전체 조회 성공',
   READ_ALL_SEND_STICKER: '전송받은 스티커 전체 조회 성공',
+  CREATED_STICKER: '스티커 전송 성공',
+  UPDATE_STICKER: '스티커 수정 성공',
 };
