@@ -6,9 +6,9 @@ const db = require('../../../db/db');
 const { sendPillDB, scheduleDB, pillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  const senderId = req.param('senderId');
-  const receiverId = req.param('receiverId');
-  const createdAt = req.param('createdAt');
+  const { senderId } = req.query;
+  const { receiverId } = req.query;
+  const { createdAt } = req.query;
   const { isOkay } = req.body;
 
   let client;
