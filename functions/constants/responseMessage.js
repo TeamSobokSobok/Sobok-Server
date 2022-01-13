@@ -23,6 +23,7 @@ module.exports = {
 
   // 그룹
   READ_ALL_GROUP: '그룹 정보 불러오기 성공',
+  READ_USER_NAME: '유저 이름 불러오기 성공',
 
   // 스케줄
   READ_MEMBER_CALENDAR: '멤버 캘린더 조회 성공',
