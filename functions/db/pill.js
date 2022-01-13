@@ -10,7 +10,7 @@ const addPill = async (client, pillName, userId, color, isStop) => {
     ($1, $2, $3, $4)
     RETURNING *
     `,
-    [pillName, userId, color, isStop]
+    [pillName, userId, color, isStop],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
@@ -24,9 +24,9 @@ const getPillById = async (client, pillId) => {
     [pillId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
-}
+};
 
-const getPillCountById = async(client, userId) => {
+const getPillCountById = async (client, userId) => {
   const { rows } = await client.query(
     `
     SELECT COUNT(user_id) FROM "pill"
@@ -35,6 +35,18 @@ const getPillCountById = async(client, userId) => {
     [userId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
-}
+};
 
-module.exports = { addPill, getPillById, getPillCountById }
+const acceptPillByPillId = async (client, receiverId, pillId) => {
+  const { rows } = await client.query(
+    `
+    UPDATE pill
+    SET user_id = $1
+    WHERE id = $2 AND user_id is null
+    `,
+    [receiverId, pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId };
