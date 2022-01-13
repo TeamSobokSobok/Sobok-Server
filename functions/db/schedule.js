@@ -43,7 +43,7 @@ const findScheduleByMemberId = async (client, memberId, date, scheduleTime) => {
 
   `,
     [memberId, date, scheduleTime],
-   );
+  );
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
@@ -95,4 +95,45 @@ const acceptPillByPillId = async (client, receiverId, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addSchedule, findCalendarByMemberId, findScheduleByMemberId, findScheduleTime, findScheduleByPillId, findScheduleTimeByPillId, acceptPillByPillId };
+const findLikeSchedule = async (client, scheduleId) => {
+  const { rows } = await client.query(
+    `
+    SELECT like_schedule.id as like_schedule_id, schedule_id, sticker_img, username FROM like_schedule
+    LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
+    LEFT JOIN "user" ON "user".id = like_schedule.sender_id
+    WHERE schedule_id = $1
+    ORDER BY like_schedule.updated_at DESC
+
+    `,
+    [scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+const findUserLikeScheduleList = async (client, userId) => {
+  const { rows } = await client.query(
+    `
+    SELECT * FROM like_schedule
+    WHERE sender_id = $1
+    `,
+    [userId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+const isLikedSchedule = async (client, likeScheduleList, userLikeScheduleList) => {
+  const isContainSchedule = (userLikeScheduleList) => userLikeScheduleList === likeScheduleList;
+  return userLikeScheduleList.some(isContainSchedule);
+};
+
+module.exports = {
+  addSchedule,
+  findCalendarByMemberId,
+  findScheduleByMemberId,
+  findScheduleTime,
+  findScheduleByPillId,
+  findScheduleTimeByPillId,
+  acceptPillByPillId,
+  findLikeSchedule,
+  findUserLikeScheduleList,
+  isLikedSchedule,
+};

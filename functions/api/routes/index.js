@@ -7,5 +7,6 @@ router.use('/group', require('./group'));
 router.use('/pill', require('./pill'));
 router.use('/notice', require('./notice'));
 router.use('/schedule', require('./schedule'));
+router.use('/sticker', require('./sticker'));
 
 module.exports = router;

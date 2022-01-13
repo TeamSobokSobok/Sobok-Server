@@ -38,4 +38,7 @@ module.exports = {
   PILL_GET_SUCCESS: '약 조회 성공',
   PILL_ACCEPT_SUCCESS: '약 받기 성공',
   PILL_REFUSE_SUCCESS: '약 거절 성공',
+
+  // 스티커
+  READ_ALL_STICKER: '스티커 전체 조회 성공',
 };
