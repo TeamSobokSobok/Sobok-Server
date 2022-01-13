@@ -38,10 +38,10 @@ const findScheduleByPillId = async (client, pillId) => {
     FROM schedule as s LEFT OUTER JOIN pill as p ON s.pill_id = p.id
     WHERE p.id = $1;
     `,
-    [pillId]
+    [pillId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
-}
+};
 
 const findScheduleTimeByPillId = async (client, pillId) => {
   const { rows } = await client.query(
@@ -50,8 +50,21 @@ const findScheduleTimeByPillId = async (client, pillId) => {
     FROM schedule as s LEFT OUTER JOIN pill as p ON s.pill_id = p.id
     WHERE p.id = $1;
     `,
-    [pillId]
+    [pillId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
-}
-module.exports = { addSchedule, findScheduleByMemberId, findScheduleByPillId, findScheduleTimeByPillId };
+};
+
+const acceptPillByPillId = async (client, receiverId, pillId) => {
+  const { rows } = await client.query(
+    `
+    UPDATE schedule
+    SET user_id = $1
+    WHERE pill_id = $2
+    `,
+    [receiverId, pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addSchedule, findScheduleByMemberId, findScheduleByPillId, findScheduleTimeByPillId, acceptPillByPillId };
