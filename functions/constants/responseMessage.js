@@ -41,4 +41,5 @@ module.exports = {
 
   // 스티커
   READ_ALL_STICKER: '스티커 전체 조회 성공',
+  READ_ALL_SEND_STICKER: '전송받은 스티커 전체 조회 성공',
 };
