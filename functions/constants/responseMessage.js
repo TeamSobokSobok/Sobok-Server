@@ -33,6 +33,8 @@ module.exports = {
   PILL_TRANSMIT_SUCCESS: '약 전송 성공',
   PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공',
 
-  // 약 조회
-  PILL_GET_SUCCESS: '약 조회 성공'
+  // 알림
+  PILL_GET_SUCCESS: '약 조회 성공',
+  PILL_ACCEPT_SUCCESS: '약 받기 성공',
+  PILL_REFUSE_SUCCESS: '약 거절 성공',
 };
