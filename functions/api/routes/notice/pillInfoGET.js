@@ -5,6 +5,7 @@ const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 
 const { sendPillDB } = require('../../../db');
+const { scheduleDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   let senderId = req.param('senderId');
@@ -15,7 +16,22 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    const pillId = await sendPillDB.getReceiverNameById(client, )
+    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId);
+    let pillData = [];
+
+    for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
+      let pillInfo = await scheduleDB.findScheduleByPillId(client, pillId[pillCount].pillId);
+      let pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId[pillCount].pillId);
+      let scheduleTime = [];
+
+      pillData.push(pillInfo[0]);
+      for (let timeCount = 0; timeCount < pillTime.length; timeCount++) {
+        scheduleTime.push(pillTime[timeCount].scheduleTime);
+      }
+      pillData[pillCount].scheduleTime = scheduleTime;
+    }
+
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillData));
     
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
