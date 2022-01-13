@@ -5,4 +5,5 @@ module.exports = {
   pillDB: require('./pill'),
   scheduleDB: require('./schedule'),
   sendPillDB: require('./sendPill'),
+  stickerDB: require('./sticker'),
 };

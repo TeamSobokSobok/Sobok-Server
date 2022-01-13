@@ -66,7 +66,7 @@ const refuseSendPillByPillId = async (client, pillId) => {
 const getSenderIdByReceiverId = async (client, receiverId) => {
   const { rows } = await client.query(
     `
-    SELECT DISTINCT sender_id FROM send_pill
+    SELECT DISTINCT sender_id, receiver_id, is_okay, is_send, created_at FROM send_pill
     WHERE receiver_id = $1
     `,
     [receiverId],
