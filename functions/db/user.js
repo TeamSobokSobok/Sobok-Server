@@ -8,9 +8,8 @@ const addUser = async (client, email, username, idFirebase) => {
     (email, username, id_firebase)
     VALUES
     ($1, $2, $3)
-    RETURNING *
+    RETURNING id, username, email, id_firebase, created_at, updated_at
     `,
-
     [email, username, idFirebase],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
@@ -86,10 +85,10 @@ const findUserByName = async (client, username) => {
 
     `,
     [username],
-   );
+  );
   return convertSnakeToCamel.keysToCamel(rows);
-};  
-    
+};
+
 const findUserNameById = async (client, userId) => {
   const { rows } = await client.query(
     `
