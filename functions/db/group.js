@@ -13,4 +13,16 @@ const findMember = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { findMember };
+const findAllMemberByUserId = async (client, userId) => {
+  const { rows } = await client.query(
+    `
+    SELECT id as group_id, member_id, member_name, is_okay, is_send, created_at
+    FROM send_group
+    WHERE user_id = $1;
+    `,
+    [userId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { findMember, findAllMemberByUserId };

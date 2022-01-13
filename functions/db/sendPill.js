@@ -63,4 +63,15 @@ const refuseSendPillByPillId = async (client, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId };
+const getSenderIdByReceiverId = async (client, receiverId) => {
+  const { rows } = await client.query(
+    `
+    SELECT DISTINCT sender_id FROM send_pill
+    WHERE receiver_id = $1
+    `,
+    [receiverId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId, getSenderIdByReceiverId };

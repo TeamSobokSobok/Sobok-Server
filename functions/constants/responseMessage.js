@@ -37,4 +37,5 @@ module.exports = {
   PILL_GET_SUCCESS: '약 조회 성공',
   PILL_ACCEPT_SUCCESS: '약 받기 성공',
   PILL_REFUSE_SUCCESS: '약 거절 성공',
+  NOTICE_GET_SUCCESS: '알림 리스트 조회 성공',
 };
