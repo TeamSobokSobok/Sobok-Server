@@ -28,6 +28,7 @@ module.exports = async (req, res) => {
       for (let timeCount = 0; timeCount < pillTime.length; timeCount++) {
         scheduleTime.push(pillTime[timeCount].scheduleTime);
       }
+      scheduleTime.sort();
       pillData[pillCount].scheduleTime = scheduleTime;
     }
 
