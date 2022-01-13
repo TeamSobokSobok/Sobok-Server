@@ -26,6 +26,7 @@ module.exports = {
 
   // 스케줄
   READ_MEMBER_CALENDAR: '멤버 캘린더 조회 성공',
+  READ_MEMBER_SCHEDULE: '멤버 약 스케줄 조회 성공',
 
   // 약추가
   PILL_ADDITION_SUCCESS: '약 추가 성공',

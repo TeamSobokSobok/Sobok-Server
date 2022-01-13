@@ -3,5 +3,6 @@ const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
 router.get('/:memberId', checkUser, require('./scheduleMemberIdGET'));
+router.get('/:memberId/detail', checkUser, require('./scheduleMemberIdDetailGET'));
 
 module.exports = router;

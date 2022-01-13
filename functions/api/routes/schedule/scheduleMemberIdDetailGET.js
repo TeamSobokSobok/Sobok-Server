@@ -8,7 +8,7 @@ const dayjs = require('dayjs');
 
 module.exports = async (req, res) => {
   const { memberId } = req.params;
-  const { date } = req.query;
+  let { date } = req.query;
 
   if (!memberId || !date) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
@@ -17,23 +17,16 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
-    const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
+    date = dayjs(date).format('YYYY-MM-DD');
 
-    const memberCalender = await scheduleDB.findCalendarByMemberId(client, memberId, startDate, endDate);
+    let findmemberScheduleTime = await scheduleDB.findScheduleTime(client, memberId, date);
 
-    for (let i = 0; i < memberCalender.length; i++) {
-      const scheduleCount = memberCalender[i].scheduleCount;
-      const isCheckCount = memberCalender[i].isCheckCount;
-
-      if (scheduleCount === isCheckCount) {
-        memberCalender[i].isComplete = 'done';
-      } else if (isCheckCount === '0') {
-        memberCalender[i].isComplete = 'none';
-      } else memberCalender[i].isComplete = 'doing';
+    for (let i = 0; i < findmemberScheduleTime.length; i++) {
+      let scheduleList = await scheduleDB.findScheduleByMemberId(client, memberId, date, findmemberScheduleTime[i].scheduleTime);
+      findmemberScheduleTime[i].scheduleList = scheduleList;
     }
 
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_MEMBER_CALENDAR, memberCalender));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_MEMBER_SCHEDULE, findmemberScheduleTime));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
