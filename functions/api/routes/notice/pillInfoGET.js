@@ -10,13 +10,14 @@ const { scheduleDB } = require('../../../db');
 module.exports = async (req, res) => {
   const senderId = req.param('senderId');
   const receiverId = req.param('receiverId');
+  const createdAt = req.param('createdAt');
 
   let client;
 
   try {
     client = await db.connect(req);
 
-    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId);
+    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId, createdAt);
     let pillData = [];
 
     for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
@@ -28,6 +29,7 @@ module.exports = async (req, res) => {
       for (let timeCount = 0; timeCount < pillTime.length; timeCount++) {
         scheduleTime.push(pillTime[timeCount].scheduleTime);
       }
+      scheduleTime.sort();
       pillData[pillCount].scheduleTime = scheduleTime;
     }
 

@@ -1,16 +1,16 @@
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addSendPill = async (client, pillId, senderId, receiverId) => {
+const addSendPill = async (client, pillId, senderId, receiverId, time) => {
   const { rows } = await client.query(
     `
     INSERT INTO "send_pill"
-    (pill_id, sender_id, receiver_id)
+    (pill_id, sender_id, receiver_id, created_at)
     VALUES
-    ($1, $2, $3)
+    ($1, $2, $3, $4)
     RETURNING id, pill_id, is_send, is_okay
     `,
-    [pillId, senderId, receiverId],
+    [pillId, senderId, receiverId, time],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -27,14 +27,14 @@ const getReceiverNameById = async (client, receiverId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const getPillIdByMemberId = async (client, senderId, receiverId) => {
+const getPillIdByMemberId = async (client, senderId, receiverId, createdAt) => {
   const { rows } = await client.query(
     `
     SELECT pill_id
     FROM send_pill
-    WHERE sender_id = $1 AND receiver_id = $2 AND is_okay is null;
+    WHERE sender_id = $1 AND receiver_id = $2 AND created_at = $3 AND is_okay is null;
     `,
-    [senderId, receiverId],
+    [senderId, receiverId, createdAt],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };

@@ -8,13 +8,14 @@ const { sendPillDB, scheduleDB, pillDB } = require('../../../db');
 module.exports = async (req, res) => {
   const senderId = req.param('senderId');
   const receiverId = req.param('receiverId');
+  const createdAt = req.param('createdAt');
   const { isOkay } = req.body;
 
   let client;
   try {
     client = await db.connect(req);
 
-    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId);
+    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId, createdAt);
 
     for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
       if (isOkay) {
