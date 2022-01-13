@@ -32,11 +32,8 @@ module.exports = async (req, res) => {
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
     }
 
-    const date = new Date();
-
     let pill;
     let sendPillInfo = [];
-
     // 약 리스트에서 약 하나씩 순회, 약 정보 db에 저장 ()
     for (let index = 0; index < pillList.length; index++) {
       pill = pillList[index];
@@ -104,7 +101,7 @@ module.exports = async (req, res) => {
         }
       }
 
-      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, receiverId, date);
+      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, receiverId);
       sendPillInfo.push(newSendPill);
     }
 
@@ -115,7 +112,7 @@ module.exports = async (req, res) => {
       util.success(statusCode.OK, responseMessage.PILL_TRANSMIT_SUCCESS, {
         senderId: user.id,
         senderName: user.username,
-        receiverId: Number(receiverId),
+        receiverId: receiverId,
         receiverName: receiverName[0].username,
         sendPillInfo: sendPillInfo,
       }),
