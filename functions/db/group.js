@@ -23,6 +23,9 @@ const findAllMemberByUserId = async (client, userId) => {
     WHERE s.member_id = $1
     `,
     [userId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
 
 const updateMemberName = async (client, memberName, groupId) => {
   const { rows } = await client.query(
