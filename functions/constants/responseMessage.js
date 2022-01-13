@@ -24,6 +24,7 @@ module.exports = {
   // 그룹
   READ_ALL_GROUP: '그룹 정보 불러오기 성공',
   READ_USER_NAME: '유저 이름 불러오기 성공',
+  UPDATE_MEMBER_NAME: '그룹 멤버 이름 수정 성공',
 
   // 스케줄
   READ_MEMBER_CALENDAR: '멤버 캘린더 조회 성공',
@@ -36,6 +37,7 @@ module.exports = {
   PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공',
 
   // 알림
+  NOTICE_GET_SUCCESS: '알림 리스트 조회 성공',
   PILL_GET_SUCCESS: '약 조회 성공',
   PILL_ACCEPT_SUCCESS: '약 받기 성공',
   PILL_REFUSE_SUCCESS: '약 거절 성공',

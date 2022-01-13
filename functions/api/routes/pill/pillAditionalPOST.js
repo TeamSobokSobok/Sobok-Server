@@ -29,36 +29,35 @@ module.exports = async (req, res) => {
     if (possiblePillCount < pillList.length) {
       return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
     }
-    
+
     let pill;
     // 약 리스트에서 약 하나씩 순회, 약 정보 db에 저장 ()
-    for (index = 0; index < pillList.length; index++) {
+    for (let index = 0; index < pillList.length; index++) {
       pill = pillList[index];
-      newPill = await pillDB.addPill(client, pill.pillName, user.id, pill.color, false);
-
+      let newPill = await pillDB.addPill(client, pill.pillName, user.id, pill.color, false);
 
       // 약 주기 정보 날짜별로 db에 저장
       let startDate = new Date(pill.start);
       let endDate = new Date(pill.end);
 
       const term = Math.abs(endDate - startDate) / (1000 * 3600 * 24) + 1;
-      if (pill.cycle === "1") {
-        for (day = 0; day < term; day++) {
-          for(t = 0; t < pill.time.length; t++) {
-            newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+      if (pill.cycle === '1') {
+        for (let day = 0; day < term; day++) {
+          for (let t = 0; t < pill.time.length; t++) {
+            let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
           }
           startDate.setDate(startDate.getDate() + 1);
         }
       }
 
-      if (pill.cycle === "2") {
+      if (pill.cycle === '2') {
         let dayList = pill.day.split(', ');
 
-        for (day = 0; day < term; day++) {
-          for (d = 0; d < dayList.length; d++) {
+        for (let day = 0; day < term; day++) {
+          for (let d = 0; d < dayList.length; d++) {
             if (week[startDate.getDay()] === dayList[d]) {
-              for(t = 0; t < pill.time.length; t++) {
-                newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+              for (let t = 0; t < pill.time.length; t++) {
+                let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
               }
               break;
             }
@@ -67,14 +66,14 @@ module.exports = async (req, res) => {
         }
       }
 
-      if (pill.cycle === "3") {
+      if (pill.cycle === '3') {
         let specificNumber = pill.specific.substr(0, 1);
         let specificCycle = pill.specific.substr(1);
 
         if (specificCycle === 'day') {
           while (startDate < endDate) {
-            for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber));
           }
@@ -82,8 +81,8 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'week') {
           while (startDate < endDate) {
-            for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setDate(startDate.getDate() + Number(specificNumber) * 7);
           }
@@ -91,8 +90,8 @@ module.exports = async (req, res) => {
 
         if (specificCycle === 'month') {
           while (startDate < endDate) {
-            for(t = 0; t < pill.time.length; t++) {
-              newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
+            for (let t = 0; t < pill.time.length; t++) {
+              let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
             startDate.setMonth(startDate.getMonth() + Number(specificNumber));
           }
@@ -110,4 +109,4 @@ module.exports = async (req, res) => {
   } finally {
     client.release();
   }
-}
+};
