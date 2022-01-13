@@ -29,7 +29,7 @@ module.exports = async (req, res) => {
       likeScheduleList[i].isMySticker = isMySticker;
     }
 
-    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_STICKER, likeScheduleList));
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_SEND_STICKER, likeScheduleList));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
