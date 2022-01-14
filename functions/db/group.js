@@ -27,20 +27,6 @@ const findAllMemberByUserId = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const updateMemberName = async (client, memberName, groupId) => {
-  const { rows } = await client.query(
-    `
-    UPDATE send_group
-    SET member_name = $1, updated_at = now()
-    WHERE id = $2
-    RETURNING * 
-    
-    `,
-    [memberName, groupId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
 const findSendGroup = async (client, senderId, memberId) => {
   const { rows } = await client.query(
     `
@@ -50,6 +36,17 @@ const findSendGroup = async (client, senderId, memberId) => {
     [senderId, memberId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
+};
+
+const findSendGroupBySendGroupId = async (client, sendGroupId) => {
+  const { rows } = await client.query(
+    `
+    SELECT * FROM "send_group"
+    WHERE id = $1 
+    `,
+    [sendGroupId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
 const addSendGroup = async (client, senderId, memberId, memberName) => {
@@ -76,4 +73,41 @@ const addSendGroup = async (client, senderId, memberId, memberName) => {
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
-module.exports = { findMember, findAllMemberByUserId, updateMemberName, addSendGroup, findSendGroup };
+const updateMemberName = async (client, memberName, groupId) => {
+  const { rows } = await client.query(
+    `
+    UPDATE send_group
+    SET member_name = $1, updated_at = now()
+    WHERE id = $2
+    RETURNING * 
+    
+    `,
+    [memberName, groupId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+const updateSendGroup = async (client, sendGroupId, isOkay) => {
+  const { rows } = await client.query(
+    `
+    WITH send_group AS (
+      UPDATE "send_group"
+      SET is_okay = $1, updated_at = now()
+      WHERE id = $2
+      RETURNING *
+    ) SELECT
+     send_group.id as send_group_id
+     , user_id as sender_id, su.username as sender_name
+     , member_id, ru.username as member_name
+     , is_send, is_okay, send_group.updated_at
+     FROM send_group
+    LEFT JOIN "user" su ON su.id = send_group.user_id
+    LEFT JOIN "user" ru ON ru.id = send_group.member_id
+    
+    `,
+    [isOkay, sendGroupId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
+module.exports = { findMember, findAllMemberByUserId, updateMemberName, addSendGroup, findSendGroup, findSendGroupBySendGroupId, updateSendGroup };
