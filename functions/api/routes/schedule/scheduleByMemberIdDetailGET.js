@@ -7,6 +7,7 @@ const { scheduleDB } = require('../../../db');
 const dayjs = require('dayjs');
 
 module.exports = async (req, res) => {
+  const { user } = req.header;
   const { memberId } = req.params;
   let { date } = req.query;
 
@@ -26,6 +27,14 @@ module.exports = async (req, res) => {
       // 시간에 대한 스케줄 리스트 불러오기
       let scheduleList = await scheduleDB.findScheduleByMemberId(client, memberId, date, findmemberScheduleTime[i].scheduleTime);
       findmemberScheduleTime[i].scheduleList = scheduleList;
+
+      for (let v = 0; v < scheduleList.length; v++) {
+        // 스케줄id로 스티커 4개 불러오기
+        let scheduleId = scheduleList[v].scheduleId;
+        // 내가 보낸 스티커를 맨 앞으로 정렬해서 불러오기
+        let stickerList = await scheduleDB.findLikeScheduleByScheduleId(client, scheduleId, user.id);
+        scheduleList[v].stickerImg = stickerList;
+      }
     }
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_MEMBER_SCHEDULE, findmemberScheduleTime));
