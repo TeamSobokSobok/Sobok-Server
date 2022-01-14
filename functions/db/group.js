@@ -5,7 +5,7 @@ const findMember = async (client, userId) => {
   const { rows } = await client.query(
     `
     SELECT id as group_id, member_id, member_name FROM "send_group"
-    WHERE user_id = $1
+    WHERE user_id = $1 AND is_okay = true
     ORDER BY created_at
     
     `,
