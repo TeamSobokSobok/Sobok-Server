@@ -45,7 +45,7 @@ const findSendGroup = async (client, senderId, memberId) => {
   const { rows } = await client.query(
     `
     SELECT * FROM "send_group"
-    WHERE user_id = $1 AND member_id = $2    
+    WHERE user_id = $1 AND member_id = $2 AND is_okay IS NULL  
     `,
     [senderId, memberId],
   );
