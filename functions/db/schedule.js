@@ -43,6 +43,18 @@ const updateSticker = async (client, likeScheduleId, stickerId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findScheduleByScheduleId = async (client, scheduleId) => {
+  const { rows } = await client.query(
+    `
+    SELECT * FROM schedule
+    WHERE id = $1
+
+    `,
+    [scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
 const findCalendarByMemberId = async (client, memberId, startDate, endDate) => {
   const { rows } = await client.query(
     `
@@ -180,4 +192,5 @@ module.exports = {
   findUserLikeScheduleList,
   findLikeScheduleById,
   isLikedSchedule,
+  findScheduleByScheduleId,
 };

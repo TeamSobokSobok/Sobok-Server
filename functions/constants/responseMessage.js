@@ -54,4 +54,5 @@ module.exports = {
   READ_ALL_SEND_STICKER: '전송받은 스티커 전체 조회 성공',
   CREATED_STICKER: '스티커 전송 성공',
   UPDATE_STICKER: '스티커 수정 성공',
+  NOT_CHECK: '해당 스케줄이 아직 완료되지 않았습니다',
 };
