@@ -75,11 +75,9 @@ const findCalendarByMemberId = async (client, memberId, startDate, endDate) => {
 const findScheduleByMemberId = async (client, memberId, date, scheduleTime) => {
   const { rows } = await client.query(
     `
-    SELECT schedule.id as schedule_id, pill_id, pill_name, schedule_time, is_check, color, sticker_img
+    SELECT schedule.id as schedule_id, pill_id, pill_name, schedule_time, is_check, color
     FROM schedule
     LEFT JOIN pill ON schedule.pill_id = pill.id
-    LEFT JOIN like_schedule on schedule.id = like_schedule.schedule_id
-    LEFT JOIN sticker on sticker_id = sticker.id
     WHERE schedule.user_id = $1 AND schedule_date = $2 AND schedule_time = $3
 
   `,
@@ -136,17 +134,17 @@ const acceptPillByPillId = async (client, receiverId, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const findLikeSchedule = async (client, scheduleId) => {
+const findLikeSchedule = async (client, scheduleId, userId) => {
   const { rows } = await client.query(
     `
-    SELECT like_schedule.id as like_schedule_id, schedule_id, sticker_img, username FROM like_schedule
+    SELECT like_schedule.id as like_schedule_id, schedule_id, sticker_img, username
+    FROM like_schedule
     LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
     LEFT JOIN "user" ON "user".id = like_schedule.sender_id
     WHERE schedule_id = $1
-    ORDER BY like_schedule.updated_at DESC
-
+    ORDER BY sender_id = $2 DESC, like_schedule.updated_at DESC
     `,
-    [scheduleId],
+    [scheduleId, userId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
@@ -178,6 +176,20 @@ const isLikedSchedule = async (client, likeScheduleList, userLikeScheduleList) =
   return userLikeScheduleList.some(isContainSchedule);
 };
 
+const findLikeScheduleByScheduleId = async (client, scheduleId, userId) => {
+  const { rows } = await client.query(
+    `
+    SELECT like_schedule.id, sticker_img FROM like_schedule
+    LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
+    WHERE schedule_id = $1
+    ORDER BY sender_id = $2 DESC, updated_at DESC
+    LIMIT 4
+    `,
+    [scheduleId, userId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 module.exports = {
   addSchedule,
   addLikeSchedule,
@@ -193,4 +205,5 @@ module.exports = {
   findLikeScheduleById,
   isLikedSchedule,
   findScheduleByScheduleId,
+  findLikeScheduleByScheduleId,
 };

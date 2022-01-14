@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     // 약 스케줄에 대한 전체 스티커 리스트 조회
-    let likeScheduleList = await scheduleDB.findLikeSchedule(client, scheduleId);
+    let likeScheduleList = await scheduleDB.findLikeSchedule(client, scheduleId, user.id);
 
     // 사용자가 보낸 스티커 리스트 조회
     const findUserLikeScheduleList = await scheduleDB.findUserLikeScheduleList(client, user.id);
