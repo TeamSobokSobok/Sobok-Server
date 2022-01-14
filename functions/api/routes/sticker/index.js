@@ -10,6 +10,6 @@ router.get('/:scheduleId', checkUser, require('./stickerByScheduleIdGET'));
 router.post('/:scheduleId', checkUser, require('./stickerByScheduleIdPOST'));
 
 // 내가 보낸 스티커 수정하기
-router.put('/my/:likeScheduleId', checkUser, require('./stickerByLikeScheduleIdPUT'));
+router.put('/my/:likeScheduleId', checkUser, require('./stickerMyByLikeScheduleIdPUT'));
 
 module.exports = router;
