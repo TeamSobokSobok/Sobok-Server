@@ -21,6 +21,7 @@ module.exports = async (req, res) => {
     const findLikeScheduleById = await scheduleDB.findLikeScheduleById(client, likeScheduleId);
     const findUser = findLikeScheduleById.senderId;
 
+    // 스티커 주인이 아닐 시 에러 반환
     if (findUser !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     const updateSticker = await scheduleDB.updateSticker(client, likeScheduleId, stickerId);
