@@ -51,7 +51,8 @@ const findCalendarByMemberId = async (client, memberId, startDate, endDate) => {
           , count(case when is_check=true THEN  1 END ) as is_check_count
     FROM schedule
     WHERE user_id = $1 AND schedule_date BETWEEN $2 AND $3
-    GROUP BY schedule_date;
+    GROUP BY schedule_date
+    ORDER BY schedule_date
 
   `,
     [memberId, startDate, endDate],
