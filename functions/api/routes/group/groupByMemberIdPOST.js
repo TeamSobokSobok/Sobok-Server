@@ -17,10 +17,12 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    // 이미 있으면 이미 공유 요청된 사용자 에러 반환
-    //const findSendGroup = await groupDB.addSendGroup
-
     const senderId = user.id;
+
+    // 이미 공유 요청된 사용자이면 에러 반환
+    const findSendGroup = await groupDB.findSendGroup(client, senderId, memberId);
+    if (findSendGroup.length !== 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_SEND_GROUP));
+
     const sendGroup = await groupDB.addSendGroup(client, senderId, memberId, memberName);
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ADD_SEND_GROUP, sendGroup));
