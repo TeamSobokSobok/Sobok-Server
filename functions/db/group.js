@@ -41,4 +41,28 @@ const updateMemberName = async (client, memberName, groupId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { findMember, findAllMemberByUserId, updateMemberName };
+const addSendGroup = async (client, senderId, memberId, memberName) => {
+  const { rows } = await client.query(
+    `
+    WITH send_group AS (
+      INSERT INTO "send_group"
+      (user_id, member_id, member_name)
+      VALUES
+      ($1, $2, $3) 
+      RETURNING *
+    ) SELECT
+     send_group.id as send_group_id
+     , user_id as sender_id, su.username as sender_name
+     , member_id, ru.username as member_name
+     , is_send, is_okay, send_group.created_at
+     FROM send_group
+    LEFT JOIN "user" su ON su.id = send_group.user_id
+    LEFT JOIN "user" ru ON ru.id = send_group.member_id
+    
+    `,
+    [senderId, memberId, memberName],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
+module.exports = { findMember, findAllMemberByUserId, updateMemberName, addSendGroup };
