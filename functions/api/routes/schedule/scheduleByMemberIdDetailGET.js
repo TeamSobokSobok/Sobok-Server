@@ -19,9 +19,11 @@ module.exports = async (req, res) => {
 
     date = dayjs(date).format('YYYY-MM-DD');
 
+    // 해당 멤버의 스케줄 날짜에 대한 시간 정보 불러오기
     let findmemberScheduleTime = await scheduleDB.findScheduleTime(client, memberId, date);
 
     for (let i = 0; i < findmemberScheduleTime.length; i++) {
+      // 시간에 대한 스케줄 리스트 불러오기
       let scheduleList = await scheduleDB.findScheduleByMemberId(client, memberId, date, findmemberScheduleTime[i].scheduleTime);
       findmemberScheduleTime[i].scheduleList = scheduleList;
     }

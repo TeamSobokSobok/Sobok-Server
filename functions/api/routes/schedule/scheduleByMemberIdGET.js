@@ -17,11 +17,13 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
+    // 조회할 날짜를 한 달로 변경
     const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
     const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
 
     const memberCalender = await scheduleDB.findCalendarByMemberId(client, memberId, startDate, endDate);
 
+    // 약 스케줄 개수와 체크 완료된 스케줄 개수 비교
     for (let i = 0; i < memberCalender.length; i++) {
       const scheduleCount = memberCalender[i].scheduleCount;
       const isCheckCount = memberCalender[i].isCheckCount;
