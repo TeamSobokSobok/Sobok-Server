@@ -179,7 +179,8 @@ const isLikedSchedule = async (client, likeScheduleList, userLikeScheduleList) =
 const findLikeScheduleByScheduleId = async (client, scheduleId, userId) => {
   const { rows } = await client.query(
     `
-    SELECT like_schedule.id, sticker_img FROM like_schedule
+    SELECT like_schedule.id as like_schedule_id, sticker_img
+    FROM like_schedule
     LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
     WHERE schedule_id = $1
     ORDER BY sender_id = $2 DESC, updated_at DESC
