@@ -28,6 +28,7 @@ module.exports = {
   UPDATE_MEMBER_NAME: '멤버 이름 수정 성공',
   ADD_SEND_GROUP: '캘린더 공유 요청 성공',
   ALREADY_SEND_GROUP: '이미 캘린더 공유 요청이 되었습니다.',
+  UPDATE_SEND_GROUP: '캘린더 공유 수정 성공',
 
   // 스케줄
   READ_MY_CALENDAR: '내 캘린더 조회 성공',

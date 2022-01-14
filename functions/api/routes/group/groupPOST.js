@@ -7,7 +7,7 @@ const { groupDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { user } = req.header;
-  const { memberId } = req.params;
+  const { memberId } = req.query;
   const { memberName } = req.body;
 
   if (!memberId || !memberName) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));

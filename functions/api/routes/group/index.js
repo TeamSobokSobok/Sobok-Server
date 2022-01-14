@@ -6,7 +6,8 @@ const router = express.Router();
 router.get('/', checkUser, require('./groupGET'));
 
 // 캘린더 공유 요청하기
-router.post('/:memberId', checkUser, require('./groupByMemberIdPOST'));
+router.post('/', checkUser, require('./groupPOST'));
+router.put('/:sendGroupId', checkUser, require('./groupBySendGroupIdPUT'));
 
 // 그룹 멤버 이름 수정하기
 router.put('/:groupId/name', checkUser, require('./groupByGroupIdNamePUT'));
