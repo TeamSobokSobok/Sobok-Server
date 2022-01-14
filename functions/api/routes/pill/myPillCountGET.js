@@ -8,13 +8,13 @@ const db = require('../../../db/db');
 const { pillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  const { userId } = req.params;
+  const { user } = req.header;
   let client;
 
   try {
     client = await db.connect(req);
 
-    const pillCount = await pillDB.getPillCountById(client, userId);
+    const pillCount = await pillDB.getPillCountById(client, user.id);
     const possiblePillCount = 5 - pillCount[0].count;
 
     // 성공
