@@ -191,6 +191,20 @@ const findLikeScheduleByScheduleId = async (client, scheduleId, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findMyLikeScheduleByScheduleId = async (client, scheduleId) => {
+  const { rows } = await client.query(
+    `
+    SELECT like_schedule.id as like_schedule_id, sticker_img
+    FROM like_schedule
+    LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
+    WHERE schedule_id = $1
+    LIMIT 4
+    `,
+    [scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 module.exports = {
   addSchedule,
   addLikeSchedule,
@@ -207,4 +221,5 @@ module.exports = {
   isLikedSchedule,
   findScheduleByScheduleId,
   findLikeScheduleByScheduleId,
+  findMyLikeScheduleByScheduleId,
 };

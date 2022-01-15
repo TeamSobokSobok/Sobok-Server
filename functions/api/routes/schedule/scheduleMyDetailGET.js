@@ -30,8 +30,7 @@ module.exports = async (req, res) => {
       for (let v = 0; v < scheduleList.length; v++) {
         // 스케줄id로 스티커 4개 불러오기
         let scheduleId = scheduleList[v].scheduleId;
-        // 내가 보낸 스티커를 맨 앞으로 정렬해서 불러오기
-        let stickerList = await scheduleDB.findLikeScheduleByScheduleId(client, scheduleId, user.id);
+        let stickerList = await scheduleDB.findMyLikeScheduleByScheduleId(client, scheduleId);
         scheduleList[v].stickerImg = stickerList;
       }
     }
