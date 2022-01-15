@@ -9,4 +9,8 @@ router.get('/:memberId', checkUser, require('./scheduleByMemberIdGET'));
 router.get('/my/detail', checkUser, require('./scheduleMyDetailGET'));
 router.get('/:memberId/detail', checkUser, require('./scheduleByMemberIdDetailGET'));
 
+// 약 스케줄 체크하기
+router.put('/check/:scheduleId', checkUser, require('./scheduleCheckByScheduleIdPUT'));
+router.put('/uncheck/:scheduleId', checkUser, require('./scheduleUnCheckByScheduleIdPUT'));
+
 module.exports = router;
