@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
         let specificCycle = pill.specific.substr(1);
 
         if (specificCycle === 'day') {
-          while (startDate < endDate) {
+          while (startDate <= endDate) {
             for (let t = 0; t < pill.time.length; t++) {
               let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
         }
 
         if (specificCycle === 'week') {
-          while (startDate < endDate) {
+          while (startDate <= endDate) {
             for (let t = 0; t < pill.time.length; t++) {
               let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
         }
 
         if (specificCycle === 'month') {
-          while (startDate < endDate) {
+          while (startDate <= endDate) {
             for (let t = 0; t < pill.time.length; t++) {
               let newSchedule = await scheduleDB.addSchedule(client, newPill[0].id, user.id, pill.start, pill.end, pill.cycle, startDate, pill.specific, pill.day, pill.time[t]);
             }
