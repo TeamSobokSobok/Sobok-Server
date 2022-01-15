@@ -49,7 +49,7 @@ const updateScheduleIsCheck = async (client, scheduleId, isCheck) => {
     UPDATE schedule
     SET is_check = $1, updated_at = now()
     WHERE id = $2
-    RETURNING *
+    RETURNING id as schedule_id, pill_id, user_id, schedule_date, schedule_time, is_check
     `,
     [isCheck, scheduleId],
   );
