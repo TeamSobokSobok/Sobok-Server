@@ -43,6 +43,19 @@ const updateSticker = async (client, likeScheduleId, stickerId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const updateScheduleIsCheck = async (client, scheduleId, isCheck) => {
+  const { rows } = await client.query(
+    `
+    UPDATE schedule
+    SET is_check = $1, updated_at = now()
+    WHERE id = $2
+    RETURNING *
+    `,
+    [isCheck, scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
 const findScheduleByScheduleId = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
@@ -207,4 +220,5 @@ module.exports = {
   isLikedSchedule,
   findScheduleByScheduleId,
   findLikeScheduleByScheduleId,
+  updateScheduleIsCheck,
 };
