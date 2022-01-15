@@ -8,15 +8,7 @@ const { scheduleDB, pillDB } = require('../../../db');
 module.exports = async (req, res) => {
   const { user } = req.header;
   const { pillId } = req.params;
-  const { pillName } = req.body;
-  const { isStop } = req.body;
-  const { color } = req.body;
-  const { start } = req.body;
-  const { end } = req.body;
-  const { cycle } = req.body;
-  const { day } = req.body;
-  const { time } = req.body;
-  const { specific } = req.body;
+  const { pillName, isStop, color, start, end, cycle, day, time, specific } = req.body;
   const week = new Array('일', '월', '화', '수', '목', '금', '토');
 
   if (!user || !pillId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
