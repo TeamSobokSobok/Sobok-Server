@@ -42,6 +42,7 @@ module.exports = {
   PILL_COUNT_OVER: '약 추가 가능 개수 초과',
   PILL_TRANSMIT_SUCCESS: '약 전송 성공',
   PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공',
+  PILL_MODIFY_SUCCESS: '약 수정 성공',
 
   // 알림
   NOTICE_GET_SUCCESS: '알림 리스트 조회 성공',

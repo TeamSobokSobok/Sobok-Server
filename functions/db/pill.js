@@ -49,4 +49,16 @@ const acceptPillByPillId = async (client, receiverId, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId };
+const updatePillNameByPillId = async (client, pillId, pillName) => {
+  const { rows } = await client.query(
+    `
+    UPDATE pill
+    SET pill_name = $1
+    WHERE id = $2
+    `,
+    [pillName, pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId };
