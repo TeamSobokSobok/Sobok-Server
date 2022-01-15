@@ -204,6 +204,17 @@ const findLikeScheduleByScheduleId = async (client, scheduleId, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const deleteScheduleByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    DELETE FROM schedule
+    WHERE pill_id = $1
+    `,
+    [pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 const findMyLikeScheduleByScheduleId = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
@@ -234,6 +245,7 @@ module.exports = {
   isLikedSchedule,
   findScheduleByScheduleId,
   findLikeScheduleByScheduleId,
+  deleteScheduleByPillId,
   updateScheduleIsCheck,
   findMyLikeScheduleByScheduleId,
 };
