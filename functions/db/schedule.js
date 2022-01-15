@@ -43,6 +43,19 @@ const updateSticker = async (client, likeScheduleId, stickerId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const updateScheduleIsCheck = async (client, scheduleId, isCheck) => {
+  const { rows } = await client.query(
+    `
+    UPDATE schedule
+    SET is_check = $1, updated_at = now()
+    WHERE id = $2
+    RETURNING id as schedule_id, pill_id, user_id, schedule_date, schedule_time, is_check
+    `,
+    [isCheck, scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
 const findScheduleByScheduleId = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
@@ -202,6 +215,20 @@ const deleteScheduleByPillId = async (client, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findMyLikeScheduleByScheduleId = async (client, scheduleId) => {
+  const { rows } = await client.query(
+    `
+    SELECT like_schedule.id as like_schedule_id, sticker_img
+    FROM like_schedule
+    LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
+    WHERE schedule_id = $1
+    LIMIT 4
+    `,
+    [scheduleId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 module.exports = {
   addSchedule,
   addLikeSchedule,
@@ -219,4 +246,6 @@ module.exports = {
   findScheduleByScheduleId,
   findLikeScheduleByScheduleId,
   deleteScheduleByPillId,
+  updateScheduleIsCheck,
+  findMyLikeScheduleByScheduleId,
 };
