@@ -74,4 +74,15 @@ const getSenderIdByReceiverId = async (client, receiverId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId, getSenderIdByReceiverId };
+const getUserIdByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    SELECT receiver_id FROM send_pill
+    WHERE pill_id = $1
+    `,
+    [pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId };

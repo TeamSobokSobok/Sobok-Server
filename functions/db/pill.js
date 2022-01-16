@@ -61,4 +61,15 @@ const updatePillNameByPillId = async (client, pillId, pillName) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId };
+const getUserIdByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    SELECT user_id FROM pill
+    WHERE id = $1
+    `,
+    [pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId, getUserIdByPillId };
