@@ -90,7 +90,7 @@ const updateMemberName = async (client, memberName, groupId) => {
     UPDATE send_group
     SET member_name = $1, updated_at = now()
     WHERE id = $2
-    RETURNING * 
+    RETURNING id as group_id, user_id, member_id, member_name 
     
     `,
     [memberName, groupId],
