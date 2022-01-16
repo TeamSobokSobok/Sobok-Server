@@ -17,10 +17,10 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    // 공유 요청한 사람 id와 유저의 id가 같은지 확인
     const findGroup = await groupDB.findSendGroupBySendGroupId(client, groupId);
     const findGroupUser = findGroup.userId;
 
+    // 공유 요청한 사람 id와 유저의 id가 같은지 확인
     if (findGroupUser !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     const updateMemberName = await groupDB.updateMemberName(client, memberName, groupId);

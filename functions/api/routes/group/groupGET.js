@@ -13,6 +13,7 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
+    // 캘린더 공유 요청을 수락한 사람만 불러오기
     const member = await groupDB.findMember(client, user.id);
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_GROUP, member));
