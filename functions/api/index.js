@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const hpp = require('hpp');
 const helmet = require('helmet');
-const { swaggerUi, specs } = require('../modules/swagger');
 
 // 보안 상 깃허브에 올리면 안 되는 정보를 .env라는 파일로 관리하기 위해 사용하는 모듈
 dotenv.config();
@@ -32,9 +31,6 @@ app.use(cookieParser());
 
 // 라우팅: routes 폴더로 관리
 app.use('/', require('./routes'));
-
-// swagger 라우팅
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 //  route 폴더에 우리가 지정할 경로가 아닌 다른 경로로 요청이 올 경우,
 //  잘못된 경로로 요청이 들어왔다는 메시지를 클라이언트에 보냄
