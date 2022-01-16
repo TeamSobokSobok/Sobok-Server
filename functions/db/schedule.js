@@ -102,7 +102,7 @@ const findScheduleByMemberId = async (client, memberId, date, scheduleTime) => {
 const findScheduleByPillId = async (client, pillId) => {
   const { rows } = await client.query(
     `
-    SELECT DISTINCT p.pill_name, p.color, s.start_date, s.end_date, s.schedule_cycle, s.schedule_day, s.schedule_specific
+    SELECT DISTINCT p.id AS pill_id, p.pill_name, p.color, s.start_date, s.end_date, s.schedule_cycle, s.schedule_day, s.schedule_specific
     FROM schedule as s LEFT OUTER JOIN pill as p ON s.pill_id = p.id
     WHERE p.id = $1;
     `,

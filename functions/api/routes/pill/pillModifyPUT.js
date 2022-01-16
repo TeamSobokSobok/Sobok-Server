@@ -3,7 +3,7 @@ const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
-const { scheduleDB, pillDB } = require('../../../db');
+const { scheduleDB, pillDB, sendPillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { user } = req.header;
@@ -11,10 +11,32 @@ module.exports = async (req, res) => {
   const { pillName, isStop, color, start, end, cycle, day, time, specific } = req.body;
   const week = new Array('일', '월', '화', '수', '목', '금', '토');
 
-  if (!user || !pillId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  if (!pillId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
   let client;
   try {
     client = await db.connect(req);
+
+    const userCheck = await pillDB.getUserIdByPillId(client, pillId);
+    const receiverCheck = await sendPillDB.getUserIdByPillId(client, pillId);
+
+    console.log(receiverCheck);
+
+    if (userCheck.length === 0 && receiverCheck.length === 0) {
+      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+    }
+
+    if (userCheck.length === 0) {
+      if (receiverCheck[0].receiverId !== user.id) {
+        return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      }
+    }
+
+    if (receiverCheck.length === 0) {
+      if (userCheck[0].userId !== user.id) {
+        return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      }
+    }
 
     const deleteSchedule = await scheduleDB.deleteScheduleByPillId(client, pillId);
 

@@ -8,7 +8,7 @@ const addSendPill = async (client, pillId, senderId, receiverId, time) => {
     (pill_id, sender_id, receiver_id, created_at)
     VALUES
     ($1, $2, $3, $4)
-    RETURNING id, pill_id, is_send, is_okay
+    RETURNING id as send_pill_id, pill_id, is_send, is_okay
     `,
     [pillId, senderId, receiverId, time],
   );
@@ -74,4 +74,15 @@ const getSenderIdByReceiverId = async (client, receiverId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId, getSenderIdByReceiverId };
+const getUserIdByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    SELECT receiver_id FROM send_pill
+    WHERE pill_id = $1
+    `,
+    [pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, acceptSendPillByPillId, refuseSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId };
