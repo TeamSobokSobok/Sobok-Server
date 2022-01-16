@@ -8,5 +8,6 @@ router.get('/my/count', checkUser, require('./myPillCountGET'));
 router.post('/member/:receiverId', checkUser, require('./friendPillAditionalPOST'));
 router.put('/:pillId', checkUser, require('./pillModifyPUT'));
 router.delete('/:pillId', checkUser, require('./deleteMyPillDELETE'));
+router.put('/stop/:pillId', checkUser, require('./stopPillPUT.js'));
 
 module.exports = router;

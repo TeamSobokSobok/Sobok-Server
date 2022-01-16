@@ -19,7 +19,7 @@ const getPillById = async (client, pillId) => {
   const { rows } = await client.query(
     `
     SELECT * FROM "pill"
-    WHERE pill_id = $1
+    WHERE id = $1
     `,
     [pillId],
   );
@@ -83,4 +83,15 @@ const deletePillByPillId = async (client, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId, getUserIdByPillId, deletePillByPillId };
+const stopPillByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    UPDATE pill
+    SET is_stop = true
+    WHERE id = $1
+    `,
+    [pillId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId, getUserIdByPillId, deletePillByPillId, stopPillByPillId };
