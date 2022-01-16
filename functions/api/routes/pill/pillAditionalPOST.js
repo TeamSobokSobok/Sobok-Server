@@ -8,6 +8,27 @@ const db = require('../../../db/db');
 const { pillDB } = require('../../../db');
 const { scheduleDB } = require('../../../db');
 
+/**
+ * @swagger
+ * /pill:
+ *  get:
+ *    tags:
+ *    -pill
+ *    description: 내 약 추가
+ *    produces:
+ *    -application/json
+ *    parameters:
+ *      -in: header
+ *      name: accesstoken
+ *      schema:
+ *        type: string
+ *        format: uid
+ *      required: true
+ *      description: Firebase UID of the user to get
+ *    requestBody:
+ *      description: User Pill Information
+ *      required: true
+ */
 module.exports = async (req, res) => {
   const { pillList } = req.body;
   const { user } = req.header;
