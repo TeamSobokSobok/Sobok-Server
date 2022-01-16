@@ -8,6 +8,7 @@ const db = require('../../../db/db');
 const { pillDB } = require('../../../db');
 const { scheduleDB } = require('../../../db');
 const { sendPillDB } = require('../../../db');
+const { groupDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { receiverId } = req.params;
@@ -18,6 +19,10 @@ module.exports = async (req, res) => {
   if (!pillList) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
+
+  // 캘린더 공유를 수락했는지 확인
+  const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, receiverId);
+  if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
   let client;
 
@@ -117,6 +122,7 @@ module.exports = async (req, res) => {
         senderName: user.username,
         receiverId: Number(receiverId),
         receiverName: receiverName[0].username,
+        createdAt: date,
         sendPillInfo: sendPillInfo,
       }),
     );
