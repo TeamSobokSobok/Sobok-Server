@@ -3,7 +3,7 @@ const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
-const { scheduleDB } = require('../../../db');
+const { scheduleDB, groupDB } = require('../../../db');
 const dayjs = require('dayjs');
 
 module.exports = async (req, res) => {
@@ -19,6 +19,10 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     date = dayjs(date).format('YYYY-MM-DD');
+
+    // 캘린더 공유를 수락했는지 확인
+    const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
+    if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     // 해당 멤버의 스케줄 날짜에 대한 시간 정보 불러오기
     let findmemberScheduleTime = await scheduleDB.findScheduleTime(client, memberId, date);
