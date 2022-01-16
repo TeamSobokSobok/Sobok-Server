@@ -38,6 +38,10 @@ module.exports = async (req, res) => {
       }
     }
 
+    if (user.id !== userCheck[0].userId || user.id !== receiverCheck[0].receiverId) {
+      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+
     const deleteSchedule = await scheduleDB.deleteScheduleByPillId(client, pillId);
 
     // 약 주기 정보 날짜별로 db에 저장
