@@ -3,10 +3,11 @@ const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
-const { scheduleDB } = require('../../../db');
+const { scheduleDB, groupDB } = require('../../../db');
 const dayjs = require('dayjs');
 
 module.exports = async (req, res) => {
+  const { user } = req.header;
   const { memberId } = req.params;
   const { date } = req.query;
 
@@ -20,6 +21,10 @@ module.exports = async (req, res) => {
     // 조회할 날짜를 한 달로 변경
     const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
     const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
+
+    // 캘린더 공유를 수락했는지 확인
+    const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
+    if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     const memberCalender = await scheduleDB.findCalendarByMemberId(client, memberId, startDate, endDate);
 
