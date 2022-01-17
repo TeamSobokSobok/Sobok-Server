@@ -3,8 +3,8 @@ const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
 // 약 정보 조회 관련 router
-router.get('/:userId/count', checkUser, require('./pillByUserIdCountGET'));
 router.get('/count', checkUser, require('./pillCountGET'));
+router.get('/:userId/count', checkUser, require('./pillByUserIdCountGET'));
 
 // 약 추가 관련 router
 router.post('/', checkUser, require('./pillAditionalPOST'));
