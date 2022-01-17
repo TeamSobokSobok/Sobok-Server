@@ -1,3 +1,4 @@
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
@@ -61,13 +62,14 @@ const findSendGroupIsOkay = async (client, senderId, memberId) => {
 };
 
 const addSendGroup = async (client, senderId, memberId, memberName) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     WITH send_group AS (
       INSERT INTO "send_group"
-      (user_id, member_id, member_name)
+      (user_id, member_id, member_name, created_at, updated_at)
       VALUES
-      ($1, $2, $3) 
+      ($1, $2, $3, $4, $4) 
       RETURNING *
     ) SELECT
      send_group.id as send_group_id
@@ -79,31 +81,33 @@ const addSendGroup = async (client, senderId, memberId, memberName) => {
     LEFT JOIN "user" ru ON ru.id = send_group.member_id
     
     `,
-    [senderId, memberId, memberName],
+    [senderId, memberId, memberName, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
 const updateMemberName = async (client, memberName, groupId) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE send_group
-    SET member_name = $1, updated_at = now()
-    WHERE id = $2
+    SET member_name = $1, updated_at = $2
+    WHERE id = $3
     RETURNING id as group_id, user_id, member_id, member_name 
     
     `,
-    [memberName, groupId],
+    [memberName, now, groupId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
 const updateSendGroup = async (client, sendGroupId, isOkay) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     WITH send_group AS (
       UPDATE "send_group"
-      SET is_okay = $1, updated_at = now()
+      SET is_okay = $1, updated_at = $3
       WHERE id = $2
       RETURNING *
     ) SELECT
@@ -116,7 +120,7 @@ const updateSendGroup = async (client, sendGroupId, isOkay) => {
     LEFT JOIN "user" ru ON ru.id = send_group.member_id
     
     `,
-    [isOkay, sendGroupId],
+    [isOkay, sendGroupId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
