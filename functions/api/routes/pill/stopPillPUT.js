@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     }
 
     if (pillCheck[0].isStop === true) {
-      return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.PILL_STOP_FAIL));
+      return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_PILL_STOP));
     }
 
     const { stopPill } = await pillDB.stopPillByPillId(client, pillId);
