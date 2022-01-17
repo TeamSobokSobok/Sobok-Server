@@ -3,8 +3,8 @@ const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
 // 캘린더 가져오기
-router.get('/calendar', checkUser, require('./scheduleGET'));
-router.get('/:memberId/calendar', checkUser, require('./scheduleByMemberIdGET'));
+router.get('/calendar', checkUser, require('./scheduleCalendarGET'));
+router.get('/:memberId/calendar', checkUser, require('./scheduleByMemberIdCalendarGET'));
 router.get('/detail', checkUser, require('./scheduleDetailGET'));
 router.get('/:memberId/detail', checkUser, require('./scheduleByMemberIdDetailGET'));
 
