@@ -1,16 +1,18 @@
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 const addSendPill = async (client, pillId, senderId, receiverId, time) => {
+  const now = dayjs(time).add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "send_pill"
-    (pill_id, sender_id, receiver_id, created_at)
+    (pill_id, sender_id, receiver_id, created_at, updated_at)
     VALUES
-    ($1, $2, $3, $4)
+    ($1, $2, $3, $4, $4)
     RETURNING id as send_pill_id, pill_id, is_send, is_okay
     `,
-    [pillId, senderId, receiverId, time],
+    [pillId, senderId, receiverId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -40,25 +42,27 @@ const getPillIdByMemberId = async (client, senderId, receiverId, createdAt) => {
 };
 
 const acceptSendPillByPillId = async (client, pillId) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE send_pill
-    SET is_okay = true
+    SET is_okay = true, updated_at = $2
     WHERE pill_id = $1
     `,
-    [pillId],
+    [pillId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
 const refuseSendPillByPillId = async (client, pillId) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE send_pill
-    SET is_okay = false
+    SET is_okay = false, updated_at = $2
     WHERE pill_id = $1
     `,
-    [pillId],
+    [pillId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
