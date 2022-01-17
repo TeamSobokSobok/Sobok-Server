@@ -7,7 +7,7 @@ const addPill = async (client, pillName, userId, color, isStop) => {
   const { rows } = await client.query(
     `
     INSERT INTO "pill"
-    (pill_name, user_id, color, is_stop, create_at, updated_at)
+    (pill_name, user_id, color, is_stop, created_at, updated_at)
     VALUES
     ($1, $2, $3, $4, $5, $5)
     RETURNING *
