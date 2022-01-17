@@ -13,5 +13,6 @@ router.get('/my/count', checkUser, require('./myPillCountGET'));
 // 약 정보 수정 관련 router
 router.put('/:pillId', checkUser, require('./pillModifyPUT'));
 router.delete('/:pillId', checkUser, require('./deleteMyPillDELETE'));
+router.put('/stop/:pillId', checkUser, require('./stopPillPUT.js'));
 
 module.exports = router;

@@ -45,7 +45,9 @@ module.exports = {
   PILL_TRANSMIT_SUCCESS: '약 전송 성공',
   PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공',
   PILL_MODIFY_SUCCESS: '약 수정 성공',
+  PILL_STOP_SUCCESS: '약 중단 성공',
   PILL_DELETE_SUCCESS: '약 삭제 성공',
+  ALREADY_PILL_STOP: '이미 중단된 약입니다',
 
   // 알림
   NOTICE_GET_SUCCESS: '알림 리스트 조회 성공',
