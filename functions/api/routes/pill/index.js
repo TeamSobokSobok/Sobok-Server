@@ -7,8 +7,8 @@ router.get('/count', checkUser, require('./pillCountGET'));
 router.get('/:userId/count', checkUser, require('./pillByUserIdCountGET'));
 
 // 약 추가 관련 router
-router.post('/', checkUser, require('./pillAditionalPOST'));
-router.post('/member/:receiverId', checkUser, require('./friendPillAditionalPOST'));
+router.post('/', checkUser, require('./pillPOST'));
+router.post('/member/:receiverId', checkUser, require('./pillMemberByReceiverIdPOST'));
 
 // 약 정보 수정 관련 router
 router.put('/:pillId', checkUser, require('./pillModifyPUT'));
