@@ -1,41 +1,32 @@
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
 const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 
-const { pillDB } = require('../../../db');
-const { scheduleDB } = require('../../../db');
-const { sendPillDB } = require('../../../db');
-const { groupDB } = require('../../../db');
+const { pillDB, scheduleDB, sendPillDB, groupDB, userDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  const { receiverId } = req.params;
+  const { memberId } = req.params;
   const { pillList } = req.body;
   const { user } = req.header;
   const week = new Array('일', '월', '화', '수', '목', '금', '토');
 
-  if (!pillList) {
+  if (!pillList || !memberId) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
-
-  // 캘린더 공유를 수락했는지 확인
-  const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, receiverId);
-  if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
   let client;
 
   try {
     client = await db.connect(req);
 
-    // 사용자가 추가 가능한 약 개수 확인
-    const pillCount = await pillDB.getPillCountById(client, receiverId);
-    const possiblePillCount = 5 - pillCount[0].count;
+    // 캘린더 공유를 수락했는지 확인
+    const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
+    if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
-    if (possiblePillCount < pillList.length) {
-      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
-    }
+    const findUser = await userDB.findUserById(client, memberId);
+    if (findUser.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
 
     const date = new Date();
 
@@ -109,18 +100,18 @@ module.exports = async (req, res) => {
         }
       }
 
-      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, receiverId, date);
+      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, memberId, date);
       sendPillInfo.push(newSendPill);
     }
 
-    const receiverName = await sendPillDB.getReceiverNameById(client, receiverId);
+    const receiverName = await sendPillDB.getReceiverNameById(client, memberId);
 
     // 성공
     res.status(statusCode.OK).send(
       util.success(statusCode.OK, responseMessage.PILL_TRANSMIT_SUCCESS, {
         senderId: user.id,
         senderName: user.username,
-        receiverId: Number(receiverId),
+        receiverId: Number(memberId),
         receiverName: receiverName[0].username,
         createdAt: date,
         sendPillInfo: sendPillInfo,
