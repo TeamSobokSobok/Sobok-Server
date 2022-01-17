@@ -18,7 +18,7 @@ const findMember = async (client, userId) => {
 const findAllMemberByUserId = async (client, userId) => {
   const { rows } = await client.query(
     `
-    SELECT s.id as group_id, s.user_id, u.username, s.is_okay, s.is_send, s.created_at
+    SELECT s.id as group_id, s.user_id, u.username, s.is_okay, s.is_send, s.created_at, s.updated_at
     FROM send_group as s
     left join "user" u on u.id = s.user_id
     WHERE s.member_id = $1
