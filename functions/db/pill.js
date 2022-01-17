@@ -1,16 +1,18 @@
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 const addPill = async (client, pillName, userId, color, isStop) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "pill"
-    (pill_name, user_id, color, is_stop)
+    (pill_name, user_id, color, is_stop, create_at, updated_at)
     VALUES
-    ($1, $2, $3, $4)
+    ($1, $2, $3, $4, $5, $5)
     RETURNING *
     `,
-    [pillName, userId, color, isStop],
+    [pillName, userId, color, isStop, now],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };

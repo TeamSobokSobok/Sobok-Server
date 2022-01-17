@@ -1,57 +1,64 @@
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 const addSchedule = async (client, pillId, userId, start, end, cycle, date, specific, day, time) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
       INSERT INTO "schedule"
-      (pill_id, user_id, start_date, end_date, schedule_cycle, schedule_date, schedule_specific, schedule_day, schedule_time)
+      (pill_id, user_id, start_date, end_date
+        , schedule_cycle, schedule_date, schedule_specific
+        , schedule_day, schedule_time, created_at, updated_at)
       VALUES
-      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
       RETURNING *
       `,
-    [pillId, userId, start, end, cycle, date, specific, day, time],
+    [pillId, userId, start, end, cycle, date, specific, day, time, now],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
 const addLikeSchedule = async (client, scheduleId, senderId, stickerId) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
       INSERT INTO "like_schedule"
-      (schedule_id, sender_id, sticker_id)
+      (schedule_id, sender_id, sticker_id, created_at, updated_at)
       VALUES
-      ($1, $2, $3)
+      ($1, $2, $3, $4, $4)
       RETURNING *
       `,
-    [scheduleId, senderId, stickerId],
+    [scheduleId, senderId, stickerId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
 const updateSticker = async (client, likeScheduleId, stickerId) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE like_schedule
-    SET sticker_id = $1, updated_at = now()
+    SET sticker_id = $1, updated_at = $3
     WHERE id = $2
     RETURNING id as likeSchedule_id, schedule_id, sender_id, sticker_id, created_at, updated_at 
     
     `,
-    [stickerId, likeScheduleId],
+    [stickerId, likeScheduleId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
 const updateScheduleIsCheck = async (client, scheduleId, isCheck) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE schedule
-    SET is_check = $1, updated_at = now()
+    SET is_check = $1, updated_at = $3
     WHERE id = $2
     RETURNING id as schedule_id, pill_id, user_id, schedule_date, schedule_time, is_check
     `,
-    [isCheck, scheduleId],
+    [isCheck, scheduleId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };

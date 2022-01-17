@@ -1,16 +1,18 @@
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 const addUser = async (client, email, username, idFirebase) => {
+  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "user"
-    (email, username, id_firebase)
+    (email, username, id_firebase, created_at, updated_at)
     VALUES
-    ($1, $2, $3)
+    ($1, $2, $3, $4, $4)
     RETURNING id, username, email, id_firebase, created_at, updated_at
     `,
-    [email, username, idFirebase],
+    [email, username, idFirebase, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -52,6 +54,7 @@ const findUserByEmail = async (client, email) => {
 };
 
 const setUserToken = async (client, user, accessToken) => {
+  const now = dayjs().add(9, 'hour');
   const { rows: existingRows } = await client.query(
     `
     SELECT * FROM "user"
@@ -68,11 +71,11 @@ const setUserToken = async (client, user, accessToken) => {
   const { rows } = await client.query(
     `
     UPDATE "user" 
-    SET access_token = $1, updated_at = now()
+    SET access_token = $1, updated_at = $3
     WHERE id = $2
     RETURNING * 
     `,
-    [data.accessToken, user.id],
+    [data.accessToken, user.id, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
