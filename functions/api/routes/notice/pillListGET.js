@@ -25,14 +25,14 @@ module.exports = async (req, res) => {
     const calendarInfo = await groupDB.findAllMemberByUserId(client, user.id);
     calendarInfo.sort((a, b) => a.createdAt - b.createdAt);
 
-    console.log(pillInfo);
-    console.log(calendarInfo);
+    // console.log(pillInfo);
+    // console.log(calendarInfo);
 
     let noticeList = {};
     noticeList.pillInfo = pillInfo;
     noticeList.calendarInfo = calendarInfo;
 
-    console.log(noticeList);
+    // console.log(noticeList);
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, noticeList));
   } catch (error) {

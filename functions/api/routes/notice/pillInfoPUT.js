@@ -6,25 +6,23 @@ const db = require('../../../db/db');
 const { sendPillDB, scheduleDB, pillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  const { senderId } = req.query;
-  const { receiverId } = req.query;
-  const { createdAt } = req.query;
+  const { senderId, receiverId, createdAt } = req.query;
   const { isOkay } = req.body;
 
   let client;
+
   try {
     client = await db.connect(req);
 
     const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId, createdAt);
 
+    // 이미 요청이 처리된 약인지 확인
+    if (pillId.length === 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_PILL_ACCEPT));
+
     for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
-      if (isOkay) {
-        let acceptSendPill = await sendPillDB.acceptSendPillByPillId(client, pillId[pillCount].pillId);
-        let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
-        let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
-      } else {
-        let refuseSendPill = await sendPillDB.refuseSendPillByPillId(client, pillId[pillCount].pillId);
-      }
+      let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, pillId[pillCount].pillId, isOkay);
+      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
+      let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
     }
 
     if (isOkay) {
