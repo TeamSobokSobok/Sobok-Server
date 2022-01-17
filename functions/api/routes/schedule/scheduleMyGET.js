@@ -16,11 +16,14 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
+    // Request로 받은 날짜를 한달 기준으로 startDate, endDate 선언
     const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
     const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
 
+    // 해당 유저의 아이디로 schedule 정보 조회
     const myCalender = await scheduleDB.findCalendarByMemberId(client, user.id, startDate, endDate);
 
+    // 약 스케줄 개수와 체크 완료된 스케줄 개수 비교
     for (let i = 0; i < myCalender.length; i++) {
       const scheduleCount = myCalender[i].scheduleCount;
       const isCheckCount = myCalender[i].isCheckCount;
