@@ -23,9 +23,12 @@ module.exports = async (req, res) => {
     }
 
     const checkUser = await pillDB.getUserIdByPillId(client, pillId);
-    console.log(checkUser);
     if (checkUser[0].userId !== user.id) {
       return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+    }
+
+    if (pillCheck[0].isStop === true) {
+      return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.PILL_STOP_FAIL));
     }
 
     const { stopPill } = await pillDB.stopPillByPillId(client, pillId);
