@@ -9,6 +9,7 @@ const { pillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { user } = req.header;
+
   let client;
 
   try {

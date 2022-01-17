@@ -8,9 +8,7 @@ const { sendPillDB, userDB } = require('../../../db');
 const { scheduleDB } = require('../../../db');
 
 module.exports = async (req, res) => {
-  const { senderId } = req.query;
-  const { receiverId } = req.query;
-  const { createdAt } = req.query;
+  const { senderId, receiverId, createdAt } = req.query;
 
   let client;
 
