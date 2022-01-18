@@ -8,6 +8,7 @@ const { sendPillDB, userDB } = require('../../../db');
 const { scheduleDB } = require('../../../db');
 
 module.exports = async (req, res) => {
+  const { user } = req.header;
   const { senderId, receiverId, createdAt } = req.query;
 
   let client;
@@ -15,14 +16,17 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId, createdAt);
+    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+    const findReceiver = findSendPill[0].receiverId;
+    if (findReceiver !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+
     const senderName = await userDB.findUserNameById(client, senderId);
 
     let pillData = [];
 
-    for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
-      let pillInfo = await scheduleDB.findScheduleByPillId(client, pillId[pillCount].pillId);
-      let pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId[pillCount].pillId);
+    for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
+      let pillInfo = await scheduleDB.findScheduleByPillId(client, findSendPill[pillCount].pillId);
+      let pillTime = await scheduleDB.findScheduleTimeByPillId(client, findSendPill[pillCount].pillId);
       let scheduleTime = [];
 
       pillData.push(pillInfo[0]);
