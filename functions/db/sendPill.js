@@ -29,12 +29,12 @@ const getReceiverNameById = async (client, receiverId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const getPillIdByMemberId = async (client, senderId, receiverId, createdAt) => {
+const getsendPillByCreatedAt = async (client, senderId, receiverId, createdAt) => {
   const { rows } = await client.query(
     `
-    SELECT pill_id
+    SELECT *
     FROM send_pill
-    WHERE sender_id = $1 AND receiver_id = $2 AND created_at = $3 AND is_okay is null;
+    WHERE sender_id = $1 AND receiver_id = $2 AND created_at = $3;
     `,
     [senderId, receiverId, createdAt],
   );
@@ -88,4 +88,4 @@ const getIsOkayByPillId = async (client, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addSendPill, getReceiverNameById, getPillIdByMemberId, updateSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId, getIsOkayByPillId };
+module.exports = { addSendPill, getReceiverNameById, getsendPillByCreatedAt, updateSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId, getIsOkayByPillId };

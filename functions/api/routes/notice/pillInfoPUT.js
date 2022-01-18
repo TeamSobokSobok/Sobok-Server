@@ -6,6 +6,7 @@ const db = require('../../../db/db');
 const { sendPillDB, scheduleDB, pillDB } = require('../../../db');
 
 module.exports = async (req, res) => {
+  const { user } = req.header;
   const { senderId, receiverId, createdAt } = req.query;
   const { isOkay } = req.body;
 
@@ -14,15 +15,20 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    const pillId = await sendPillDB.getPillIdByMemberId(client, senderId, receiverId, createdAt);
+    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+    const findReceiver = findSendPill[0].receiverId;
+    const findIsOkay = findSendPill[0].isOkay;
+
+    // 약 요청을 수락하려는 사람과 받는 사람의 id 비교
+    if (findReceiver !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     // 이미 요청이 처리된 약인지 확인
-    if (pillId.length === 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_PILL_ACCEPT));
+    if (findIsOkay !== null) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_PILL_ACCEPT));
 
-    for (let pillCount = 0; pillCount < pillId.length; pillCount++) {
-      let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, pillId[pillCount].pillId, isOkay);
-      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
-      let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, pillId[pillCount].pillId);
+    for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
+      let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
+      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
+      let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
     }
 
     if (isOkay) {
