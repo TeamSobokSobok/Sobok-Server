@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
         let scheduleId = scheduleList[v].scheduleId;
         // 내가 보낸 스티커를 맨 앞으로 정렬해서 불러오기
         let stickerList = await scheduleDB.findLikeScheduleByScheduleId(client, scheduleId, user.id);
-        scheduleList[v].stickerImg = stickerList;
+        scheduleList[v].stickerId = stickerList;
       }
     }
 
