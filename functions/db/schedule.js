@@ -109,8 +109,11 @@ const findScheduleByMemberId = async (client, memberId, date, scheduleTime) => {
 const findScheduleByPillId = async (client, pillId) => {
   const { rows } = await client.query(
     `
-    SELECT DISTINCT p.id AS pill_id, p.pill_name, p.color, s.start_date, s.end_date, s.schedule_cycle, s.schedule_day, s.schedule_specific
-    FROM schedule as s LEFT OUTER JOIN pill as p ON s.pill_id = p.id
+    SELECT DISTINCT p.id AS pill_id, p.pill_name
+    , p.color, s.start_date, s.end_date
+    , s.schedule_cycle, s.schedule_day, s.schedule_specific
+    FROM schedule AS s 
+    LEFT OUTER JOIN pill as p ON s.pill_id = p.id
     WHERE p.id = $1;
     `,
     [pillId],
@@ -224,10 +227,10 @@ const deleteScheduleByPillId = async (client, pillId) => {
 const findMyLikeScheduleByScheduleId = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
-    SELECT like_schedule.id as like_schedule_id, sticker_img
+    SELECT like_schedule.id as like_schedule_id, sticker_id
     FROM like_schedule
-    LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
     WHERE schedule_id = $1
+    ORDER BY updated_at DESC
     LIMIT 4
     `,
     [scheduleId],
