@@ -138,12 +138,6 @@
 - merge는 github에서 진행합니다
 - 다 쓴 브랜치는 삭제합니다
 
-## ✨ Base URL
-
-```
-https://asia-northeast3-sobok-76d0a.cloudfunctions.net/api
-```
-
 ### 👉 [SobokSobok ERD]
 ![image](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/374f114b-4dcd-4f0a-83d2-cc3f4bca9061/sobok-erd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220112%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220112T113821Z&X-Amz-Expires=86400&X-Amz-Signature=edd0cd1abb22e6c8a60abac10044f0f3698e11ce7d562e5b9d256c9bffb022da&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22sobok-erd.png%22&x-id=GetObject)
 
