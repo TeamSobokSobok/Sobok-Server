@@ -18,6 +18,9 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+
+    if (findSendPill.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_SEND));
+
     const findReceiver = findSendPill[0].receiverId;
     if (findReceiver !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
