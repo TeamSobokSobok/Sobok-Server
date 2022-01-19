@@ -141,7 +141,7 @@
 ## ✨ Base URL
 
 ```
-
+https://asia-northeast3-sobok-76d0a.cloudfunctions.net/api
 ```
 
 ### 👉 [SobokSobok ERD]
