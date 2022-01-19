@@ -19,6 +19,10 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     const findGroup = await groupDB.findSendGroupBySendGroupId(client, groupId);
+
+    // findGroup이 없을 시 에러 반환
+    if (!findGroup) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+
     const findGroupUser = findGroup.userId;
 
     // 공유 요청한 사람 id와 유저의 id가 같은지 확인

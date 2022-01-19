@@ -18,10 +18,11 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    // 해당 스케줄 주인의 id와 유저 id로 그룹 수락 여부를 확인
     const findScheduleByScheduleId = await scheduleDB.findScheduleByScheduleId(client, scheduleId);
-    const findScheduleUser = findScheduleByScheduleId.userId;
+    if (!findScheduleByScheduleId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
 
+    // 해당 스케줄 주인의 id와 유저 id로 그룹 수락 여부를 확인
+    const findScheduleUser = findScheduleByScheduleId.userId;
     const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, findScheduleUser);
     if (findSendGroup.length === 0) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 

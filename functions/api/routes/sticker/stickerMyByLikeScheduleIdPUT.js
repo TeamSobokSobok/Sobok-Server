@@ -20,6 +20,9 @@ module.exports = async (req, res) => {
 
     // 해당 스티커 정보 조회
     const findLikeScheduleById = await scheduleDB.findLikeScheduleById(client, likeScheduleId);
+
+    if (!findLikeScheduleById) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+
     const findUser = findLikeScheduleById.senderId;
 
     // 스티커 주인이 아닐 시 에러 반환
