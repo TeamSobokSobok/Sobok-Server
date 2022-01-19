@@ -41,7 +41,7 @@
 ### 👉 [API 명세서 링크](https://www.notion.so/baejiann120/API-6280231150ca40eeb2de46beb5292931)
 
 ## 🛠 Dependencies module
-```javascript
+```json
 "dependencies": {
     "axios": "^0.25.0",
     "cookie-parser": "^1.4.6",
