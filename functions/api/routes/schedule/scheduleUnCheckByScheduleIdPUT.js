@@ -17,10 +17,14 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    // 스케줄 유저인지 확인
     const findSchedule = await scheduleDB.findScheduleByScheduleId(client, scheduleId);
+
+    // 스케줄이 존재하는지 확인
+    if (!findSchedule) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+
     const findScheduleUser = findSchedule.userId;
 
+    // 스케줄 유저인지 확인
     if (findScheduleUser !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     const isCheckedSchedule = await scheduleDB.updateScheduleIsCheck(client, scheduleId, false);
