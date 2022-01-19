@@ -3,7 +3,7 @@ const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
-const { groupDB } = require('../../../db');
+const { groupDB, userDB } = require('../../../db');
 const slackAPI = require('../../../middlewares/slackAPI');
 
 module.exports = async (req, res) => {
@@ -20,7 +20,14 @@ module.exports = async (req, res) => {
 
     const senderId = user.id;
 
-    // 이미 공유 요청된 사용자이면 에러 반환
+    // 나한테 공유 요청하면 에러 반환
+    if (Number(senderId) === Number(memberId)) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ENABLE_SEND_GROUP));
+
+    // 캘린더 공유 요청하려는 사용자가 없으면 에러 반환
+    const findMember = await userDB.findUserById(client, memberId);
+    if (!findMember) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+
+    // 이미 캘린더 공유 요청된 사용자이면 에러 반환
     const findSendGroup = await groupDB.findSendGroup(client, senderId, memberId);
     if (findSendGroup.length !== 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_SEND_GROUP));
 
