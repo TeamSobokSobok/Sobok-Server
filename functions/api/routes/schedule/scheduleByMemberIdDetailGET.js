@@ -39,6 +39,10 @@ module.exports = async (req, res) => {
         // 내가 보낸 스티커를 맨 앞으로 정렬해서 불러오기
         let stickerList = await scheduleDB.findLikeScheduleByScheduleId(client, scheduleId, user.id);
         scheduleList[v].stickerId = stickerList;
+
+        // 약 스케줄에 대한 전체 스티커 리스트 조회
+        let stickerTotalCount = await scheduleDB.findAllLikeScheduleByScheduleId(client, scheduleId);
+        scheduleList[v].stickerTotalCount = stickerTotalCount.length;
       }
     }
 
