@@ -70,7 +70,7 @@ const getUserIdByPillId = async (client, pillId) => {
   const { rows } = await client.query(
     `
     SELECT receiver_id FROM send_pill
-    WHERE pill_id = $1
+    WHERE pill_id = $1 AND is_okay is null
     `,
     [pillId],
   );
