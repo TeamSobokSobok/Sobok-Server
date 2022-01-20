@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
 
     const userCheck = await userDB.findUserById(client, userId);
 
-    if (userCheck.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+    if (!userCheck) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
 
     const pillCount = await pillDB.getPillCountById(client, userId);
     const possiblePillCount = 5 - pillCount[0].count;
