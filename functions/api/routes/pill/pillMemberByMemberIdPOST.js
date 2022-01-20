@@ -6,6 +6,7 @@ const db = require('../../../db/db');
 const slackAPI = require('../../../middlewares/slackAPI');
 
 const { pillDB, scheduleDB, sendPillDB, groupDB, userDB } = require('../../../db');
+const dayjs = require('dayjs');
 
 module.exports = async (req, res) => {
   const { memberId } = req.params;
@@ -29,7 +30,7 @@ module.exports = async (req, res) => {
     const findUser = await userDB.findUserById(client, memberId);
     if (findUser.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
 
-    const date = new Date();
+    const now = dayjs().add(9, 'hour');
 
     let pill;
     let sendPillInfo = [];
@@ -101,7 +102,7 @@ module.exports = async (req, res) => {
         }
       }
 
-      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, memberId, date);
+      let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, memberId, now);
       sendPillInfo.push(newSendPill);
     }
 
@@ -114,7 +115,7 @@ module.exports = async (req, res) => {
         senderName: user.username,
         receiverId: Number(memberId),
         receiverName: receiverName[0].username,
-        createdAt: date,
+        createdAt: now,
         sendPillInfo: sendPillInfo,
       }),
     );

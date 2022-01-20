@@ -26,7 +26,7 @@ const findUserById = async (client, userId) => {
     `,
     [userId],
   );
-  return convertSnakeToCamel.keysToCamel(rows[0]);
+  return convertSnakeToCamel.keysToCamel(rows);
 };
 
 const findUserByIdFirebase = async (client, idFirebase) => {

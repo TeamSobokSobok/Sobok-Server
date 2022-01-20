@@ -6,7 +6,7 @@ const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 const slackAPI = require('../../../middlewares/slackAPI');
 
-const { pillDB } = require('../../../db');
+const { pillDB, userDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { userId } = req.params;
@@ -14,6 +14,10 @@ module.exports = async (req, res) => {
 
   try {
     client = await db.connect(req);
+
+    const userCheck = await userDB.findUserById(client, userId);
+
+    if (userCheck.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
 
     const pillCount = await pillDB.getPillCountById(client, userId);
     const possiblePillCount = 5 - pillCount[0].count;
