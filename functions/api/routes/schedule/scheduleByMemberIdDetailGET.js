@@ -28,14 +28,19 @@ module.exports = async (req, res) => {
     // 해당 멤버의 스케줄 날짜에 대한 시간 정보 불러오기
     let findmemberScheduleTime = await scheduleDB.findScheduleTime(client, memberId, date);
 
+    // 사용자가 보낸 스티커 리스트 조회
+    const findUserLikeScheduleList = await scheduleDB.findUserLikeScheduleList(client, user.id);
+    const userLikeScheduleList = findUserLikeScheduleList.map((userLikeSchedule) => userLikeSchedule.scheduleId);
+
     for (let i = 0; i < findmemberScheduleTime.length; i++) {
       // 시간에 대한 스케줄 리스트 불러오기
       let scheduleList = await scheduleDB.findScheduleByMemberId(client, memberId, date, findmemberScheduleTime[i].scheduleTime);
       findmemberScheduleTime[i].scheduleList = scheduleList;
 
       for (let v = 0; v < scheduleList.length; v++) {
-        // 스케줄id로 스티커 4개 불러오기
         let scheduleId = scheduleList[v].scheduleId;
+
+        // 스케줄id로 스티커 4개 불러오기
         // 내가 보낸 스티커를 맨 앞으로 정렬해서 불러오기
         let stickerList = await scheduleDB.findLikeScheduleByScheduleId(client, scheduleId, user.id);
         scheduleList[v].stickerId = stickerList;
@@ -43,6 +48,10 @@ module.exports = async (req, res) => {
         // 약 스케줄에 대한 전체 스티커 리스트 조회
         let stickerTotalCount = await scheduleDB.findAllLikeScheduleByScheduleId(client, scheduleId);
         scheduleList[v].stickerTotalCount = stickerTotalCount.length;
+
+        // 스티커를 보낸 스케줄인지 조회
+        const isLikedSchedule = await scheduleDB.isLikedSchedule(client, scheduleList[v].scheduleId, userLikeScheduleList);
+        scheduleList[v].isLikedSchedule = isLikedSchedule;
       }
     }
 
