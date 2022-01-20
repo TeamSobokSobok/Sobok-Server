@@ -21,27 +21,6 @@
 
 ## 💭 프로젝트 상세기능
 
-# 메인 뷰
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/51286325/150308072-e6212f82-6b1d-4e82-9994-d7bd5f3e812c.png" width=243>
-</p>
-
-# 공유 뷰
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/51286325/150306211-1b2e6396-7d86-40f9-8b67-7312c95e43df.png" width=241>
-</p>
-
-# 알림 뷰
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/51286325/150307662-ebb07a57-e22d-4f8b-9096-25d8b9426678.png" width=315>
-</p>
-
-# 약 추가 뷰
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/51286325/150311209-2ecc0b3f-02e9-4823-9c54-8916242f3b5e.png" width=315>
-  <img src="https://user-images.githubusercontent.com/51286325/150311455-cb45e896-1f4b-419c-b715-fdb0352bc9d5.png" width=315>
-  <img src="https://user-images.githubusercontent.com/51286325/150312158-b0844f1b-dad7-46c0-afd6-52e9b45d08f9.png" width=315>
-</p>
 
 ## 🙋🏻‍♂️ Team Member 사복이들
 
