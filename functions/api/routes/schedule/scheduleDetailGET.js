@@ -33,6 +33,10 @@ module.exports = async (req, res) => {
         let scheduleId = scheduleList[v].scheduleId;
         let stickerList = await scheduleDB.findMyLikeScheduleByScheduleId(client, scheduleId);
         scheduleList[v].stickerId = stickerList;
+
+        // 약 스케줄에 대한 전체 스티커 리스트 조회
+        let stickerTotalCount = await scheduleDB.findAllLikeScheduleByScheduleId(client, scheduleId);
+        scheduleList[v].stickerTotalCount = stickerTotalCount.length;
       }
     }
 
