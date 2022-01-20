@@ -160,7 +160,7 @@ const acceptPillByPillId = async (client, receiverId, pillId) => {
 const findLikeSchedule = async (client, scheduleId, userId) => {
   const { rows } = await client.query(
     `
-    SELECT like_schedule.id as like_schedule_id, schedule_id, sticker_img, username
+    SELECT like_schedule.id as like_schedule_id, schedule_id, sticker_id, sticker_img, username
     FROM like_schedule
     LEFT JOIN sticker ON sticker.id = like_schedule.sticker_id
     LEFT JOIN "user" ON "user".id = like_schedule.sender_id
