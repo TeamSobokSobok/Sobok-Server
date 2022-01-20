@@ -12,6 +12,10 @@ module.exports = async (req, res) => {
   const { user } = req.header;
   const { senderId, receiverId, createdAt } = req.query;
 
+  if (!senderId || !receiverId || !createdAt) {
+    return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+
   let client;
 
   try {
@@ -23,6 +27,8 @@ module.exports = async (req, res) => {
 
     const findReceiver = findSendPill[0].receiverId;
     if (findReceiver !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+
+    if (findSendPill[0].isOkay !== null) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_ACCEPT));
 
     const senderName = await userDB.findUserNameById(client, senderId);
 

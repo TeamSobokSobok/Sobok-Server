@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   const { user } = req.header;
   const { pillId } = req.params;
 
-  if (!pillId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+  if (!pillId) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
   let client;
 
@@ -18,9 +18,10 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     const userCheck = await pillDB.getUserIdByPillId(client, pillId);
+    const pillCheck = await pillDB.getPillById(client, pillId);
 
-    if (userCheck[0].userId === 0) {
-      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+    if (pillCheck.length === 0) {
+      return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
     }
 
     if (userCheck[0].userId !== user.id) {

@@ -3,7 +3,6 @@ const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 const addSendPill = async (client, pillId, senderId, receiverId, time) => {
-  const now = dayjs(time).add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "send_pill"
@@ -12,7 +11,7 @@ const addSendPill = async (client, pillId, senderId, receiverId, time) => {
     ($1, $2, $3, $4, $4)
     RETURNING id as send_pill_id, pill_id, is_send, is_okay
     `,
-    [pillId, senderId, receiverId, now],
+    [pillId, senderId, receiverId, time],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
