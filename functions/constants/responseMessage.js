@@ -64,4 +64,5 @@ module.exports = {
   CREATED_STICKER: '스티커 전송 성공',
   UPDATE_STICKER: '스티커 수정 성공',
   NOT_CHECK: '해당 스케줄이 아직 완료되지 않았습니다',
+  ALREADY_POST_STICKER: '이미 스티커를 전송했습니다.',
 };
