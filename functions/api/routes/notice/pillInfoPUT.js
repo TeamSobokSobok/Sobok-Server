@@ -21,6 +21,11 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+    const userPillCount = await pillDB.getPillCountById(client, user.id);
+    const possiblePill = 5 - userPillCount[0].count;
+
+    console.log(possiblePill);
+    console.log(userPillCount);
 
     if (findSendPill.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_SEND));
 
@@ -32,6 +37,8 @@ module.exports = async (req, res) => {
 
     // 이미 요청이 처리된 약인지 확인
     if (findIsOkay !== null) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_PILL_ACCEPT));
+
+    if (possiblePill < findSendPill.length) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
 
     for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
       let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
