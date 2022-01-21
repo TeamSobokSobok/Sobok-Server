@@ -27,7 +27,7 @@ const addLikeSchedule = async (client, scheduleId, senderId, stickerId) => {
       (schedule_id, sender_id, sticker_id, created_at, updated_at)
       VALUES
       ($1, $2, $3, $4, $4)
-      RETURNING *
+      RETURNING id as like_schedule_id, schedule_id, sender_id, sticker_id, created_at, updated_at
       `,
     [scheduleId, senderId, stickerId, now],
   );
