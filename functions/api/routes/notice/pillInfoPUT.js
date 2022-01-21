@@ -37,16 +37,20 @@ module.exports = async (req, res) => {
 
     if (possiblePill < findSendPill.length) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
 
-    if (isOkay) {
+    if (isOkay === 'false') {
       for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
         let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
-        let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
-        let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
       }
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS));
-    } else {
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS));
+      return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS));
     }
+
+    for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
+      let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
+      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
+      let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
+    }
+
+    res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS));
   } catch (error) {
     functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
     console.log(error);
