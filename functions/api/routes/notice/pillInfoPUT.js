@@ -24,9 +24,6 @@ module.exports = async (req, res) => {
     const userPillCount = await pillDB.getPillCountById(client, user.id);
     const possiblePill = 5 - userPillCount[0].count;
 
-    console.log(possiblePill);
-    console.log(userPillCount);
-
     if (findSendPill.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_SEND));
 
     const findReceiver = findSendPill[0].receiverId;
