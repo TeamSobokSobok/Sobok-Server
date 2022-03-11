@@ -5,7 +5,7 @@ const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 const slackAPI = require('../../../middlewares/slackAPI');
 
-const { pillDB, scheduleDB, sendPillDB, groupDB, userDB } = require('../../../db');
+const { pillDB, scheduleDB, sendPillDB, groupDB, userDB, noticeDB } = require('../../../db');
 const dayjs = require('dayjs');
 const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
 
@@ -118,6 +118,7 @@ module.exports = async (req, res) => {
       }
 
       let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, memberId, now);
+      let sendPillNotice = await noticeDB.saveNotice(client, user.id, memberId, 'pill');
       sendPillInfo.push(newSendPill);
     }
 
