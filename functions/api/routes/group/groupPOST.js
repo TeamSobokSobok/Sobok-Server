@@ -3,7 +3,7 @@ const util = require('../../../lib/util');
 const statusCode = require('../../../constants/statusCode');
 const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
-const { groupDB, userDB } = require('../../../db');
+const { groupDB, userDB, noticeDB } = require('../../../db');
 const slackAPI = require('../../../middlewares/slackAPI');
 
 module.exports = async (req, res) => {
@@ -31,7 +31,9 @@ module.exports = async (req, res) => {
     const findSendGroup = await groupDB.findSendGroup(client, senderId, memberId);
     if (findSendGroup.length !== 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_SEND_GROUP));
 
+    // send_group & notice 테이블에 각각 정보 추가
     const sendGroup = await groupDB.addSendGroup(client, senderId, memberId, memberName);
+    const notice = await noticeDB.addNotice(client, memberId, sendGroup.id, 'calendar');
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ADD_SEND_GROUP, sendGroup));
   } catch (error) {
