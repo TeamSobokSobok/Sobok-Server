@@ -2,20 +2,22 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addSendPill = async (client, pillId, senderId, receiverId, time) => {
+// CREATE
+const addSendPill = async (client, pillId, senderId, receiverId, now) => {
   const { rows } = await client.query(
     `
     INSERT INTO "send_pill"
-    (pill_id, sender_id, receiver_id, created_at, updated_at)
+    (pill_id, sender_id, receiver_id, created_at, updated_at, is_send)
     VALUES
-    ($1, $2, $3, $4, $4)
-    RETURNING id as send_pill_id, pill_id, is_send, is_okay
+    ($1, $2, $3, $4, $4, true)
+    RETURNING id, pill_id, is_send, is_okay
     `,
-    [pillId, senderId, receiverId, time],
+    [pillId, senderId, receiverId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
+// READ
 const getReceiverNameById = async (client, receiverId) => {
   const { rows } = await client.query(
     `
@@ -24,6 +26,17 @@ const getReceiverNameById = async (client, receiverId) => {
     WHERE s.receiver_id = $1
     `,
     [receiverId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
+const getUserIdByPillId = async (client, pillId) => {
+  const { rows } = await client.query(
+    `
+    SELECT receiver_id FROM send_pill
+    WHERE pill_id = $1 AND is_okay is null
+    `,
+    [pillId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
@@ -39,6 +52,10 @@ const getsendPillByCreatedAt = async (client, senderId, receiverId, createdAt) =
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
+
+// UPDATE
+
+// DELETE
 
 const updateSendPillByPillId = async (client, pillId, isOkay) => {
   const now = dayjs().add(9, 'hour');
@@ -61,17 +78,6 @@ const getSenderIdByReceiverId = async (client, receiverId) => {
     WHERE receiver_id = $1
     `,
     [receiverId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
-const getUserIdByPillId = async (client, pillId) => {
-  const { rows } = await client.query(
-    `
-    SELECT receiver_id FROM send_pill
-    WHERE pill_id = $1 AND is_okay is null
-    `,
-    [pillId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };

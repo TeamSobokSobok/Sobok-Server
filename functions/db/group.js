@@ -54,6 +54,18 @@ const findSendGroupBySendGroupId = async (client, sendGroupId) => {
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
+
+const findSendGroupIsOkay = async (client, senderId, receiverId) => {
+  const { rows } = await client.query(
+    `
+    SELECT * FROM "send_group"
+    WHERE sender_id = $1 AND receiver_id = $2 AND is_okay = true  
+    `,
+    [senderId, receiverId],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 // UPDATE
 const updateMemberName = async (client, memberName, groupId) => {
   const now = dayjs().add(9, 'hour');
@@ -105,17 +117,6 @@ const findAllMemberByUserId = async (client, userId) => {
     WHERE s.member_id = $1
     `,
     [userId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
-const findSendGroupIsOkay = async (client, senderId, memberId) => {
-  const { rows } = await client.query(
-    `
-    SELECT * FROM "send_group"
-    WHERE user_id = $1 AND member_id = $2 AND is_okay = true  
-    `,
-    [senderId, memberId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };

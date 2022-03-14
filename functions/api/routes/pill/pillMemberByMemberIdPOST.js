@@ -118,7 +118,7 @@ module.exports = async (req, res) => {
       }
 
       let newSendPill = await sendPillDB.addSendPill(client, newPill[0].id, user.id, memberId, now);
-      let sendPillNotice = await noticeDB.saveNotice(client, user.id, memberId, 'pill');
+      let sendPillNotice = await noticeDB.addNotice(client, user.id, newSendPill.id, 'pill');
       sendPillInfo.push(newSendPill);
     }
 
