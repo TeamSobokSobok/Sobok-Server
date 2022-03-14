@@ -87,8 +87,7 @@
 ```
 
 ### 👉 [SobokSobok ERD]
-![image](![sobok-erd (1)](https://user-images.githubusercontent.com/68781598/158166543-46024b66-e2ae-44aa-add8-82203b246400.png)
-)
+(![sobok-erd (1)](https://user-images.githubusercontent.com/68781598/158166543-46024b66-e2ae-44aa-add8-82203b246400.png)
 
 
 ## 💻 Code Convention
