@@ -87,7 +87,8 @@
 ```
 
 ### 👉 [SobokSobok ERD]
-![image](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/374f114b-4dcd-4f0a-83d2-cc3f4bca9061/sobok-erd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220112%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220112T113821Z&X-Amz-Expires=86400&X-Amz-Signature=edd0cd1abb22e6c8a60abac10044f0f3698e11ce7d562e5b9d256c9bffb022da&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22sobok-erd.png%22&x-id=GetObject)
+![image](![sobok-erd (1)](https://user-images.githubusercontent.com/68781598/158166543-46024b66-e2ae-44aa-add8-82203b246400.png)
+)
 
 
 ## 💻 Code Convention
