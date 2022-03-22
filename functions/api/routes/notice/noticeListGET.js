@@ -14,6 +14,7 @@ module.exports = async (req, res) => {
     client = await db.connect(req);
 
     const pillInfo = await sendPillDB.getSenderIdByReceiverId(client, user.id);
+    console.log(pillInfo);
     for (let pillCount = 0; pillCount < pillInfo.length; pillCount++) {
       let senderName = await userDB.findUserNameById(client, pillInfo[pillCount].senderId);
       let receiverName = await userDB.findUserNameById(client, pillInfo[pillCount].receiverId);
@@ -23,7 +24,7 @@ module.exports = async (req, res) => {
     }
     pillInfo.sort((a, b) => a.createdAt - b.createdAt);
 
-    const calendarInfo = await groupDB.findAllMemberByUserId(client, user.id);
+    const calendarInfo = await groupDB.findAllMemberByUserId(client, pillInfo[0].senderId);
     calendarInfo.sort((a, b) => a.createdAt - b.createdAt);
 
     // console.log(pillInfo);

@@ -53,23 +53,6 @@ const getsendPillByCreatedAt = async (client, senderId, receiverId, createdAt) =
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-// UPDATE
-
-// DELETE
-
-const updateSendPillByPillId = async (client, pillId, isOkay) => {
-  const now = dayjs().add(9, 'hour');
-  const { rows } = await client.query(
-    `
-    UPDATE send_pill
-    SET is_okay = $1, updated_at = $3
-    WHERE pill_id = $2
-    `,
-    [isOkay, pillId, now],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
 const getSenderIdByReceiverId = async (client, receiverId) => {
   const { rows } = await client.query(
     `
@@ -92,5 +75,20 @@ const getIsOkayByPillId = async (client, pillId) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
+
+// UPDATE
+const updateSendPillByPillId = async (client, pillId, isOkay) => {
+  const now = dayjs().add(9, 'hour');
+  const { rows } = await client.query(
+    `
+    UPDATE send_pill
+    SET is_okay = $1, updated_at = $3
+    WHERE pill_id = $2
+    `,
+    [isOkay, pillId, now],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+// DELETE
 
 module.exports = { addSendPill, getReceiverNameById, getsendPillByCreatedAt, updateSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId, getIsOkayByPillId };
