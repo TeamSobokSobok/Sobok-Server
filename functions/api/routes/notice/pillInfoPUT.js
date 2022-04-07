@@ -8,19 +8,21 @@ const slackAPI = require('../../../middlewares/slackAPI');
 
 module.exports = async (req, res) => {
   const { user } = req.header;
-  const { senderId, receiverId, createdAt } = req.query;
+  const { senderId, createdAt } = req.query;
   const { isOkay } = req.body;
 
-  if (!senderId || !receiverId || !createdAt || !isOkay) {
+  if (!senderId || !createdAt) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
+
+  console.log(senderId, createdAt, isOkay);
 
   let client;
 
   try {
     client = await db.connect(req);
 
-    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, user.id, createdAt);
     const userPillCount = await pillDB.getPillCountById(client, user.id);
     const possiblePill = 5 - userPillCount[0].count;
 
@@ -37,17 +39,18 @@ module.exports = async (req, res) => {
 
     if (possiblePill < findSendPill.length) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
 
-    if (isOkay === 'false') {
+    if (isOkay === false) {
       for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
         let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
+        let deleteScheduleByPillId = await scheduleDB.deleteScheduleByPillId(client, findSendPill[pillCount].pillId);
       }
       return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS));
     }
 
     for (let pillCount = 0; pillCount < findSendPill.length; pillCount++) {
       let acceptSendPill = await sendPillDB.updateSendPillByPillId(client, findSendPill[pillCount].pillId, isOkay);
-      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
-      let acceptPill = await pillDB.acceptPillByPillId(client, receiverId, findSendPill[pillCount].pillId);
+      let acceptSchedule = await scheduleDB.acceptPillByPillId(client, user.id, findSendPill[pillCount].pillId);
+      let acceptPill = await pillDB.acceptPillByPillId(client, user.id, findSendPill[pillCount].pillId);
     }
 
     res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS));

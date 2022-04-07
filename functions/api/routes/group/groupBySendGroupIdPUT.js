@@ -23,10 +23,10 @@ module.exports = async (req, res) => {
     // 해당 그룹이 없을 시 에러 반환
     if (!findSendGroup) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
 
-    const memberId = findSendGroup.memberId;
+    const receiverId = findSendGroup.receiverId;
 
     // 해당 그룹 정보 조회해서 memberId와 수락 요청하는 userId 비교
-    if (memberId !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+    if (receiverId !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
 
     const updateSendGroup = await groupDB.updateSendGroup(client, sendGroupId, isOkay);
 

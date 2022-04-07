@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
     // findGroup이 없을 시 에러 반환
     if (!findGroup) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
 
-    const findGroupUser = findGroup.userId;
+    const findGroupUser = findGroup.senderId;
 
     // 공유 요청한 사람 id와 유저의 id가 같은지 확인
     if (findGroupUser !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));

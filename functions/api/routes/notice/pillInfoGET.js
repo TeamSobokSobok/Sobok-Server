@@ -10,9 +10,9 @@ const { scheduleDB } = require('../../../db');
 
 module.exports = async (req, res) => {
   const { user } = req.header;
-  const { senderId, receiverId, createdAt } = req.query;
+  const { senderId, createdAt } = req.query;
 
-  if (!senderId || !receiverId || !createdAt) {
+  if (!user || !senderId || !createdAt) {
     return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
 
@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
   try {
     client = await db.connect(req);
 
-    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, receiverId, createdAt);
+    const findSendPill = await sendPillDB.getsendPillByCreatedAt(client, senderId, user.id, createdAt);
 
     if (findSendPill.length === 0) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_SEND));
 
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
 
     if (findSendPill[0].isOkay !== null) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_ACCEPT));
 
-    const senderName = await userDB.findUserNameById(client, senderId);
+    const senderName = await userDB.findUserNameById(client, user.id);
 
     let pillData = [];
 
