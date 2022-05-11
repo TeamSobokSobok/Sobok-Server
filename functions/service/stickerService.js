@@ -1,3 +1,4 @@
+const db = require('../db/db');
 const { scheduleDB, groupDB, stickerDB } = require('../db');
 
 module.exports = {
