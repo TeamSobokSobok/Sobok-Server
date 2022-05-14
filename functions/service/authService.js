@@ -54,7 +54,7 @@ module.exports = {
       client.release();
     }
   },
-  signUp: async (email, name, password) => {
+  signUp: async (email, nickname, password) => {
     let client;
 
     try {
@@ -62,7 +62,7 @@ module.exports = {
 
       const userFirebase = await admin
         .auth()
-        .createUser({ email, password, name })
+        .createUser({ email, password, nickname })
         .then((user) => user)
         .catch((e) => {
           console.log(e);
@@ -81,13 +81,13 @@ module.exports = {
 
       const idFirebase = userFirebase.uid;
 
-      const user = await userDB.addUser(client, email, name, idFirebase);
+      const user = await userDB.addUser(client, email, nickname, idFirebase);
       const { accesstoken } = jwtHandlers.sign(user);
       await userDB.setUserToken(client, user, accesstoken);
 
       console.log(user);
 
-      return { user, accesstoken };
+      return user, accesstoken;
     } catch (error) {
       functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
       console.log(error);

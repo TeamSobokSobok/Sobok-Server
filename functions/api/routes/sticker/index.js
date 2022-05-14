@@ -3,7 +3,7 @@ const stickerController = require('../../../controller/stickerController');
 const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
-router.get('/', checkUser, stickerController.getAllSticker);
+router.get('/', stickerController.getAllSticker);
 // 해당 약 스케줄의 모든 스티커 불러오기
 router.get('/:scheduleId', checkUser, stickerController.getStickerBySchedule);
 
