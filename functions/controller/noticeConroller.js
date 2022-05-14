@@ -5,33 +5,24 @@ const responseMessage = require('../../../constants/responseMessage');
 const db = require('../../../db/db');
 const { groupDB } = require('../../../db');
 const slackAPI = require('../../../middlewares/slackAPI');
+const noticeService = require('../service/noticeService');
 
 module.exports = {
-  updateGroupName: async (req, res) => {
-    const { user } = req.header;
-    const { groupId } = req.params;
-    const { memberName } = req.body;
-
-    if (!groupId || !memberName) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
+  updateMemberName: async (req, res) => {
     let client;
 
     try {
       client = await db.connect(req);
 
-      const findGroup = await groupDB.findSendGroupBySendGroupId(client, groupId);
+      const { user } = req.header;
+      const { groupId } = req.params;
+      const { memberName } = req.body;
 
-      // findGroup이 없을 시 에러 반환
-      if (!findGroup) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      if (!groupId || !memberName) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-      const findGroupUser = findGroup.senderId;
+      const result = noticeService.updateMemberName(user, groupId, memberName);
 
-      // 공유 요청한 사람 id와 유저의 id가 같은지 확인
-      if (findGroupUser !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
-
-      const updateMemberName = await groupDB.updateMemberName(client, memberName, groupId);
-
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.UPDATE_MEMBER_NAME, updateMemberName));
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.UPDATE_MEMBER_NAME, result));
     } catch (error) {
       functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
       console.log(error);
@@ -45,30 +36,20 @@ module.exports = {
     }
   },
   updateIsOkay: async (req, res) => {
-    const { user } = req.header;
-    const { sendGroupId } = req.params;
-    const { isOkay } = req.body;
-
-    if (!sendGroupId || !isOkay) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
     let client;
 
     try {
       client = await db.connect(req);
 
-      const findSendGroup = await groupDB.findSendGroupBySendGroupId(client, sendGroupId);
+      const { user } = req.header;
+      const { sendGroupId } = req.params;
+      const { isOkay } = req.body;
 
-      // 해당 그룹이 없을 시 에러 반환
-      if (!findSendGroup) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      if (!sendGroupId || !isOkay) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-      const receiverId = findSendGroup.receiverId;
+      const result = noticeService.updateIsOkay(user, sendGroupId, isOkay);
 
-      // 해당 그룹 정보 조회해서 memberId와 수락 요청하는 userId 비교
-      if (receiverId !== user.id) return res.status(statusCode.UNAUTHORIZED).send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
-
-      const updateSendGroup = await groupDB.updateSendGroup(client, sendGroupId, isOkay);
-
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.UPDATE_SEND_GROUP, updateSendGroup));
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.UPDATE_SEND_GROUP, result));
     } catch (error) {
       functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
       console.log(error);
@@ -81,18 +62,17 @@ module.exports = {
       client.release();
     }
   },
-  getGroup: async (req, res) => {
-    const user = req.header.user;
-
+  getMember: async (req, res) => {
     let client;
 
     try {
       client = await db.connect(req);
 
-      // 캘린더 공유 요청을 수락한 사람만 불러오기
-      const member = await groupDB.findMember(client, user.id);
+      const user = req.header.user;
 
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_GROUP, member));
+      const memberList = noticeService.getMember(user);
+
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_ALL_GROUP, memberList));
     } catch (error) {
       functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
       console.log(error);
@@ -106,35 +86,20 @@ module.exports = {
     }
   },
   sendGroup: async (req, res) => {
-    const { user } = req.header;
-    const { memberId } = req.query;
-    const { memberName } = req.body;
-
-    if (!memberId || !memberName) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
     let client;
 
     try {
       client = await db.connect(req);
 
-      const senderId = user.id;
+      const { user } = req.header;
+      const { memberId } = req.query;
+      const { memberName } = req.body;
 
-      // 나한테 공유 요청하면 에러 반환
-      if (Number(senderId) === Number(memberId)) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.ENABLE_SEND_GROUP));
+      if (!memberId || !memberName) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-      // 캘린더 공유 요청하려는 사용자가 없으면 에러 반환
-      const findMember = await userDB.findUserById(client, memberId);
-      if (!findMember) return res.status(statusCode.BAD_REQUEST).send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+      const result = noticeService.sendGroup(user, memberId, memberName);
 
-      // 이미 캘린더 공유 요청된 사용자이면 에러 반환
-      const findSendGroup = await groupDB.findSendGroup(client, senderId, memberId);
-      if (findSendGroup.length !== 0) return res.status(statusCode.CONFLICT).send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_SEND_GROUP));
-
-      // send_group & notice 테이블에 각각 정보 추가
-      const sendGroup = await groupDB.addSendGroup(client, senderId, memberId, memberName);
-      const notice = await noticeDB.addNotice(client, memberId, sendGroup.id, 'calendar');
-
-      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ADD_SEND_GROUP, sendGroup));
+      res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.ADD_SEND_GROUP, result));
     } catch (error) {
       functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
       console.log(error);
