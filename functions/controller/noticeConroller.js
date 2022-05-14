@@ -9,11 +9,7 @@ const noticeService = require('../service/noticeService');
 
 module.exports = {
   updateMemberName: async (req, res) => {
-    let client;
-
     try {
-      client = await db.connect(req);
-
       const { user } = req.header;
       const { groupId } = req.params;
       const { memberName } = req.body;
@@ -36,11 +32,7 @@ module.exports = {
     }
   },
   updateIsOkay: async (req, res) => {
-    let client;
-
     try {
-      client = await db.connect(req);
-
       const { user } = req.header;
       const { sendGroupId } = req.params;
       const { isOkay } = req.body;
@@ -63,11 +55,7 @@ module.exports = {
     }
   },
   getMember: async (req, res) => {
-    let client;
-
     try {
-      client = await db.connect(req);
-
       const user = req.header.user;
 
       const memberList = noticeService.getMember(user);
@@ -86,11 +74,7 @@ module.exports = {
     }
   },
   sendGroup: async (req, res) => {
-    let client;
-
     try {
-      client = await db.connect(req);
-
       const { user } = req.header;
       const { memberId } = req.query;
       const { memberName } = req.body;
