@@ -2,6 +2,7 @@ module.exports = {
   NULL_VALUE: '필요한 값이 없습니다',
   OUT_OF_VALUE: '파라미터 값이 잘못되었습니다',
   NO_AUTHENTICATED: '접근 권한이 없습니다',
+  INTERNAL_SERVER_ERROR: '서버 내 오류',
 
   // 회원가입
   CREATED_USER: '회원 가입 성공',
@@ -15,9 +16,8 @@ module.exports = {
   LOGIN_FAIL: '로그인 실패',
   NO_USER: '존재하지 않는 회원입니다.',
   MISS_MATCH_PW: '비밀번호가 맞지 않습니다.',
-
-  // 서버 내 오류
-  INTERNAL_SERVER_ERROR: '서버 내 오류',
+  WRONG_EMAIL_CONVENTION: '이메일 형식에 맞지 않는 메일 주소입니다.',
+  WRONG_PASSWORD_CONVENTION: '비밀번호 형식에 맞지 않는 메일 주소입니다.',
 
   // 토큰
   TOKEN_EXPIRED: '토큰이 만료되었습니다.',

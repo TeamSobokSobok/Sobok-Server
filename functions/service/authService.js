@@ -1,14 +1,18 @@
+const functions = require('firebase-functions');
 const { signInWithEmailAndPassword } = require('firebase/auth');
 const { firebaseAuth } = require('../config/firebaseClient');
-const { userDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 const admin = require('firebase-admin');
 const jwtHandlers = require('../lib/jwtHandlers');
+const { userDB } = require('../db');
+const statusCode = require('../constants/statusCode');
+const responseMessage = require('../constants/responseMessage');
 
 module.exports = {
   authEmail: async (email, password) => {
     let client;
+    let req = `email = ${email}, password = ${password}`;
 
     try {
       client = await db.connect(req);
@@ -22,13 +26,13 @@ module.exports = {
 
       if (userFirebase.err) {
         if (userFirebase.error.code === 'auth/user-not-found') {
-          return res.status(statusCode.NOT_FOUND).json(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+          return responseMessage.NO_USER;
         } else if (userFirebase.error.code === 'auth/invalid-email') {
-          return res.status(statusCode.NOT_FOUND).json(util.fail(statusCode.NOT_FOUND, responseMessage.INVALID_EMAIL));
+          return responseMessage.WRONG_EMAIL_CONVENTION;
         } else if (userFirebase.error.code === 'auth/wrong-password') {
-          return res.status(statusCode.NOT_FOUND).json(util.fail(statusCode.NOT_FOUND, responseMessage.MISS_MATCH_PW));
+          return responseMessage.MISS_MATCH_PW;
         } else {
-          return res.status(statusCode.INTERNAL_SERVER_ERROR).json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+          return responseMessage.INTERNAL_SERVER_ERROR;
         }
       }
 
@@ -41,21 +45,20 @@ module.exports = {
 
       const findUser = await userDB.findUserByIdFirebase(client, idFirebase);
 
-      //const { accesstoken } = jwtHandlers.sign(findUser);
-
       return findUser;
     } catch (error) {
-      functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
+      functions.logger.error(
+        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+        `[CONTENT] ${error}`,
+      );
       console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'} ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
     } finally {
       client.release();
     }
   },
   signUp: async (email, nickname, password) => {
     let client;
+    let req = `email = ${email}, nickname = ${nickname}, password = ${password}`;
 
     try {
       client = await db.connect(req);
@@ -71,29 +74,27 @@ module.exports = {
 
       if (userFirebase.err) {
         if (userFirebase.error.code === 'auth/email-already-exists') {
-          return res.status(statusCode.NOT_FOUND).json(util.fail(statusCode.NOT_FOUND, '해당 이메일을 가진 유저가 이미 있습니다.'));
+          return responseMessage.ALREADY_EMAIL;
         } else if (userFirebase.error.code === 'auth/invalid-password') {
-          return res.status(statusCode.NOT_FOUND).json(util.fail(statusCode.NOT_FOUND, '비밀번호 형식이 잘못되었습니다. 패스워드는 최소 6자리의 문자열이어야 합니다.'));
+          return responseMessage.WRONG_PASSWORD_CONVENTION;
         } else {
-          return res.status(statusCode.INTERNAL_SERVER_ERROR).json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+          return responseMessage.INTERNAL_SERVER_ERROR;
         }
       }
 
       const idFirebase = userFirebase.uid;
 
-      const user = await userDB.addUser(client, email, nickname, idFirebase);
-      const { accesstoken } = jwtHandlers.sign(user);
-      await userDB.setUserToken(client, user, accesstoken);
+      const newUser = await userDB.addUser(client, email, nickname, idFirebase);
+      const { accesstoken } = jwtHandlers.sign(newUser);
+      await userDB.setUserToken(client, newUser, accesstoken);
 
-      console.log(user);
-
-      return user, accesstoken;
+      return newUser;
     } catch (error) {
-      functions.logger.error(`[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`, `[CONTENT] ${error}`);
+      functions.logger.error(
+        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+        `[CONTENT] ${error}`,
+      );
       console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'} ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
     } finally {
       client.release();
     }
