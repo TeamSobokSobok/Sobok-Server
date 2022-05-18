@@ -28,7 +28,7 @@ module.exports = {
   READ_ALL_GROUP: '그룹 정보 불러오기 성공',
   READ_USER_NAME: '유저 이름 불러오기 성공',
   UPDATE_MEMBER_NAME: '멤버 이름 수정 성공',
-  ADD_SEND_GROUP: '캘린더 공유 요청 성공',
+  CREATED_SEND_GROUP: '캘린더 공유 요청 성공',
   ALREADY_SEND_GROUP: '이미 캘린더 공유 요청이 되었습니다.',
   UPDATE_SEND_GROUP: '캘린더 공유 수정 성공',
   ENABLE_SEND_GROUP: '자신에게 캘린더 공유 요청을 할 수 없습니다.',
