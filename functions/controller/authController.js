@@ -7,7 +7,7 @@ const { authService } = require('../service');
 
 /**
  *  @로그인
- *  @route POST auth/login/email
+ *  @route POST /auth/login/email
  *  @access public
  *  @err 1. 필요한 값이 없을 때
  *       2. 존재하지 않는 사용자일 때

@@ -7,7 +7,7 @@ const { noticeService } = require('../service');
 
 /**
  *  @그룹_멤버_이름_수정
- *  @route PUT group/:groupId/name
+ *  @route PUT /group/:groupId/name
  *  @access private
  *  @err 1. 필요한 값이 없을 때
  *       2. 존재하지 않는 그룹일 때
@@ -64,7 +64,7 @@ const updateMemberName = async (req, res) => {
 
 /**
  *  @그룹_수락상태_수정
- *  @route PUT group/:sendGroupId
+ *  @route PUT /group/:sendGroupId
  *  @access private
  *  @err 1. 필요한 값이 없을 때
  *       2. 존재하지 않는 그룹일 때
@@ -121,7 +121,7 @@ const updateIsOkay = async (req, res) => {
 
 /**
  *  @그룹_멤버들_불러오기
- *  @route GET group
+ *  @route GET /group
  *  @access private
  *  @err
  */
@@ -153,7 +153,7 @@ const getMember = async (req, res) => {
 };
 /**
  *  @그룹_멤버_이름_수정
- *  @route POST group
+ *  @route POST /group
  *  @access private
  *  @err 1. 필요한 값이 없을 때
  *       2. 자신한테 공유 요청했을 때
