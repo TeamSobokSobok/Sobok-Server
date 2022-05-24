@@ -1,4 +1,5 @@
 const express = require('express');
+const pillController = require('../../../controller/pillController');
 const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
@@ -7,7 +8,7 @@ router.get('/count', checkUser, require('./pillCountGET'));
 router.get('/:userId/count', require('./pillByUserIdCountGET'));
 
 // 약 추가 관련 router
-router.post('/', checkUser, require('./pillPOST'));
+router.post('/', checkUser, pillController.addPill);
 router.post('/member/:memberId', checkUser, require('./pillMemberByMemberIdPOST'));
 
 // 약 정보 수정 관련 router

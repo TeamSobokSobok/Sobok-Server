@@ -1,9 +1,9 @@
 module.exports = {
   userDB: require('./user'),
   groupDB: require('./group'),
-  pillDB: require('./pill'),
+  pillDao: require('./pillDao'),
   noticeDB: require('./notice'),
-  scheduleDB: require('./schedule'),
+  scheduleDao: require('./scheduleDao'),
   sendPillDB: require('./sendPill'),
   stickerDB: require('./sticker'),
 };
