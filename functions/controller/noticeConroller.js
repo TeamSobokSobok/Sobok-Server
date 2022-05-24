@@ -4,6 +4,7 @@ const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 const slackAPI = require('../middlewares/slackAPI');
 const { noticeService } = require('../service');
+const returnType = require('../constants/returnType');
 
 /**
  *  @그룹_멤버_이름_수정
@@ -28,14 +29,14 @@ const updateMemberName = async (req, res) => {
     const data = noticeService.updateMemberName(user, groupId, memberName);
 
     // @err 2. 존재하지 않는 그룹일 때
-    if (data === 'WRONG_REQUEST') {
+    if (data === returnType.DB_NOT_FOUND) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
     }
 
     // @err 3. 권한이 없을 떼
-    if (data === 'NO_AUTHENTICATED') {
+    if (data === returnType.WRONG_REQUEST_VALUE) {
       return res
         .status(statusCode.FORBIDDEN)
         .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
@@ -85,14 +86,14 @@ const updateIsOkay = async (req, res) => {
     const data = noticeService.updateIsOkay(user, sendGroupId, isOkay);
 
     // @err 2. 존재하지 않는 그룹일 때
-    if (data === 'WRONG_REQUEST') {
+    if (data === returnType.DB_NOT_FOUND) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
     }
 
     // @err 3. 권한이 없을 떼
-    if (data === 'NO_AUTHENTICATED') {
+    if (data === returnType.WRONG_REQUEST_VALUE) {
       return res
         .status(statusCode.FORBIDDEN)
         .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
@@ -175,19 +176,19 @@ const sendGroup = async (req, res) => {
     const data = noticeService.sendGroup(user, memberId, memberName);
 
     // @err 2. 자신한테 공유 요청했을 때
-    if (data === 'WRONG_REQUEST') {
+    if (data === returnType.WRONG_REQUEST_VALUE) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ENABLE_SEND_GROUP));
     }
     // @err 3. 요청하려는 사용자가 없을 때
-    if (data === 'DB_NOT_FOUND') {
+    if (data === returnType.DB_NOT_FOUND) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
     }
     // @err 4. 이미 요청된 사용자일 때
-    if (data === 'ALREADY_EXIST') {
+    if (data === returnType.VALUE_ALREADY_EXIST) {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_SEND_GROUP));
