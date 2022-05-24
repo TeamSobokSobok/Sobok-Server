@@ -2,21 +2,6 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addPill = async (client, pillName, userId, color, isStop) => {
-  const now = dayjs().add(9, 'hour');
-  const { rows } = await client.query(
-    `
-    INSERT INTO "pill"
-    (pill_name, user_id, color, is_stop, created_at, updated_at)
-    VALUES
-    ($1, $2, $3, $4, $5, $5)
-    RETURNING *
-    `,
-    [pillName, userId, color, isStop, now],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
 const getPillById = async (client, pillId) => {
   const { rows } = await client.query(
     `
@@ -96,4 +81,68 @@ const stopPillByPillId = async (client, pillId) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
-module.exports = { addPill, getPillById, getPillCountById, acceptPillByPillId, updatePillNameByPillId, getUserIdByPillId, deletePillByPillId, stopPillByPillId };
+
+// CREATE
+
+/**
+ * addPill
+ * 사용자 약 추가 쿼리문
+ * @param pill_name 해당 약 아이디
+ * @param userId 해당 약을 추가하는 유저 아이디
+ * @param color 해당 약의 색상
+ * @returns 추가된 약의 pillName
+ */
+const addPill = async (client, pillName, userId, color) => {
+  try {
+    const { rows } = await client.query(
+      `
+      INSERT INTO "pill" (pill_name, user_id, color)
+      VALUES ($1, $2, $3)
+      RETURNING id, pill_name
+      `,
+      [pillName, userId, color],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('pillDao.addPill에서 오류 발생: ' + error);
+  }
+};
+
+// READ
+
+/**
+ * getPillCount
+ * 사용자의 약 개수 조회
+ * @param userId 사용자 아이디
+ */
+const getPillCount = async (client, userId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT COUNT(user_id)
+      FROM "pill"
+      WHERE user_id = $1
+      `,
+      [userId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('pillDao.getPillCount에서 오류 발생: ' + error);
+  }
+};
+
+// UPDATE
+
+// DELETE
+
+module.exports = {
+  addPill,
+  getPillCount,
+  getPillById,
+  getPillCountById,
+  acceptPillByPillId,
+  updatePillNameByPillId,
+  getUserIdByPillId,
+  deletePillByPillId,
+  stopPillByPillId,
+};
