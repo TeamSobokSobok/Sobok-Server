@@ -1,8 +1,9 @@
-const { pillService, scheduleService } = require('../service');
+const { pillService } = require('../service');
 
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
+const returnType = require('../constants/returnType');
 
 /**
  * POST ~/pill
@@ -29,23 +30,26 @@ const addPill = async (req, res) => {
     }
 
     // 약 추가 서비스
-    const newPill = await pillService.addPill(pillName, user.id);
-    if (newPill.success === false) {
-      return res.status(newPill.status).json(newPill);
+    const newPill = await pillService.addPill(
+      pillName,
+      user.id,
+      takeInterval,
+      day,
+      specific,
+      time,
+      start,
+      end,
+    );
+    if (newPill === returnType.PILL_COUNT_OVER) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
     }
 
-    // 스케줄 추가 서비스
-    for (let pillCount = 0; pillCount < newPill.data.length; pillCount++) {
-      await scheduleService.addSchedule(
-        newPill.data[pillCount].id,
-        user.id,
-        takeInterval,
-        day,
-        specific,
-        time,
-        start,
-        end,
-      );
+    if (newPill === returnType.DB_NOT_FOUND) {
+      return res
+        .status(statusCode.DB_ERROR)
+        .json(util.fail(statusCode.DB_ERROR, responseMessage.DB_ERROR));
     }
 
     return res.status(newPill.status).json(newPill);
