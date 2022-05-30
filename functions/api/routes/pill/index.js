@@ -5,7 +5,7 @@ const router = express.Router();
 
 // 약 정보 조회 관련 router
 router.get('/count', checkUser, require('./pillCountGET'));
-router.get('/:userId/count', require('./pillByUserIdCountGET'));
+router.get('/:memberId/count', pillController.getPillCount);
 
 // 약 추가 관련 router
 router.post('/', checkUser, pillController.addPill);
