@@ -15,4 +15,10 @@ module.exports = {
   EMAIL_NOT_FOUND: -13, // 이메일이 존재하지 않을 때
   PW_NOT_CORRECT: -14, // 비밀번호가 일치하지 않을 때
   ANONYMOUS_USER: -15, // 비회원인 유저일 때
+
+  // 약
+  PILL_COUNT_OVER: -16, // 약 추가 개수 초과
+
+  // 캘린더
+  NO_MEMBER: -17, // 캘린더 공유가 안된 상황일 때
 };
