@@ -1,5 +1,5 @@
 const db = require('../db/db');
-const { pillDB, scheduleDB, noticeDB, sendPillDB, groupDB } = require('../db');
+const { pillDB, scheduleDB, noticeDB, sendPillDB, groupDB, userDB } = require('../db');
 
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
@@ -173,7 +173,35 @@ const addMemberPill = async (
   }
 };
 
+/**
+ * getPillCount
+ * 현재 복용중인 약 개수 반환
+ * @param memberId 약 개수를 조회할 유저 아이디
+ */
+const getPillCount = async (memberId) => {
+  let client;
+  const log = `pillDao.getPillCount | memberId = ${memberId}`;
+
+  try {
+    client = await db.connect(log);
+    await client.query('COMMIT');
+
+    const user = await userDB.findUserById(client, memberId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    const pillCount = await pillDB.getPillCount(client, memberId);
+
+    return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, pillCount);
+  } catch (error) {
+    console.error('getPillCount error 발생: ' + error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   addPill,
   addMemberPill,
+  getPillCount,
 };

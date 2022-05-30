@@ -119,7 +119,32 @@ const addMemberPill = async (req, res) => {
   }
 };
 
+/**
+ * GET ~/pill/:memberId/count
+ * 약 추가 가능한 개수 조회
+ * @private
+ */
+const getPillCount = async (req, res) => {
+  try {
+    const { memberId } = req.params;
+
+    const pillCount = await pillService.getPillCount(memberId);
+    if (pillCount === returnType.NON_EXISTENT_USER)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
+
+    return res.status(pillCount.status).json(pillCount);
+  } catch (error) {
+    console.log('getPillCount Controller 에러: ' + error);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   addPill,
   addMemberPill,
+  getPillCount,
 };

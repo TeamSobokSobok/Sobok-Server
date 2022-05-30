@@ -119,7 +119,7 @@ const getPillCount = async (client, userId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT COUNT(user_id)
+      SELECT COUNT(user_id) as pill_count
       FROM "pill"
       WHERE user_id = $1
       `,
