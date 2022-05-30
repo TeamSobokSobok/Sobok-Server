@@ -18,4 +18,7 @@ module.exports = {
 
   // 약
   PILL_COUNT_OVER: -16, // 약 추가 개수 초과
+
+  // 캘린더
+  NO_MEMBER: -17, // 캘린더 공유가 안된 상황일 때
 };

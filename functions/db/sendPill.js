@@ -3,16 +3,15 @@ const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 // CREATE
-const addSendPill = async (client, pillId, senderId, receiverId, now) => {
+const addSendPill = async (client, pillId, noticeId) => {
   const { rows } = await client.query(
     `
     INSERT INTO "send_pill"
-    (pill_id, sender_id, receiver_id, created_at, updated_at, is_send)
+    (pill_id, notice_id)
     VALUES
-    ($1, $2, $3, $4, $4, true)
-    RETURNING id, pill_id, is_send, is_okay
+    ($1, $2)
     `,
-    [pillId, senderId, receiverId, now],
+    [pillId, noticeId],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -91,4 +90,12 @@ const updateSendPillByPillId = async (client, pillId, isOkay) => {
 };
 // DELETE
 
-module.exports = { addSendPill, getReceiverNameById, getsendPillByCreatedAt, updateSendPillByPillId, getSenderIdByReceiverId, getUserIdByPillId, getIsOkayByPillId };
+module.exports = {
+  addSendPill,
+  getReceiverNameById,
+  getsendPillByCreatedAt,
+  updateSendPillByPillId,
+  getSenderIdByReceiverId,
+  getUserIdByPillId,
+  getIsOkayByPillId,
+};
