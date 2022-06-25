@@ -3,7 +3,7 @@ const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 const slackAPI = require('../middlewares/slackAPI');
-const { noticeService } = require('../service');
+const { noticeService, pillService } = require('../service');
 const returnType = require('../constants/returnType');
 
 /**
@@ -215,9 +215,36 @@ const sendGroup = async (req, res) => {
   }
 };
 
+/**
+ *  @약_알림_상세조회
+ *  @route GET /notice/:pillId
+ *  @access private
+ *  @err 1. 해당 약이 존재하지 않을 경우
+ */
+const getPillInfo = async (req, res) => {
+  try {
+    const { pillId } = req.params;
+    
+    const pillInfo = await noticeService.getPillInfo(pillId);
+    if (pillInfo === returnType.NON_EXISTENT_PILL) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
+    }
+
+    return res.status(pillInfo.status).json(pillInfo);
+  } catch (error) {
+    console.log('getPillInfo Controller 에러: ' + error);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
 module.exports = {
   updateMemberName,
   updateIsOkay,
   getMember,
   sendGroup,
+  getPillInfo,
 };

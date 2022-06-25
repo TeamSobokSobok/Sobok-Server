@@ -1,9 +1,39 @@
 const functions = require('firebase-functions');
 const db = require('../db/db');
-const { userDB, groupDB, noticeDB } = require('../db');
+const { userDB, groupDB, noticeDB, pillDB } = require('../db');
 const returnType = require('../constants/returnType');
+const util = require('../lib/util');
+const statusCode = require('../constants/statusCode');
+const responseMessage = require('../constants/responseMessage');
+
+/**
+ * 약 알림 상세조회 서비스
+ * @param pillId - 해당 약 아이디
+ */
+const getPillInfo = async (pillId) => {
+  let client;
+  const log = `pillDB.getPillInfo | pillId = ${pillId}`;
+
+  try {
+    client = await db.connect(log);
+    
+    const pillInfo = await pillDB.getPillInfo(client, pillId);
+    if (!pillInfo) return returnType.NON_EXISTENT_PILL;
+
+    let scheduleTime = [];
+    pillInfo.forEach(info => scheduleTime.push(info.scheduleTime));
+    pillInfo[0].scheduleTime = scheduleTime;
+
+    return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
+  } catch (error) {
+    console.error('getPillInfo error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+}
 
 module.exports = {
+  getPillInfo,
   updateMemberName: async (user, groupId, memberName) => {
     let client;
     const req = `user = ${user}, groupId = ${groupId}, memberName = ${memberName}`;
