@@ -24,10 +24,13 @@ const getNoticeList = async (userId) => {
     let calendarInfo = await groupDB.findCalendarInfo(client, userId);
     let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
 
-    calendarInfo = calendarInfo.sort((first, second) => first.createdAt - second.createdAt).reverse();
-    pillInfo = pillInfo.sort((first, second) => first.createdAt - second.createdAt).reverse();
+    let infoList = []
+    calendarInfo.forEach(info => infoList.push(info));
+    pillInfo.forEach(info => infoList.push(info));
 
-    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {pillInfo, calendarInfo})
+    infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
+
+    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {infoList: infoList})
   } catch (error) {
     console.error('getNoticeList error 발생: ' + error);
   } finally {
