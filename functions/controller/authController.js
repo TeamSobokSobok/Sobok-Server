@@ -60,7 +60,7 @@ const signUp = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { socialId } = req.body;
+    const { socialId } = req.query;
 
     //  @err 1. 필요한 값이 없을 때
     if (!socialId)
