@@ -11,8 +11,8 @@ module.exports = {
   ALREADY_EMAIL: '이미 사용중인 이메일입니다.',
   ALREADY_NICKNAME: '이미 사용중인 닉네임입니다.',
   USEABLE_NICKNAME: '사용 가능한 닉네임입니다.',
-  ALREADY_SOCIALID: '',
-  NOT_SIGNED_UP: '',
+  ALREADY_SOCIALID: '이미 사용중인 소셜 아이디입니다. ',
+  NOT_SIGNED_UP: '회원가입을 하지 않은 사용자입니다.',
 
   // 로그인
   LOGIN_SUCCESS: '로그인 성공',

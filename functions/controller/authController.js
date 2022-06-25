@@ -11,7 +11,7 @@ const returnType = require('../constants/returnType');
  *  @route POST /auth/signup
  *  @access public
  *  @err 1. 필요한 값이 없을 때
- *       2. 이메일이 이미 존재할 때
+ *       2. 이미 존재하는 socialId
  *       3. 패스워드 형식이 올바르지 않을 때
  */
 
@@ -19,6 +19,7 @@ const signUp = async (req, res) => {
   try {
     const { socialId, email, username } = req.body;
 
+    // @err 1. 필요한 값이 없을 때
     if (!socialId || !email || !username)
       return res
         .status(statusCode.BAD_REQUEST)
@@ -26,7 +27,7 @@ const signUp = async (req, res) => {
 
     const newUser = await authService.signUp(socialId, email, username);
 
-    // ㅇㅣㅁㅣ ㅈㅗㄴㅈㅐㅎㅏㄴㅡㄴ ㅅㅗㅅㅕㄹ
+    // @err 2. 이미 존재하는 socialId
     if (newUser === returnType.VALUE_ALREADY_EXIST) {
       return res
         .status(statusCode.BAD_REQUEST)
@@ -50,18 +51,18 @@ const signUp = async (req, res) => {
 };
 
 /**
- *  @ㄹㅗㄱㅡㅇㅣㄴ
+ *  @로그인
  *  @route GET /auth/signin
  *  @access public
  *  @err 1. 필요한 값이 없을 때
- *       2. 이메일이 이미 존재할 때
- *       3. 패스워드 형식이 올바르지 않을 때
+ *       2. 신규 사용자일 때
  */
 
 const signIn = async (req, res) => {
   try {
     const { socialId } = req.body;
 
+    //  @err 1. 필요한 값이 없을 때
     if (!socialId)
       return res
         .status(statusCode.BAD_REQUEST)
@@ -69,7 +70,7 @@ const signIn = async (req, res) => {
 
     const user = await authService.singIn(socialId);
 
-    // ㅇㅣㅁㅣ ㅈㅗㄴㅈㅐㅎㅏㄴㅡㄴ ㅅㅗㅅㅕㄹ
+    // 2. 신규 사용자일 때
     if (user === returnType.NON_EXISTENT_USER) {
       return res
         .status(statusCode.OK)

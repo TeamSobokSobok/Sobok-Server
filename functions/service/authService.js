@@ -45,13 +45,13 @@ module.exports = {
         return returnType.NON_EXISTENT_USER;
       }
 
-      //
+      // 회원가입 된 사용자
       let accesstoken = jwtHandlers.sign(findUser);
       accesstoken.isNew = false;
 
       return accesstoken;
     } catch (error) {
-      console.log('singIn Service ㅇㅔㄹㅓ' + error);
+      console.log('singIn Service 에러 발생' + error);
     } finally {
       client.release();
     }
