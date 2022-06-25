@@ -18,7 +18,7 @@ const getPillInfo = async (pillId) => {
     client = await db.connect(log);
     
     const pillInfo = await pillDB.getPillInfo(client, pillId);
-    if (!pillInfo) return returnType.NON_EXISTENT_PILL;
+    if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
 
     let scheduleTime = [];
     pillInfo.forEach(info => scheduleTime.push(info.scheduleTime));
