@@ -2,17 +2,17 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addUser = async (client, email, username, idFirebase) => {
+const addUser = async (client, email, username, socialId) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "user"
-    (email, username, id_firebase, created_at, updated_at)
+    (email, username, social_id, created_at, updated_at)
     VALUES
     ($1, $2, $3, $4, $4)
-    RETURNING id, username, email, id_firebase, created_at, updated_at
+    RETURNING id, username, email, social_id, created_at, updated_at
     `,
-    [email, username, idFirebase, now],
+    [email, username, socialId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -29,14 +29,14 @@ const findUserById = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
-const findUserByIdFirebase = async (client, idFirebase) => {
+const findUserBySocialId = async (client, socialId) => {
   const { rows } = await client.query(
     `
     SELECT * FROM "user"
-    WHERE id_firebase = $1
+    WHERE social_id = $1
     
     `,
-    [idFirebase],
+    [socialId],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -103,4 +103,12 @@ const findUserNameById = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { addUser, findUserById, findUserByIdFirebase, findUserByEmail, setUserToken, findUserByName, findUserNameById };
+module.exports = {
+  addUser,
+  findUserById,
+  findUserBySocialId,
+  findUserByEmail,
+  setUserToken,
+  findUserByName,
+  findUserNameById,
+};

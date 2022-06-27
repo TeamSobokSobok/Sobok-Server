@@ -184,7 +184,6 @@ const getPillCount = async (memberId) => {
 
   try {
     client = await db.connect(log);
-    await client.query('COMMIT');
 
     const user = await userDB.findUserById(client, memberId);
     if (!user) return returnType.NON_EXISTENT_USER;
@@ -194,7 +193,6 @@ const getPillCount = async (memberId) => {
     return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, pillCount);
   } catch (error) {
     console.error('getPillCount error 발생: ' + error);
-    await client.query('ROLLBACK');
   } finally {
     client.release();
   }

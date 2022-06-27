@@ -1,10 +1,42 @@
 const functions = require('firebase-functions');
 const db = require('../db/db');
-const { userDB, groupDB, noticeDB, pillDB } = require('../db');
+const { userDB, groupDB, noticeDB, pillDB, sendPillDB } = require('../db');
 const returnType = require('../constants/returnType');
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
+
+/**
+ * getNoticeList
+ * 알림 리스트 전체 조회 서비스
+ * @param userId - 알림 리스트 조회할 유저 아이디
+ */
+const getNoticeList = async (userId) => {
+  let client;
+  const log = `noticeDB.getNoticeList | userId = ${userId}`;
+
+  try {
+    client = await db.connect(db);
+
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    let calendarInfo = await groupDB.findCalendarInfo(client, userId);
+    let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
+
+    let infoList = []
+    calendarInfo.forEach(info => infoList.push(info));
+    pillInfo.forEach(info => infoList.push(info));
+
+    infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
+
+    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {infoList: infoList})
+  } catch (error) {
+    console.error('getNoticeList error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
 
 /**
  * 약 알림 상세조회 서비스
@@ -33,6 +65,7 @@ const getPillInfo = async (pillId) => {
 }
 
 module.exports = {
+  getNoticeList,
   getPillInfo,
   updateMemberName: async (user, groupId, memberName) => {
     let client;

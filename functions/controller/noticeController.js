@@ -240,6 +240,33 @@ const getPillInfo = async (req, res) => {
       .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 }
+    
+ * @알림_리스트_전체_조회
+ * @route ~/notice/list
+ * @access private
+ * @err 1. 헤더에 유저 정보가 잘못되었을 때
+ */
+const getNoticeList = async (req, res) => {
+  try {
+    const { user } = req.header;
+    
+    // 유저 정보가 헤더에 없는 경우
+    if (!user) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+    }
+
+    const noticeList = await noticeService.getNoticeList(user.id);
+
+    return res.status(noticeList.status).json(noticeList);
+  } catch (error) {
+    console.log('getNoticeList Controller 에러: ' + error);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
 
 module.exports = {
   updateMemberName,
@@ -247,4 +274,5 @@ module.exports = {
   getMember,
   sendGroup,
   getPillInfo,
+  getNoticeList,
 };

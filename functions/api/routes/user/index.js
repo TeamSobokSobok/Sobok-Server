@@ -6,6 +6,6 @@ const router = express.Router();
 router.get('/', checkUser, userContoller.getUsername);
 
 // 닉네임 중복검사
-router.post('/name', userContoller.checkNickname);
+router.post('/name', userContoller.checkUsername);
 
 module.exports = router;
