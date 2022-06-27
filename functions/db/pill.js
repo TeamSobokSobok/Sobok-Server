@@ -153,6 +153,26 @@ const getPillInfo = async (client, pillId) => {
 }
 
 // UPDATE
+/**
+ * acceptSendPill
+ * 전송받은 약 수락
+ * @param pillId 약 아이디
+ */
+const acceptSendPill = async (client, userId, pillId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      UPDATE "pill"
+      SET user_id = $1
+      WHERE id = $2
+      `,
+      [userId, pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('pillDB.acceptSendPill에서 오류 발생: ' + error);
+  }
+}
 
 // DELETE
 
@@ -167,4 +187,5 @@ module.exports = {
   getUserIdByPillId,
   deletePillByPillId,
   stopPillByPillId,
+  acceptSendPill,
 };

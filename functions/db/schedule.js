@@ -299,6 +299,27 @@ const addSchedule = async (
 // READ
 
 // UPDATE
+/**
+ * acceptSendPill
+ * 타인에게 받은 약 수락 쿼리
+ * @param pillId
+ * @param userId
+ */
+const acceptSendPill = async (client, pillId, userId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      UPDATE "schedule"
+      SET user_id = $1
+      WHERE pill_id = $2
+      `,
+      [userId, pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('scehduleDB.acceptSendPill에서 오류 발생: ' + error);
+  }
+}
 
 // DELETE
 
@@ -324,4 +345,5 @@ module.exports = {
   deleteScheduleByDate,
   findAllLikeScheduleByScheduleId,
   findLikeScheduleBySenderId,
+  acceptSendPill,
 };

@@ -76,15 +76,35 @@ const getIsOkayByPillId = async (client, pillId) => {
 };
 
 const findSendPillInfo = async (client, userId) => {
-  const { rows } = await client.query(
-    `
-    SELECT notice_id, section, is_okay, is_send, n.created_at as created_at, username as sender_name, pill_name, pill_id
-    FROM notice as n JOIN send_pill sp on n.id = sp.notice_id JOIN "user" u on u.id = n.sender_id JOIN pill p on p.id = sp.pill_id
-    WHERE n.user_id = $1
-    `,
-    [userId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows)
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT notice_id, section, is_okay, is_send, n.created_at as created_at, username as sender_name, pill_name, pill_id
+      FROM notice as n JOIN send_pill sp on n.id = sp.notice_id JOIN "user" u on u.id = n.sender_id JOIN pill p on p.id = sp.pill_id
+      WHERE n.user_id = $1
+      `,
+      [userId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows)
+  } catch (error) {
+    throw new Error('sendPillDB.findSendPillInfo에서 오류 발생: ' + error);
+  }
+}
+
+const getSendPillUser = async (client, pillId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT pill_id, is_okay, user_id
+      FROM send_pill as sp JOIN notice n on n.id = sp.notice_id
+      WHERE pill_id = $1;
+      `,
+      [pillId]
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('sendPillDB.getSendPillUser에서 오류 발생: ' + error);
+  }
 }
 
 // UPDATE
@@ -100,6 +120,22 @@ const updateSendPillByPillId = async (client, pillId, isOkay) => {
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
+
+const updateSendPill = async (client, pillId, acceptState) => {
+  try {
+    const { rows } = await client.query(
+      `
+      UPDATE "send_pill"
+      SET is_okay = $1
+      WHERE pill_id = $2
+      `,
+      [acceptState, pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('sendPillDB.updateSendPill에서 오류 발생: ' + error);
+  }
+}
 // DELETE
 
 module.exports = {
@@ -111,4 +147,6 @@ module.exports = {
   getSenderIdByReceiverId,
   getUserIdByPillId,
   getIsOkayByPillId,
+  updateSendPill,
+  getSendPillUser,
 };

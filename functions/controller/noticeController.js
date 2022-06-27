@@ -270,6 +270,59 @@ const getNoticeList = async (req, res) => {
   }
 }
 
+/** 
+  * @약_상태_업데이트
+  * @route ~/notice/list/:pillId
+  * @access private
+  * @err 1. 헤더에 유저 정보가 잘못되었을 때
+  *      2. 입력값이 잘못 되었을 때
+  *      3. 해당 약의 주인이 아닐 때
+  *      4. 이미 처리된 약일 때
+  */
+ const updateSendPill = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { pillId } = req.params;
+    const { isOkay } = req.body;
+
+    // 유저 정보가 헤더에 없는 경우
+    if (!user) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+    }
+
+    const updateSendPill = await noticeService.updateSendPill(user.id, pillId, isOkay);
+    // 잘못된 값이 들어왔을 때
+    if (updateSendPill === returnType.WRONG_REQUEST_VALUE) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(statusCode.BAD_REQUEST, responseMessage.WRONG_PILL_STATE);
+    }
+
+    // 해당 약의 주인이 아닐 때
+    if (updateSendPill === returnType.NO_PILL_USER) {
+      return res
+          .status(statusCode.UNAUTHORIZED)
+          .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.PILL_UNAUTHORIZED));
+    }
+
+    // 이미 처리된 약일 때
+    if (updateSendPill === returnType.ALREADY_COMPLETE) {
+      return res
+          .status(statusCode.BAD_REQUEST)
+          .json(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_ACCEPT));
+    }
+
+    return res.status(updateSendPill.status).json(updateSendPill);
+  } catch (error) {
+    console.log('updateSendPill Controller 에러: ' + error);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+ }
+
 module.exports = {
   updateMemberName,
   updateIsOkay,
@@ -277,4 +330,5 @@ module.exports = {
   sendGroup,
   getPillInfo,
   getNoticeList,
+  updateSendPill,
 };
