@@ -127,9 +127,30 @@ const getPillCount = async (client, userId) => {
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
-    throw new Error('pillDao.getPillCount에서 오류 발생: ' + error);
+    throw new Error('pillDB.getPillCount에서 오류 발생: ' + error);
   }
 };
+
+/**
+ * getPillInfo
+ * 해당 약의 정보 조회
+ * @param pillId 약 아이디
+ */
+const getPillInfo = async (client, pillId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT DISTINCT pill_name, take_interval, schedule_time, start_date, end_date
+      FROM pill JOIN schedule s on pill.id = s.pill_id
+      WHERE pill_id = $1;
+      `,
+      [pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('pillDB.getPillInfo에서 오류 발생: ' + error);
+  }
+}
 
 // UPDATE
 
@@ -138,6 +159,7 @@ const getPillCount = async (client, userId) => {
 module.exports = {
   addPill,
   getPillCount,
+  getPillInfo,
   getPillById,
   getPillCountById,
   acceptPillByPillId,
