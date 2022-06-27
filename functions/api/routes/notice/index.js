@@ -8,6 +8,6 @@ router.get('/list/:pillId', checkUser, noticeController.getPillInfo);
 router.get('/list', checkUser, noticeController.getNoticeList);
 
 // 알림 정보 수정 관련 router
-router.put('/', checkUser, require('./pillInfoPUT'));
+router.put('/list/:pillId', checkUser, noticeController.updateSendPill);
 
 module.exports = router;

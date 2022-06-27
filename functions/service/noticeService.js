@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const db = require('../db/db');
-const { userDB, groupDB, noticeDB, pillDB, sendPillDB } = require('../db');
+const { userDB, groupDB, noticeDB, pillDB, sendPillDB, scheduleDB } = require('../db');
 const returnType = require('../constants/returnType');
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
@@ -64,9 +64,55 @@ const getPillInfo = async (pillId) => {
   }
 }
 
+/**
+ * 약 알림 수락 & 거절 서비스
+ * @param pillId - 업데이트할 약 아이디
+ */
+const updateSendPill = async (userId, pillId, acceptState) => {
+  let client;
+  const log = `pillDB.accept.acceptSendPill | pillId = ${pillId}`;
+
+  try {
+    client = await db.connect(log);
+    await client.query('BEGIN');
+
+    const pillReceiverInfo = await sendPillDB.getSendPillUser(client, pillId);
+    console.log(pillReceiverInfo);
+    // 해당 약을 받은 유저가 아닐 때
+    if (pillReceiverInfo.userId !== userId) {
+      return returnType.NO_PILL_USER;
+    }
+
+    // 이미 처리된 약일 때
+    if (pillReceiverInfo.isOkay !== 'waiting') {
+      return returnType.ALREADY_COMPLETE;
+    }
+
+    const updateSendPill = await sendPillDB.updateSendPill(client, pillId, acceptState);
+    if (acceptState === 'refuse') {
+      await client.query('COMMIT');
+      return util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS, updateSendPill);
+    } else if (acceptState === 'accept') {
+      const acceptSendPill = await pillDB.acceptSendPill(client, userId, pillId);
+      const updateSchedule = await scheduleDB.acceptSendPill(client, pillId, userId);
+      await client.query('COMMIT');
+      return util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS, updateSendPill);
+    } else {
+      return returnType.WRONG_REQUEST_VALUE;
+    }
+
+  } catch (error) {
+    console.error('acceptSendPill error 발생: ' + error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getNoticeList,
   getPillInfo,
+  updateSendPill,
   updateMemberName: async (user, groupId, memberName) => {
     let client;
     const req = `user = ${user}, groupId = ${groupId}, memberName = ${memberName}`;
