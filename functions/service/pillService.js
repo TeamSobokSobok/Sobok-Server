@@ -113,7 +113,8 @@ const addMemberPill = async (
 
     // 캘린더 공유 상황 확인
     const checkUser = await groupDB.findSendGroupIsOkay(client, memberId, userId);
-    if (checkUser.isOkay !== 'accept') return returnType.NO_MEMBER;
+    console.log(checkUser);
+    if (!checkUser || checkUser.isOkay !== 'accept') return returnType.NO_MEMBER;
 
     // 현재 유저의 약 개수 반환
     const pills = await pillDB.getPillCount(client, memberId);

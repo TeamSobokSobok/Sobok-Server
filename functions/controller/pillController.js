@@ -98,6 +98,12 @@ const addMemberPill = async (req, res) => {
       start,
       end,
     );
+    if (newPill === returnType.NO_MEMBER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_MEMBER));
+    }
+
     if (newPill === returnType.PILL_COUNT_OVER) {
       return res
         .status(statusCode.BAD_REQUEST)
