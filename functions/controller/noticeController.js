@@ -152,6 +152,7 @@ const getMember = async (req, res) => {
       .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 };
+
 /**
  *  @그룹_멤버_이름_수정
  *  @route POST /group
@@ -217,7 +218,7 @@ const sendGroup = async (req, res) => {
 
 /**
  *  @약_알림_상세조회
- *  @route GET /notice/:pillId
+ *  @route GET /notice/list/:pillId
  *  @access private
  *  @err 1. 해당 약이 존재하지 않을 경우
  */
@@ -241,11 +242,12 @@ const getPillInfo = async (req, res) => {
   }
 }
     
- * @알림_리스트_전체_조회
- * @route ~/notice/list
- * @access private
- * @err 1. 헤더에 유저 정보가 잘못되었을 때
- */
+ /** 
+  * @알림_리스트_전체_조회
+  * @route ~/notice/list
+  * @access private
+  * @err 1. 헤더에 유저 정보가 잘못되었을 때
+  */
 const getNoticeList = async (req, res) => {
   try {
     const { user } = req.header;
