@@ -22,15 +22,19 @@ const getNoticeList = async (userId) => {
     if (!user) return returnType.NON_EXISTENT_USER;
 
     let calendarInfo = await groupDB.findCalendarInfo(client, userId);
+    calendarInfo.forEach((data) => {
+      data.pillId = null;
+      data.pillName = null;
+    });
     let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
 
-    let infoList = []
-    calendarInfo.forEach(info => infoList.push(info));
-    pillInfo.forEach(info => infoList.push(info));
+    let infoList = [];
+    calendarInfo.forEach((info) => infoList.push(info));
+    pillInfo.forEach((info) => infoList.push(info));
 
     infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
 
-    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {infoList: infoList})
+    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, { infoList: infoList });
   } catch (error) {
     console.error('getNoticeList error 발생: ' + error);
   } finally {
@@ -48,12 +52,12 @@ const getPillInfo = async (pillId) => {
 
   try {
     client = await db.connect(log);
-    
+
     const pillInfo = await pillDB.getPillInfo(client, pillId);
     if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
 
     let scheduleTime = [];
-    pillInfo.forEach(info => scheduleTime.push(info.scheduleTime));
+    pillInfo.forEach((info) => scheduleTime.push(info.scheduleTime));
     pillInfo[0].scheduleTime = scheduleTime;
 
     return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
@@ -62,7 +66,7 @@ const getPillInfo = async (pillId) => {
   } finally {
     client.release();
   }
-}
+};
 
 /**
  * 약 알림 수락 & 거절 서비스
@@ -100,14 +104,13 @@ const updateSendPill = async (userId, pillId, acceptState) => {
     } else {
       return returnType.WRONG_REQUEST_VALUE;
     }
-
   } catch (error) {
     console.error('acceptSendPill error 발생: ' + error);
     await client.query('ROLLBACK');
   } finally {
     client.release();
   }
-}
+};
 
 module.exports = {
   getNoticeList,
