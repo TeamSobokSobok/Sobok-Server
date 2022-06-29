@@ -1,4 +1,46 @@
+const dayjs = require('dayjs');
+const responseMessage = require('../constants/responseMessage');
+const statusCode = require('../constants/statusCode');
+const { scheduleDB } = require('../db');
+const db = require('../db/db');
+const util = require('../lib/util');
+
+/**
+ * 내 캘린더 전체 조회
+ * @param date - 현재 날짜
+ * @param userId - 해당 유저 아이디
+ */
+const getMyCalendar = async (date, userId) => {
+  let client;
+  const log = `scheduleDB.getMyCalendar | date = ${date}`;
+
+  try {
+    client = await db.connect(log);
+
+    const startMonth = dayjs(date).startOf('month').format('YYYY-MM-DD');
+    const endMonth = dayjs(date).endOf('month').format('YYYY-MM-DD');
+
+    const myCalender = await scheduleDB.getMyCalendar(client, userId, startMonth, endMonth);
+    myCalender.forEach((data) => {
+      if (data.scheduleCount === data.isCheckCount) {
+        data.isComplete = 'done';
+      } else if (data.scheduleCount > data.isCheckCount && Number(data.isCheckCount) > 0) {
+        data.isComplete = 'doing';
+      } else if (Number(data.isCheckCount) === 0) {
+        data.isComplete = 'none';
+      }
+    });
+
+    return util.success(statusCode.OK, responseMessage.READ_MY_CALENDAR, myCalender);
+  } catch (error) {
+    console.error('getMyCalendar error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
+  getMyCalendar,
   /**
   getMyCalendar: async (user, date) => {
     let client;
