@@ -297,6 +297,32 @@ const addSchedule = async (
 };
 
 // READ
+/**
+ * getMyCalendar
+ * 내 캘린더 조회 쿼리
+ * @param userId - 해당 약 사용자 아이디
+ * @param startMonth - 해당 월 시작일
+ * @param endMonth - 해당 월 종료일
+ */
+const getMyCalendar = async (client, userId, startMonth, endMonth) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT schedule_date
+          , count(schedule_date) as schedule_count
+          , count(case when is_check=true THEN  1 END ) as is_check_count
+      FROM schedule
+      WHERE user_id = $1 AND schedule_date BETWEEN $2 AND $3
+      GROUP BY schedule_date
+      ORDER BY schedule_date 
+      `,
+      [userId, startMonth, endMonth],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('scheduleDB.getMyCalendar에서 오류 발생: ' + error);
+  }
+};
 
 // UPDATE
 /**
@@ -319,7 +345,7 @@ const acceptSendPill = async (client, pillId, userId) => {
   } catch (error) {
     throw new Error('scehduleDB.acceptSendPill에서 오류 발생: ' + error);
   }
-}
+};
 
 // DELETE
 
@@ -346,4 +372,5 @@ module.exports = {
   findAllLikeScheduleByScheduleId,
   findLikeScheduleBySenderId,
   acceptSendPill,
+  getMyCalendar,
 };
