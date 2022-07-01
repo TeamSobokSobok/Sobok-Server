@@ -22,7 +22,7 @@ const addSendGroup = async (client, noticeId, memberName) => {
 const findMember = async (client, userId) => {
   const { rows } = await client.query(
     `
-    SELECT * 
+    SELECT sg.id as group_id, n.user_id as member_id, sg.member_name
     FROM "send_group" sg
     JOIN "notice" n
     ON sg.notice_id = n.id
