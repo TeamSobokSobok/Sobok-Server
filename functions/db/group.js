@@ -3,40 +3,30 @@ const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 // CREATE
-const addSendGroup = async (client, senderId, memberId, memberName) => {
+const addSendGroup = async (client, noticeId, memberName) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO send_group
-    (sender_id, receiver_id, member_name, is_send, created_at, updated_at)
+    (member_name, notice_id, is_send, is_okay, created_at, updated_at)
     VALUES
-    ($1, $2, $3, true, $4, $4)
+    ($1, $2, true, 'wating', $3, $3)
     RETURNING *
     `,
-    [senderId, memberId, memberName, now],
+    [memberName, noticeId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
 // READ
-const findSendGroup = async (client, senderId, receiverId) => {
-  const { rows } = await client.query(
-    `
-    SELECT sender_id, receiver_id, is_okay
-    FROM send_group
-    WHERE sender_id = $1 AND receiver_id = $2 AND is_okay is not false
-    `,
-    [senderId, receiverId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
 const findMember = async (client, userId) => {
   const { rows } = await client.query(
     `
-    SELECT id as group_id, receiver_id, member_name FROM "send_group"
-    WHERE sender_id = $1 AND is_okay = true
-    ORDER BY created_at
+    SELECT * 
+    FROM "send_group" sg
+    JOIN "notice" n
+    ON sg.notice_id = n.id
+    WHERE n.sender_id = $1 AND sg.is_okay = 'accept'
     
     `,
     [userId],
@@ -47,8 +37,11 @@ const findMember = async (client, userId) => {
 const findSendGroupBySendGroupId = async (client, sendGroupId) => {
   const { rows } = await client.query(
     `
-    SELECT * FROM "send_group"
-    WHERE id = $1 
+    SELECT * 
+    FROM "send_group" sg
+    JOIN "notice" n
+    ON sg.notice_id = n.id
+    WHERE sg.id = $1 
     `,
     [sendGroupId],
   );
@@ -94,7 +87,7 @@ const findCalendarInfo = async (client, userId) => {
   } catch (error) {
     throw new Error('group.findCalendarInfo에서 오류 발생: ' + error);
   }
-}
+};
 
 // UPDATE
 const updateMemberName = async (client, memberName, groupId) => {
@@ -104,7 +97,7 @@ const updateMemberName = async (client, memberName, groupId) => {
     UPDATE send_group
     SET member_name = $1, updated_at = $2
     WHERE id = $3
-    RETURNING id as group_id, sender_id, receiver_id, member_name 
+    RETURNING id as group_id, member_name 
     
     `,
     [memberName, now, groupId],
@@ -116,22 +109,12 @@ const updateSendGroup = async (client, sendGroupId, isOkay) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
-    WITH send_group AS (
       UPDATE "send_group"
-      SET is_okay = $1, updated_at = $3
-      WHERE id = $2
+      SET is_okay = $1, updated_at = $2
+      WHERE id = $3
       RETURNING *
-    ) SELECT
-     send_group.id as send_group_id
-     , sender_id, su.username as sender_name
-     , receiver_id, ru.username as member_name
-     , is_send, is_okay, send_group.updated_at
-     FROM send_group
-    LEFT JOIN "user" su ON su.id = send_group.sender_id
-    LEFT JOIN "user" ru ON ru.id = send_group.receiver_id
-    
     `,
-    [isOkay, sendGroupId, now],
+    [isOkay, now, sendGroupId],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -139,7 +122,6 @@ const updateSendGroup = async (client, sendGroupId, isOkay) => {
 // DELETE
 
 module.exports = {
-  findSendGroup,
   findAllMemberByUserId,
   findCalendarInfo,
   findMember,
