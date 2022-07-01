@@ -26,7 +26,7 @@ const updateMemberName = async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const data = noticeService.updateMemberName(user, groupId, memberName);
+    const data = await noticeService.updateMemberName(user, groupId, memberName);
 
     // @err 2. 존재하지 않는 그룹일 때
     if (data === returnType.DB_NOT_FOUND) {
@@ -83,7 +83,7 @@ const updateIsOkay = async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const data = noticeService.updateIsOkay(user, sendGroupId, isOkay);
+    const data = await noticeService.updateIsOkay(user, sendGroupId, isOkay);
 
     // @err 2. 존재하지 않는 그룹일 때
     if (data === returnType.DB_NOT_FOUND) {
@@ -130,7 +130,7 @@ const getMember = async (req, res) => {
   try {
     const user = req.header.user;
 
-    const memberList = noticeService.getMember(user);
+    const memberList = await noticeService.getMember(user);
 
     return res
       .status(statusCode.OK)
@@ -174,7 +174,7 @@ const sendGroup = async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const data = noticeService.sendGroup(user, memberId, memberName);
+    const data = await noticeService.sendGroup(user, memberId, memberName);
 
     // @err 2. 자신한테 공유 요청했을 때
     if (data === returnType.WRONG_REQUEST_VALUE) {
@@ -187,12 +187,6 @@ const sendGroup = async (req, res) => {
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
-    }
-    // @err 4. 이미 요청된 사용자일 때
-    if (data === returnType.VALUE_ALREADY_EXIST) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_SEND_GROUP));
     }
 
     return res
@@ -225,7 +219,7 @@ const sendGroup = async (req, res) => {
 const getPillInfo = async (req, res) => {
   try {
     const { pillId } = req.params;
-    
+
     const pillInfo = await noticeService.getPillInfo(pillId);
     if (pillInfo === returnType.NON_EXISTENT_PILL) {
       return res
@@ -240,18 +234,18 @@ const getPillInfo = async (req, res) => {
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
-}
-    
- /** 
-  * @알림_리스트_전체_조회
-  * @route ~/notice/list
-  * @access private
-  * @err 1. 헤더에 유저 정보가 잘못되었을 때
-  */
+};
+
+/**
+ * @알림_리스트_전체_조회
+ * @route ~/notice/list
+ * @access private
+ * @err 1. 헤더에 유저 정보가 잘못되었을 때
+ */
 const getNoticeList = async (req, res) => {
   try {
     const { user } = req.header;
-    
+
     // 유저 정보가 헤더에 없는 경우
     if (!user) {
       return res
@@ -268,18 +262,18 @@ const getNoticeList = async (req, res) => {
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
-}
+};
 
-/** 
-  * @약_상태_업데이트
-  * @route ~/notice/list/:pillId
-  * @access private
-  * @err 1. 헤더에 유저 정보가 잘못되었을 때
-  *      2. 입력값이 잘못 되었을 때
-  *      3. 해당 약의 주인이 아닐 때
-  *      4. 이미 처리된 약일 때
-  */
- const updateSendPill = async (req, res) => {
+/**
+ * @약_상태_업데이트
+ * @route ~/notice/list/:pillId
+ * @access private
+ * @err 1. 헤더에 유저 정보가 잘못되었을 때
+ *      2. 입력값이 잘못 되었을 때
+ *      3. 해당 약의 주인이 아닐 때
+ *      4. 이미 처리된 약일 때
+ */
+const updateSendPill = async (req, res) => {
   try {
     const { user } = req.header;
     const { pillId } = req.params;
@@ -303,15 +297,15 @@ const getNoticeList = async (req, res) => {
     // 해당 약의 주인이 아닐 때
     if (updateSendPill === returnType.NO_PILL_USER) {
       return res
-          .status(statusCode.UNAUTHORIZED)
-          .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.PILL_UNAUTHORIZED));
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.PILL_UNAUTHORIZED));
     }
 
     // 이미 처리된 약일 때
     if (updateSendPill === returnType.ALREADY_COMPLETE) {
       return res
-          .status(statusCode.BAD_REQUEST)
-          .json(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_ACCEPT));
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_ACCEPT));
     }
 
     return res.status(updateSendPill.status).json(updateSendPill);
@@ -321,7 +315,7 @@ const getNoticeList = async (req, res) => {
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
- }
+};
 
 module.exports = {
   updateMemberName,
