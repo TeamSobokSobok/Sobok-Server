@@ -46,40 +46,50 @@ const getMyCalendar = async (req, res) => {
   }
 };
 
+/**
+ * GET ~/schedule/detail
+ * 해당 날짜 스케줄 조회
+ * @private
+ */
+const getMySchedule = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { date } = req.query;
+
+    if (!date)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+    if (!user)
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+
+    const mySchedule = await scheduleService.getMySchedule(user.id, date);
+
+    return res.status(mySchedule.status).json(mySchedule);
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   getMyCalendar,
-  getMySchedule: async (req, res) => {
-    try {
-      const { user } = req.header;
-      let { date } = req.query;
-
-      if (!user || !date)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
-      const scheduleList = await scheduleService.getMySchedule(user, date);
-
-      res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.READ_MEMBER_SCHEDULE, scheduleList));
-    } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-  },
+  getMySchedule,
   getMemberCalendar: async (req, res) => {
     try {
       const { user } = req.header;
