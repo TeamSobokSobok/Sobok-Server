@@ -1,7 +1,7 @@
 const dayjs = require('dayjs');
 const responseMessage = require('../constants/responseMessage');
 const statusCode = require('../constants/statusCode');
-const { scheduleDB } = require('../db');
+const { scheduleDB, stickerDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 
@@ -39,8 +39,71 @@ const getMyCalendar = async (date, userId) => {
   }
 };
 
+/**
+ * 해당 일정 복약 스케줄 조회
+ * @param userId - 유저 아이디
+ * @param date - 조회를 원하는 날짜
+ */
+const getMySchedule = async (userId, date) => {
+  let client;
+  const log = `scheduleDB.getMySchedule | userId = ${userId}, date = ${date}`;
+
+  try {
+    client = await db.connect(db);
+
+    const myScheduleTime = await scheduleDB.getMyScheduleTime(client, userId, date);
+    for (let data = 0; data < myScheduleTime.length; data++) {
+      let schedule = await scheduleDB.getMySchedule(
+        client,
+        userId,
+        date,
+        myScheduleTime[data].scheduleTime,
+      );
+
+      for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
+        let stickerCount = {
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+        };
+        let stickerList = await stickerDB.findStickerListById(
+          client,
+          userId,
+          schedule[scheduleInfo].scheduleId,
+        );
+
+        for (let sticker = 0; sticker < stickerList.length; sticker++) {
+          if (stickerList[sticker].stickerId === 1) {
+            stickerCount[1]++;
+          } else if (stickerList[sticker].stickerId === 2) {
+            stickerCount[2]++;
+          } else if (stickerList[sticker].stickerId === 3) {
+            stickerCount[3]++;
+          } else if (stickerList[sticker].stickerId === 4) {
+            stickerCount[4]++;
+          } else if (stickerList[sticker].stickerId === 5) {
+            stickerCount[5]++;
+          }
+        }
+        schedule[scheduleInfo].stickerId = stickerCount;
+        schedule[scheduleInfo].stickerTotalCount = stickerList.length;
+      }
+      myScheduleTime[data].scheduleList = schedule;
+    }
+
+    return util.success(statusCode.OK, responseMessage.READ_MY_SCHEDULE, myScheduleTime);
+  } catch (error) {
+    console.log('getMySchedule error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   getMyCalendar,
+  getMySchedule,
   /**
   getMyCalendar: async (user, date) => {
     let client;

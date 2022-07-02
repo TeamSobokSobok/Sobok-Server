@@ -11,4 +11,21 @@ const findStickerList = async (client) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-module.exports = { findStickerList };
+const findStickerListById = async (client, userId, scheduleId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT sticker_id
+      FROM like_schedule as ls JOIN schedule s on ls.schedule_id = s.id
+      WHERE user_id = $1 AND s.id = $2
+      `,
+      [userId, scheduleId],
+    );
+
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('stickerDB.findStickerListById에서 Error 발생: ' + error);
+  }
+};
+
+module.exports = { findStickerList, findStickerListById };
