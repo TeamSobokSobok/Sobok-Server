@@ -6,7 +6,7 @@ const returnType = require('../constants/returnType');
 module.exports = {
   getStickerBySchedule: async (user, scheduleId) => {
     let client;
-    const req = ``;
+    const req = `user = ${user}, scheduleId = ${scheduleId}`;
 
     try {
       client = await db.connect(req);
@@ -32,10 +32,6 @@ module.exports = {
 
       return likeScheduleList;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
       console.log(error);
     } finally {
       client.release();
@@ -43,7 +39,7 @@ module.exports = {
   },
   sendSticker: async (user, stickerId, scheduleId) => {
     let client;
-    const req = ``;
+    const req = `user = ${user}, stickerId = ${stickerId}, scheduleId = ${scheduleId}`;
 
     try {
       client = await db.connect(req);
@@ -94,10 +90,6 @@ module.exports = {
 
       return addLikeSchedule;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
       console.log(error);
     } finally {
       client.release();

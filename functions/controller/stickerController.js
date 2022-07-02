@@ -67,7 +67,7 @@ const sendSticker = async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const data = await stickerService.sendSticker(user, stickerId, scheduleId);
+    const data = await stickerService.sendSticker(user, Number(stickerId), Number(scheduleId));
 
     // @err 2. 존재하지 않는 스케줄일 때
     if (data === returnType.DB_NOT_FOUND) {

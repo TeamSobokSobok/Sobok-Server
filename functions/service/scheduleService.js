@@ -1,7 +1,8 @@
 const dayjs = require('dayjs');
 const responseMessage = require('../constants/responseMessage');
+const returnType = require('../constants/returnType');
 const statusCode = require('../constants/statusCode');
-const { scheduleDB } = require('../db');
+const { scheduleDB, groupDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 
@@ -40,10 +41,9 @@ const getMyCalendar = async (date, userId) => {
 };
 
 module.exports = {
-  getMyCalendar,
-  /**
   getMyCalendar: async (user, date) => {
     let client;
+    const req = ``;
 
     try {
       client = await db.connect(req);
@@ -74,22 +74,14 @@ module.exports = {
 
       return myCalender;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
       console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
     } finally {
       client.release();
     }
   },
   getMySchedule: async (user, date) => {
     let client;
+    const req = ``;
 
     try {
       client = await db.connect(req);
@@ -126,22 +118,14 @@ module.exports = {
 
       return findmemberScheduleTime;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
       console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
     } finally {
       client.release();
     }
   },
   getMemberCalendar: async (user, memberId, date) => {
     let client;
+    const req = `user = ${user}, memberId = ${memberId}, date = ${date}`;
 
     try {
       client = await db.connect(req);
@@ -151,11 +135,10 @@ module.exports = {
       const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
 
       // 캘린더 공유를 수락했는지 확인
-      const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
-      if (findSendGroup.length === 0)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      const findSendGroup = await groupDB.findSendGroupIsOkay(client, memberId, user.id);
+      if (!findSendGroup) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
 
       const memberCalender = await scheduleDB.findCalendarByMemberId(
         client,
@@ -178,22 +161,14 @@ module.exports = {
 
       return memberCalender;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+      console.log('getMemberCalendar service ㅇㅔㄹㅓㅂㅏㄹㅅㅐㅇ' + error);
     } finally {
       client.release();
     }
   },
   getMemeberSchedule: async (user, memberId, date) => {
     let client;
+    const req = `user = ${user}, memberId = ${memberId}, date = ${date}`;
 
     try {
       client = await db.connect(req);
@@ -202,10 +177,9 @@ module.exports = {
 
       // 캘린더 공유를 수락했는지 확인
       const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
-      if (findSendGroup.length === 0)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      if (!findSendGroup) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
 
       // 해당 멤버의 스케줄 날짜에 대한 시간 정보 불러오기
       let findmemberScheduleTime = await scheduleDB.findScheduleTime(client, memberId, date);
@@ -257,22 +231,14 @@ module.exports = {
 
       return findmemberScheduleTime;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+      console.log('getMemberSchedule service ㅇㅔㄹㅓㅂㅏㄹㅅㅐㅇ' + error);
     } finally {
       client.release();
     }
   },
   checkSchedule: async (user, scheduleId) => {
     let client;
+    const req = `user = ${user}, scheduleId = ${scheduleId}`;
 
     try {
       client = await db.connect(req);
@@ -280,75 +246,54 @@ module.exports = {
       const findSchedule = await scheduleDB.findScheduleByScheduleId(client, scheduleId);
 
       // 스케줄이 존재하는지 확인
-      if (!findSchedule)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      if (!findSchedule) {
+        return returnType.DB_NOT_FOUND;
+      }
 
       const findScheduleUser = findSchedule.userId;
 
       // 스케줄 유저인지 확인
-      if (findScheduleUser !== user.id)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      if (findScheduleUser !== user.id) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
 
       const isCheckedSchedule = await scheduleDB.updateScheduleIsCheck(client, scheduleId, true);
 
       return isCheckedSchedule;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+      console.log('checkSchedule service 에러 발생' + error);
     } finally {
       client.release();
     }
   },
   unCheckSchedule: async (user, scheduleId) => {
     let client;
+    const req = `user = ${user}, scheduleId = ${scheduleId}`;
+
     try {
       client = await db.connect(req);
 
       const findSchedule = await scheduleDB.findScheduleByScheduleId(client, scheduleId);
 
       // 스케줄이 존재하는지 확인
-      if (!findSchedule)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      if (!findSchedule) {
+        return returnType.DB_NOT_FOUND;
+      }
 
       const findScheduleUser = findSchedule.userId;
 
       // 스케줄 유저인지 확인
-      if (findScheduleUser !== user.id)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+      if (findScheduleUser !== user.id) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
 
       const isCheckedSchedule = await scheduleDB.updateScheduleIsCheck(client, scheduleId, false);
 
       return isCheckedSchedule;
     } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+      console.log('unCheckSchedule service 에러 발생' + error);
     } finally {
       client.release();
     }
   },
-  */
 };

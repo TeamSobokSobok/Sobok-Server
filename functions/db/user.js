@@ -83,7 +83,8 @@ const setUserToken = async (client, user, accessToken) => {
 const findUserByName = async (client, username) => {
   const { rows } = await client.query(
     `
-    SELECT id as member_id, username as member_name FROM "user"
+    SELECT id as member_id, username as member_name
+    FROM "user"
     WHERE username = $1
 
     `,

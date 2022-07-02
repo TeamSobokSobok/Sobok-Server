@@ -52,7 +52,9 @@ const findSendGroupIsOkay = async (client, userId, senderId) => {
   const { rows } = await client.query(
     `
     SELECT user_id, sender_id, member_name, is_send, is_okay
-    FROM notice JOIN send_group sg on notice.id = sg.notice_id
+    FROM notice
+    JOIN send_group sg
+    ON notice.id = sg.notice_id
     WHERE user_id = $1 AND sender_id = $2 AND is_okay = 'accept';  
     `,
     [userId, senderId],

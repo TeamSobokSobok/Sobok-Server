@@ -4,6 +4,7 @@ const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 const slackAPI = require('../middlewares/slackAPI');
 const { scheduleService } = require('../service');
+const returnType = require('../constants/returnType');
 
 /**
  * GET ~/schedule
@@ -91,9 +92,16 @@ module.exports = {
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-      const calendar = await scheduleService.getMemberCalendar(user, memberId, date);
+      const calendar = await scheduleService.getMemberCalendar(user, Number(memberId), date);
 
-      res
+      // 캘린더 공유 수락 X
+      if (calendar === returnType.WRONG_REQUEST_VALUE) {
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+      }
+
+      return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.READ_MEMBER_CALENDAR, calendar));
     } catch (error) {
@@ -108,7 +116,7 @@ module.exports = {
       } ${JSON.stringify(error)}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
 
-      res
+      return res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
@@ -124,9 +132,15 @@ module.exports = {
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-      const scheduleList = await scheduleService.getMemeberSchedule(user, memberId, date);
+      const scheduleList = await scheduleService.getMemeberSchedule(user, Number(memberId), date);
+      // 캘린더 공유 수락 X
+      if (scheduleList === returnType.WRONG_REQUEST_VALUE) {
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+      }
 
-      res
+      return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.READ_MEMBER_SCHEDULE, scheduleList));
     } catch (error) {
@@ -141,7 +155,7 @@ module.exports = {
       } ${JSON.stringify(error)}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
 
-      res
+      return res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
@@ -151,14 +165,27 @@ module.exports = {
       const { user } = req.header;
       const { scheduleId } = req.params;
 
-      if (!scheduleId)
+      if (!scheduleId) {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+      }
 
-      const result = await scheduleService.checkSchedule(user, scheduleId);
+      const result = await scheduleService.checkSchedule(user, Number(scheduleId));
 
-      res
+      if (result === returnType.DB_NOT_FOUND) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      }
+
+      if (result === returnType.WRONG_REQUEST_VALUE) {
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+      }
+
+      return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.UPDATE_SCHEDULE_CHECK, result));
     } catch (error) {
@@ -173,7 +200,7 @@ module.exports = {
       } ${JSON.stringify(error)}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
 
-      res
+      return res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
@@ -183,16 +210,29 @@ module.exports = {
       const { user } = req.header;
       const { scheduleId } = req.params;
 
-      if (!scheduleId)
+      if (!scheduleId) {
         return res
           .status(statusCode.BAD_REQUEST)
           .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+      }
 
-      const result = await scheduleService.unCheckSchedule(user, scheduleId);
+      const result = await scheduleService.unCheckSchedule(user, Number(scheduleId));
 
-      res
+      if (result === returnType.DB_NOT_FOUND) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+      }
+
+      if (result === returnType.WRONG_REQUEST_VALUE) {
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+      }
+
+      return res
         .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.UPDATE_SCHEDULE_CHECK, result));
+        .send(util.success(statusCode.OK, responseMessage.UPDATE_SCHEDULE_UNCHECK, result));
     } catch (error) {
       functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
@@ -205,7 +245,7 @@ module.exports = {
       } ${JSON.stringify(error)}`;
       slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
 
-      res
+      return res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
