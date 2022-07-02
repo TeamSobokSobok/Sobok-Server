@@ -26,7 +26,7 @@ const updateMemberName = async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const data = await noticeService.updateMemberName(user, groupId, memberName);
+    const data = await noticeService.updateMemberName(user, Number(groupId), memberName);
 
     // @err 2. 존재하지 않는 그룹일 때
     if (data === returnType.DB_NOT_FOUND) {
