@@ -324,6 +324,53 @@ const getMyCalendar = async (client, userId, startMonth, endMonth) => {
   }
 };
 
+/**
+ * getMyScheduleTime
+ * 해당 날짜 복약 시간 리스트
+ * @param date - 조회할 날짜
+ * @param userId - 유저 아이디
+ */
+const getMyScheduleTime = async (client, userId, date) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT schedule_time
+      FROM schedule
+      WHERE user_id = $1 AND schedule_date = $2
+      GROUP BY schedule_time
+      `,
+      [userId, date],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('scheduleDB.getMyScheduleTime에서 오류 발생: ' + error);
+  }
+};
+
+/**
+ * getMySchedule
+ * 해당 날짜 복약 정보 조회
+ * @param userId - 해당 유저 아이디
+ * @param date - 해당 날짜
+ * @param time - 해당 시간
+ */
+const getMySchedule = async (client, userId, date, time) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT s.id as schedule_id, p.id as pill_id, p.pill_name, s.is_check, p.color
+      FROM schedule as s JOIN pill p on p.id = s.pill_id
+      WHERE p.user_id = $1 AND schedule_date = $2 AND schedule_time = $3
+      `,
+      [userId, date, time],
+    );
+
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('scheduleDB.getMySchedule에서 오류 발생: ' + error);
+  }
+};
+
 // UPDATE
 /**
  * acceptSendPill
@@ -373,4 +420,6 @@ module.exports = {
   findLikeScheduleBySenderId,
   acceptSendPill,
   getMyCalendar,
+  getMyScheduleTime,
+  getMySchedule,
 };
