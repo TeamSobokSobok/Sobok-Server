@@ -59,17 +59,6 @@ const getUserIdByPillId = async (client, pillId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
-const deletePillByPillId = async (client, pillId) => {
-  const { rows } = await client.query(
-    `
-    DELETE FROM pill
-    WHERE id = $1
-    `,
-    [pillId],
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
-
 const stopPillByPillId = async (client, pillId) => {
   const { rows } = await client.query(
     `
@@ -150,7 +139,7 @@ const getPillInfo = async (client, pillId) => {
   } catch (error) {
     throw new Error('pillDB.getPillInfo에서 오류 발생: ' + error);
   }
-}
+};
 
 // UPDATE
 /**
@@ -172,9 +161,28 @@ const acceptSendPill = async (client, userId, pillId) => {
   } catch (error) {
     throw new Error('pillDB.acceptSendPill에서 오류 발생: ' + error);
   }
-}
+};
 
 // DELETE
+/**
+ * deletePill
+ * 본인 약 삭제
+ * @param pillId - 약 아이디
+ */
+const deletePill = async (client, pillId) => {
+  try {
+    const rows = await client.query(
+      `
+      DELETE FROM "pill"
+      WHERE id = $1
+      `,
+      [pillId],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error('pillDB.deletePill에서 오류 발생: ' + error);
+  }
+};
 
 module.exports = {
   addPill,
@@ -185,7 +193,7 @@ module.exports = {
   acceptPillByPillId,
   updatePillNameByPillId,
   getUserIdByPillId,
-  deletePillByPillId,
+  deletePill,
   stopPillByPillId,
   acceptSendPill,
 };

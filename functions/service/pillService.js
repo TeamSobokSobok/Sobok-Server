@@ -203,4 +203,29 @@ module.exports = {
   addPill,
   addMemberPill,
   getPillCount,
+  deletePill: async (userId, pillId) => {
+    let client;
+    const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;
+
+    try {
+      client = await db.connect(log);
+      await client.query('BEGIN');
+
+      const user = await userDB.findUserById(client, userId);
+      if (!user) return returnType.NON_EXISTENT_USER;
+
+      const pill = await pillDB.getPillById(client, pillId);
+      if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
+
+      await pillDB.deletePill(client, pillId);
+      await client.query('COMMIT');
+
+      return util.success(statusCode.OK, responseMessage.PILL_DELETE_SUCCESS);
+    } catch (error) {
+      console.error('deletePill error 발생: ' + error);
+      await client.query('ROLLBACK');
+    } finally {
+      client.release();
+    }
+  },
 };
