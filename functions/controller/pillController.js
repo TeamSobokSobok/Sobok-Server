@@ -4,6 +4,8 @@ const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 const returnType = require('../constants/returnType');
+const { functions } = require('lodash');
+const slackAPI = require('../middlewares/slackAPI');
 
 /**
  * POST ~/pill
@@ -173,9 +175,58 @@ const getMemberPillCount = async (req, res) => {
   }
 };
 
+/**
+ * DELETE ~/pill/:pillId
+ * 해당 약 삭제
+ * @private
+ */
+const deletePill = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { pillId } = req.params;
+
+    if (!user || !pillId) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+
+    const deletePill = await pillService.deletePill(user.id, Number(pillId));
+    if (deletePill === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+    }
+
+    if (deletePill === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.PILL_UNAUTHORIZED));
+    }
+
+    return res.status(deletePill.status).json(deletePill);
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   addPill,
   addMemberPill,
   getPillCount,
   getMemberPillCount,
+  deletePill,
 };

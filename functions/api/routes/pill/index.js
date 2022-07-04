@@ -16,6 +16,6 @@ router.put('/:pillId', checkUser, require('./pillModifyPUT'));
 router.put('/stop/:pillId', checkUser, require('./stopPillPUT.js'));
 
 // 약 삭제 관련 router
-router.delete('/:pillId', checkUser, require('./deleteMyPillDELETE'));
+router.delete('/:pillId', checkUser, pillController.deletePill);
 
 module.exports = router;
