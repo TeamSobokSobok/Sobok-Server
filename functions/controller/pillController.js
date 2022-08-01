@@ -304,7 +304,7 @@ const stopPill = async (req, res) => {
   try {
     const { user } = req.header;
     const { pillId } = req.params;
-    const { date } = req.body;
+    const { date } = req.query;
 
     if (!user || !pillId) {
       return res
