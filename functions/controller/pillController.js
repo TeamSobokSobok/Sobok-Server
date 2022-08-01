@@ -176,6 +176,78 @@ const getMemberPillCount = async (req, res) => {
 };
 
 /**
+ * PUT ~/pill/:pillId
+ * 해당 약 일정 수정
+ * @private
+ */
+const pillScheduleModify = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { pillId } = req.params;
+    const { start, end, cycle, day, specific, time, pillName, date } = req.body;
+
+    if (!user || !pillId) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+
+    const pillModify = await pillService.pillInfoModify(
+      user.id,
+      pillId,
+      pillName,
+      start,
+      end,
+      cycle,
+      day,
+      specific,
+      time,
+      date,
+    );
+
+    if (!pillName || !time || !date)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+    if (pillModify === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+    }
+
+    if (pillModify === returnType.NON_EXISTENT_PILL) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
+    }
+
+    if (pillModify === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.PILL_UNAUTHORIZED));
+    }
+
+    return res.status(pillModify.status).json(pillModify);
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
+/**
  * DELETE ~/pill/:pillId
  * 해당 약 삭제
  * @private
@@ -223,10 +295,67 @@ const deletePill = async (req, res) => {
   }
 };
 
+/**
+ * PUT ~/pill/stop/:pillId
+ * 해당 복약중단
+ * @private
+ */
+const stopPill = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { pillId } = req.params;
+    const { date } = req.body;
+
+    if (!user || !pillId) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
+
+    const stopPill = await pillService.stopPill(user.id, pillId, date);
+    if (stopPill === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+    }
+
+    if (stopPill === returnType.NON_EXISTENT_PILL) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
+    }
+
+    if (stopPill === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.PILL_UNAUTHORIZED));
+    }
+
+    return res.status(stopPill.status).json(stopPill);
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   addPill,
   addMemberPill,
   getPillCount,
   getMemberPillCount,
+  pillScheduleModify,
   deletePill,
+  stopPill,
 };
