@@ -30,7 +30,10 @@ const getNoticeList = async (userId) => {
 
     let infoList = [];
     calendarInfo.forEach((info) => infoList.push(info));
-    pillInfo.forEach((info) => infoList.push(info));
+    pillInfo.forEach((info) => {
+      info.senderGroupId = null;
+      infoList.push(info);
+    });
 
     infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
 
