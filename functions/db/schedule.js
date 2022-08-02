@@ -94,7 +94,7 @@ const findScheduleByPillId = async (client, pillId) => {
     `
     SELECT DISTINCT p.id AS pill_id, p.pill_name
     , p.color, s.start_date, s.end_date
-    , s.schedule_cycle, s.schedule_day, s.schedule_specific
+    , s.take_interval, s.schedule_day, s.schedule_specific
     FROM schedule AS s 
     LEFT OUTER JOIN pill as p ON s.pill_id = p.id
     WHERE p.id = $1;
