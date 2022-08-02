@@ -8,4 +8,6 @@ router.get('/', checkUser, userContoller.getUsername);
 // 닉네임 중복검사
 router.post('/name', userContoller.checkUsername);
 
+router.put('/nickname', checkUser, userContoller.updateUsername);
+
 module.exports = router;

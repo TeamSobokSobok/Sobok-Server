@@ -5,6 +5,7 @@ const responseMessage = require('../constants/responseMessage');
 const slackAPI = require('../middlewares/slackAPI');
 
 const { userService } = require('../service');
+const returnType = require('../constants/returnType');
 
 module.exports = {
   getUsername: async (req, res) => {
@@ -53,6 +54,53 @@ module.exports = {
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME, data));
+    } catch (error) {
+      functions.logger.error(
+        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+        `[CONTENT] ${error}`,
+      );
+      console.log(error);
+
+      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+      } ${JSON.stringify(error)}`;
+      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+      return res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+    }
+  },
+  updateUsername: async (req, res) => {
+    try {
+      const { user } = req.header;
+      const { username } = req.body;
+
+      if (!user)
+        return res
+          .status(statusCode.UNAUTHORIZED)
+          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.TOKEN_EMPTY));
+
+      if (!username)
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+      const data = await userService.updateUsername(user.id, username);
+
+      if (data === returnType.NON_EXISTENT_USER)
+        return res
+          .status(statusCode.NOT_FOUND)
+          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+
+      if (data === returnType.NICKNAME_ALREADY_EXIST)
+        return res
+          .status(statusCode.CONFLICT)
+          .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
+
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, responseMessage.UPDATE_NICKNAME));
     } catch (error) {
       functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
