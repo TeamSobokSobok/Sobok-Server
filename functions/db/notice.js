@@ -3,7 +3,7 @@ const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
 // CREATE
-const addNotice = async (client, senderId, memberId, section) => {
+const addNotice = async (client, memberId, senderId, section) => {
   const { rows } = await client.query(
     `
     INSERT INTO notice
