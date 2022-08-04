@@ -1,6 +1,6 @@
 const db = require('../db/db');
 const { pillDB, scheduleDB, noticeDB, sendPillDB, groupDB, userDB } = require('../db');
-
+const admin = require('firebase-admin');
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
@@ -164,6 +164,35 @@ const addMemberPill = async (
     }
 
     await client.query('COMMIT');
+
+    // 양 방향성 캘린더 공유인지 확인
+    const groupCheck = await groupDB.findSendGroupIsOkay(client, userId, memberId);
+    const username = await userDB.findUserById(client, userId);
+    if (groupCheck) {
+      let body = `${groupCheck.memberName}님께서 약을 보냈습니다.`;
+
+      const deviceToken = await userDB.findDeviceTokenById(client, memberId);
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+      admin.messaging().send(message);
+    } else {
+      let body = `${username[0].username}님께서 약을 보냈습니다.`;
+
+      const deviceToken = await userDB.findDeviceTokenById(client, memberId);
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+      admin.messaging().send(message);
+    }
 
     return util.success(statusCode.CREATED, responseMessage.PILL_ADDITION_SUCCESS, newPill);
   } catch (error) {

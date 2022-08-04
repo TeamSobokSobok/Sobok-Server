@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
 const db = require('../db/db');
 const { userDB, groupDB, noticeDB, pillDB, sendPillDB, scheduleDB } = require('../db');
 const returnType = require('../constants/returnType');
@@ -83,25 +84,40 @@ const updateSendPill = async (userId, pillId, acceptState) => {
     client = await db.connect(log);
     await client.query('BEGIN');
 
-    const pillReceiverInfo = await sendPillDB.getSendPillUser(client, pillId);
-    console.log(pillReceiverInfo);
+    const sendPillInfo = await sendPillDB.getSendPillUser(client, pillId);
     // 해당 약을 받은 유저가 아닐 때
-    if (pillReceiverInfo.userId !== userId) {
+    if (sendPillInfo.userId !== userId) {
       return returnType.NO_PILL_USER;
     }
 
     // 이미 처리된 약일 때
-    if (pillReceiverInfo.isOkay !== 'waiting') {
+    if (sendPillInfo.isOkay !== 'waiting') {
       return returnType.ALREADY_COMPLETE;
     }
+
+    const memberName = await noticeDB.findSenderName(client, userId, sendPillInfo.senderId);
+
+    let body;
+    if (acceptState === 'accept') body = `${memberName.memberName}님께 전송한 약이 수락되었습니다.`;
+    if (acceptState === 'refuse') body = `${memberName.memberName}님께 전송한 약이 거절되었습니다.`;
+
+    const deviceToken = await userDB.findDeviceTokenById(client, sendPillInfo.senderId);
+    const message = {
+      notification: {
+        title: '소복소복 알림',
+        body: body,
+      },
+      token: deviceToken.deviceToken,
+    };
+    admin.messaging().send(message);
 
     const updateSendPill = await sendPillDB.updateSendPill(client, pillId, acceptState);
     if (acceptState === 'refuse') {
       await client.query('COMMIT');
       return util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS, updateSendPill);
     } else if (acceptState === 'accept') {
-      const acceptSendPill = await pillDB.acceptSendPill(client, userId, pillId);
-      const updateSchedule = await scheduleDB.acceptSendPill(client, pillId, userId);
+      await pillDB.acceptSendPill(client, userId, pillId);
+      await scheduleDB.acceptSendPill(client, pillId, userId);
       await client.query('COMMIT');
       return util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS, updateSendPill);
     } else {
@@ -156,7 +172,6 @@ module.exports = {
       client = await db.connect(req);
 
       const findSendGroup = await groupDB.findSendGroupBySendGroupId(client, sendGroupId);
-      console.log(findSendGroup);
 
       // 해당하는 그룹이 없을 때
       if (!findSendGroup) {
@@ -172,6 +187,24 @@ module.exports = {
 
       // 수락 여부 수정
       const updateSendGroup = await groupDB.updateSendGroup(client, sendGroupId, isOkay);
+
+      const memberName = await noticeDB.findSenderName(client, user.id, findSendGroup.senderId);
+
+      let body;
+      if (isOkay === 'accept')
+        body = `${memberName.memberName}님이 캘린더 공유 요청을 수락하셨습니다.`;
+      if (isOkay === 'refuse')
+        body = `${memberName.memberName}님이 캘린더 공유 요청을 거절하셨습니다.`;
+
+      const deviceToken = await userDB.findDeviceTokenById(client, findSendGroup.senderId);
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+      admin.messaging().send(message);
 
       return updateSendGroup;
     } catch (error) {
@@ -218,9 +251,27 @@ module.exports = {
         return returnType.DB_NOT_FOUND;
       }
 
+      // 이미 해당 사용자에게 캘린더를 요청했을 경우
+      const findGroup = await noticeDB.findSendGroup(client, memberId, senderId, 'calendar');
+      if (findGroup) return returnType.ALREADY_SEND_GROUP;
+
       // send_group & notice 테이블에 각각 정보 추가
-      const notice = await noticeDB.addNotice(client, senderId, memberId, 'calendar');
+      const notice = await noticeDB.addNotice(client, memberId, senderId, 'calendar');
       const sendGroup = await groupDB.addSendGroup(client, notice.id, memberName);
+
+      const userName = await userDB.findUserById(client, senderId);
+
+      let body = `${userName[0].username}님께서 캘린더 공유요청을 보냈습니다.`;
+
+      const deviceToken = await userDB.findDeviceTokenById(client, memberId);
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+      admin.messaging().send(message);
 
       return sendGroup;
     } catch (error) {
