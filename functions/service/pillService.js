@@ -189,9 +189,11 @@ const getPillCount = async (memberId) => {
     const user = await userDB.findUserById(client, memberId);
     if (!user) return returnType.NON_EXISTENT_USER;
 
-    const pillCount = await pillDB.getPillCount(client, memberId);
+    const count = await pillDB.getPillCount(client, memberId);
 
-    return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, pillCount);
+    return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, {
+      pillCount: Number(count.pillCount),
+    });
   } catch (error) {
     console.error('getPillCount error 발생: ' + error);
   } finally {
