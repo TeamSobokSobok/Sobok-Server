@@ -24,6 +24,10 @@ module.exports = {
   WRONG_EMAIL_CONVENTION: '이메일 형식에 맞지 않는 메일 주소입니다.',
   WRONG_PASSWORD_CONVENTION: '비밀번호 형식에 맞지 않는 메일 주소입니다.',
 
+  // 유저
+  READ_PILL_LIST: '약 리스트 조회 성공',
+  READ_PILL: '약 상세조회 성공',
+
   // 토큰
   TOKEN_EXPIRED: '토큰이 만료되었습니다.',
   TOKEN_INVALID: '토큰이 유효하지 않습니다.',

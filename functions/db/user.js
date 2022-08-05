@@ -121,6 +121,23 @@ const updateUserNameById = async (client, userId, username) => {
   }
 };
 
+const findPillById = async (client, userId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT p.id, p.color, p.pill_name
+      FROM "user" as u JOIN pill p on u.id = p.user_id
+      WHERE u.id = $1 AND p.is_stop = false;
+      `,
+      [userId],
+    );
+
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('userDB.findPillById에서 오류 발생: ' + error);
+  }
+};
+
 module.exports = {
   addUser,
   findUserById,
@@ -130,4 +147,5 @@ module.exports = {
   findUserByName,
   findUserNameById,
   updateUserNameById,
+  findPillById,
 };
