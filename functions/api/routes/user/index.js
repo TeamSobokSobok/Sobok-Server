@@ -8,4 +8,7 @@ router.get('/', checkUser, userContoller.getUsername);
 // 닉네임 중복검사
 router.post('/name', userContoller.checkUsername);
 
+router.get('/pill', checkUser, userContoller.getPillList);
+router.get('/pill/:pillId', checkUser, userContoller.getPill);
+
 module.exports = router;
