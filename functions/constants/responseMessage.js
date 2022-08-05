@@ -20,6 +20,7 @@ module.exports = {
   LOGIN_FAIL: '로그인 실패',
   NO_USER: '존재하지 않는 회원입니다.',
   MISS_MATCH_PW: '비밀번호가 맞지 않습니다.',
+  WRONG_USERNAME_CONVENTION: '닉네임 형식에 맞지 않습니다.',
   WRONG_EMAIL_CONVENTION: '이메일 형식에 맞지 않는 메일 주소입니다.',
   WRONG_PASSWORD_CONVENTION: '비밀번호 형식에 맞지 않는 메일 주소입니다.',
 

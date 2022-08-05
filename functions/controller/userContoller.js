@@ -98,6 +98,11 @@ module.exports = {
           .status(statusCode.CONFLICT)
           .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
 
+      if (data === returnType.WRONG_NICKNAME_CONVENTION)
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.WRONG_USERNAME_CONVENTION));
+
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.UPDATE_NICKNAME));

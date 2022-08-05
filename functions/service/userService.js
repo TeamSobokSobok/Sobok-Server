@@ -1,6 +1,7 @@
 const returnType = require('../constants/returnType');
 const { userDB } = require('../db');
 const db = require('../db/db');
+const { nicknameVerify } = require('../lib/nicknameVerify');
 
 module.exports = {
   getUsername: async (username) => {
@@ -27,6 +28,9 @@ module.exports = {
     try {
       client = await db.connect(log);
       await client.query('BEGIN');
+
+      const nicknameCheck = nicknameVerify(username);
+      if (nicknameCheck) return returnType.WRONG_NICKNAME_CONVENTION;
 
       const user = await userDB.findUserById(client, userId);
       if (!user) return returnType.NON_EXISTENT_USER;
