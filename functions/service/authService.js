@@ -2,6 +2,7 @@ const db = require('../db/db');
 const jwtHandlers = require('../lib/jwtHandlers');
 const { userDB } = require('../db');
 const returnType = require('../constants/returnType');
+const { nicknameVerify } = require('../lib/nicknameVerify');
 
 module.exports = {
   signUp: async (socialId, email, username) => {
@@ -15,6 +16,10 @@ module.exports = {
 
       if (findUser) {
         return returnType.VALUE_ALREADY_EXIST;
+      }
+
+      if (nicknameVerify(username)) {
+        return returnType.WRONG_NICKNAME_CONVENTION;
       }
 
       // 신규 사용자
