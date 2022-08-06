@@ -118,11 +118,6 @@ module.exports = {
       console.log(checkUser);
       if (!checkUser || checkUser.isOkay !== 'accept') return returnType.NO_MEMBER;
 
-      // 현재 유저의 약 개수 반환
-      const pills = await pillDB.getPillCount(client, memberId);
-      const pillCount = Number(pills.count) + pillName.length;
-      if (pillCount > 5) return returnType.PILL_COUNT_OVER;
-
       // 약 전송 알림 추가
       const newNotice = await noticeDB.addNotice(client, memberId, userId, 'pill');
 
@@ -253,7 +248,6 @@ module.exports = {
         pillSchedule[0].scheduleDay !== day ||
         pillSchedule[0].scheduleSpecific !== specific
       ) {
-        console.log('hi');
         await pillDB.deletePill(client, pillId);
         const newPill = await pillDB.addPill(client, pillName, userId, pill[0].color);
 
@@ -318,6 +312,33 @@ module.exports = {
       client.release();
     }
   },
+  
+  /**
+   * getPillCount
+   * 현재 복용중인 약 개수 반환
+   * @param memberId 약 개수를 조회할 유저 아이디
+   */
+  getPillCount: async (memberId) => {
+    let client;
+    const log = `pillDao.getPillCount | memberId = ${memberId}`;
+
+    try {
+      client = await db.connect(log);
+
+      const user = await userDB.findUserById(client, memberId);
+      if (!user) return returnType.NON_EXISTENT_USER;
+
+      const count = await pillDB.getPillCount(client, memberId);
+
+      return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, {
+        pillCount: Number(count.pillCount),
+      });
+    } catch (error) {
+      console.error('getPillCount error 발생: ' + error);
+    } finally {
+      client.release();
+    }
+  },
 
   stopPill: async (userId, pillId, date) => {
     let client;
@@ -335,8 +356,6 @@ module.exports = {
 
       if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
 
-      console.log(pill);
-
       await pillDB.stopPillByPillId(client, pillId);
       await scheduleDB.deleteScheduleByDate(client, pillId, date);
 
@@ -350,7 +369,7 @@ module.exports = {
       client.release();
     }
   },
-
+  
   deletePill: async (userId, pillId) => {
     let client;
     const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;

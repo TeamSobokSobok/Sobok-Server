@@ -100,6 +100,11 @@ const updateSendPill = async (userId, pillId, acceptState) => {
       await client.query('COMMIT');
       return util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS, updateSendPill);
     } else if (acceptState === 'accept') {
+      // 내 약 개수 초과시
+      const pills = await pillDB.getPillCount(client, userId);
+      const pillCount = Number(pills.pillCount) + 1;
+      if (pillCount > 5) return returnType.PILL_COUNT_OVER;
+
       const acceptSendPill = await pillDB.acceptSendPill(client, userId, pillId);
       const updateSchedule = await scheduleDB.acceptSendPill(client, pillId, userId);
       await client.query('COMMIT');

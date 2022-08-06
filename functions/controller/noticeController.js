@@ -294,6 +294,13 @@ const updateSendPill = async (req, res) => {
         .json(statusCode.BAD_REQUEST, responseMessage.WRONG_PILL_STATE);
     }
 
+    // 약 개수 초과시
+    if (updateSendPill === returnType.PILL_COUNT_OVER) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
+    }
+
     // 해당 약의 주인이 아닐 때
     if (updateSendPill === returnType.NO_PILL_USER) {
       return res
