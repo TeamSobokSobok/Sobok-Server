@@ -1,8 +1,9 @@
 const dayjs = require('dayjs');
+const admin = require('firebase-admin');
 const responseMessage = require('../constants/responseMessage');
 const returnType = require('../constants/returnType');
 const statusCode = require('../constants/statusCode');
-const { scheduleDB, groupDB, stickerDB } = require('../db');
+const { scheduleDB, groupDB, stickerDB, userDB, pillDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 
@@ -272,6 +273,45 @@ module.exports = {
       console.log('unCheckSchedule service 에러 발생' + error);
     } finally {
       client.release();
+    }
+  },
+  sendScheduleNotification: async (schedule) => {
+    let userAndScheduleClient;
+    let pillClient;
+    const req = (domain, pk) => `${domain}Id = ${pk}`;
+
+    try {
+      [userAndScheduleClient, pillClient] = await Promise.all([
+        db.connect(req('user&schedule', schedule.userId)),
+        db.connect(req('pill', schedule.pillId)),
+      ]);
+
+      const [user, pill] = await Promise.all([
+        userDB.findUserById(userAndScheduleClient, schedule.userId),
+        pillDB.getPillById(pillClient, schedule.pillId),
+      ]);
+      const username = user.username;
+
+      let body = `${username}님 ${pill.pillName} 먹을 시간이에요!`; //TODO: 멘트 수정
+
+      const deviceToken = user.deviceToken;
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+
+      const result = await admin.messaging().send(message);
+      await scheduleDB.updateScheduleSentAt(userAndScheduleClient, schedule.scheduleId);
+
+      return result;
+    } catch (error) {
+      console.log('sendScheduleNotification service 에러 발생' + error);
+    } finally {
+      userAndScheduleClient.release();
+      pillClient.release();
     }
   },
 };
