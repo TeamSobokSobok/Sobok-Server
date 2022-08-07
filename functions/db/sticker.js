@@ -1,10 +1,12 @@
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
+//READ
 const findStickerList = async (client) => {
   const { rows } = await client.query(
     `
-    SELECT id as sticker_id, sticker_img FROM sticker
+    SELECT id as sticker_id, sticker_img 
+    FROM sticker
     
     `,
   );
@@ -16,7 +18,7 @@ const findStickerListById = async (client, userId, scheduleId) => {
     const { rows } = await client.query(
       `
       SELECT ls.id, sticker_id
-      FROM like_schedule as ls JOIN schedule s on ls.schedule_id = s.id
+      FROM like_schedule AS ls JOIN schedule s ON ls.schedule_id = s.id
       WHERE user_id = $1 AND s.id = $2
       `,
       [userId, scheduleId],
@@ -28,4 +30,15 @@ const findStickerListById = async (client, userId, scheduleId) => {
   }
 };
 
-module.exports = { findStickerList, findStickerListById };
+//DELETE
+const deleteStickerByUserId = async (client, userId) => {
+  await client.query(
+    `
+    DELETE FROM like_schedule
+    WHERE sender_id = $1
+    `,
+    [userId],
+  );
+};
+
+module.exports = { findStickerList, findStickerListById, deleteStickerByUserId };

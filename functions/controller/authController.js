@@ -12,7 +12,7 @@ const returnType = require('../constants/returnType');
  *  @access public
  *  @err 1. 필요한 값이 없을 때
  *       2. 이미 존재하는 socialId
- *       3. 패스워드 형식이 올바르지 않을 때
+ *       3. 닉네임이 중복됐을 때
  */
 
 const signUp = async (req, res) => {
@@ -34,7 +34,14 @@ const signUp = async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_SOCIALID));
     }
 
-    // @err 3. 닉네임 형식이 잘못되었을 경우
+    // @err 3. 닉네임이 중복됐을 때
+    if (newUser === returnType.NICKNAME_ALREADY_EXIST) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_NICKNAME));
+    }
+
+    // @err 4. 닉네임 형식이 잘못되었을 경우
     if (newUser === returnType.WRONG_NICKNAME_CONVENTION) {
       return res
         .status(statusCode.BAD_REQUEST)
@@ -100,7 +107,69 @@ const signIn = async (req, res) => {
   }
 };
 
+/**
+ *  @로그아웃
+ *  @route POST /auth/logout
+ *  @access public
+ *  @err 1. 필요한 값이 없을 때
+ *       2. 이미 존재하는 socialId
+ *       3. 패스워드 형식이 올바르지 않을 때
+ */
+
+const logout = async (req, res) => {
+  try {
+    const { user } = req.header;
+
+    await authService.logout(user);
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.LOGOUT_SUCCESS));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
+/**
+ *  @탈퇴하기
+ *  @route DELETE /auth/user
+ *  @access public
+ *  @err 1. 필요한 값이 없을 때
+ *       2. 이미 존재하는 socialId
+ *       3. 패스워드 형식이 올바르지 않을 때
+ */
+
+const deleteUser = async (req, res) => {
+  try {
+    const { user } = req.header;
+
+    await authService.deleteUser(user);
+
+    return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_USER));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
+  logout,
+  deleteUser,
 };
