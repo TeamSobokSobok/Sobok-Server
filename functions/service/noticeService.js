@@ -260,7 +260,9 @@ module.exports = {
 
       // 이미 해당 사용자에게 캘린더를 요청했을 경우
       const findGroup = await noticeDB.findSendGroup(client, memberId, senderId, 'calendar');
-      if (findGroup) return returnType.ALREADY_SEND_GROUP;
+      if (findGroup) {
+        return returnType.ALREADY_SEND_GROUP;
+      }
 
       // send_group & notice 테이블에 각각 정보 추가
       const notice = await noticeDB.addNotice(client, memberId, senderId, 'calendar');
