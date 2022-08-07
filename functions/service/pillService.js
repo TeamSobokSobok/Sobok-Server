@@ -131,7 +131,7 @@ module.exports = {
         // 랜덤 컬러 생성
         const color = Math.floor(Math.random() * 5 + 1);
 
-        newPill.push(await pillDB.addPill(client, pillName[nameLoop], '', color));
+        newPill.push(await pillDB.addPill(client, pillName[nameLoop], null, color));
       }
       if (!newPill) return returnType.DB_NOT_FOUND;
 
