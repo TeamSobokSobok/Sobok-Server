@@ -13,14 +13,20 @@ module.exports = {
   USEABLE_NICKNAME: '사용 가능한 닉네임입니다.',
   ALREADY_SOCIALID: '이미 사용중인 소셜 아이디입니다. ',
   NOT_SIGNED_UP: '회원가입을 하지 않은 사용자입니다.',
+  UPDATE_NICKNAME: '닉네임 변경 성공',
 
   // 로그인
   LOGIN_SUCCESS: '로그인 성공',
   LOGIN_FAIL: '로그인 실패',
   NO_USER: '존재하지 않는 회원입니다.',
   MISS_MATCH_PW: '비밀번호가 맞지 않습니다.',
+  WRONG_USERNAME_CONVENTION: '닉네임 형식에 맞지 않습니다.',
   WRONG_EMAIL_CONVENTION: '이메일 형식에 맞지 않는 메일 주소입니다.',
   WRONG_PASSWORD_CONVENTION: '비밀번호 형식에 맞지 않는 메일 주소입니다.',
+
+  // 유저
+  READ_PILL_LIST: '약 리스트 조회 성공',
+  READ_PILL: '약 상세조회 성공',
 
   // 토큰
   TOKEN_EXPIRED: '토큰이 만료되었습니다.',

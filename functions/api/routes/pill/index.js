@@ -12,8 +12,8 @@ router.post('/', checkUser, pillController.addPill);
 router.post('/member/:memberId', checkUser, pillController.addMemberPill);
 
 // 약 정보 수정 관련 router
-router.put('/:pillId', checkUser, require('./pillModifyPUT'));
-router.put('/stop/:pillId', checkUser, require('./stopPillPUT.js'));
+router.put('/:pillId', checkUser, pillController.pillScheduleModify);
+router.put('/stop/:pillId', checkUser, pillController.stopPill);
 
 // 약 삭제 관련 router
 router.delete('/:pillId', checkUser, pillController.deletePill);

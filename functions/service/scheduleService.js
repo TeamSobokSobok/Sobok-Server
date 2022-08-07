@@ -63,13 +63,7 @@ module.exports = {
         );
 
         for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
-          let stickerCount = {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-          };
+          let stickerCount = [];
           let stickerList = await stickerDB.findStickerListById(
             client,
             userId,
@@ -77,17 +71,7 @@ module.exports = {
           );
 
           for (let sticker = 0; sticker < stickerList.length; sticker++) {
-            if (stickerList[sticker].stickerId === 1) {
-              stickerCount[1]++;
-            } else if (stickerList[sticker].stickerId === 2) {
-              stickerCount[2]++;
-            } else if (stickerList[sticker].stickerId === 3) {
-              stickerCount[3]++;
-            } else if (stickerList[sticker].stickerId === 4) {
-              stickerCount[4]++;
-            } else if (stickerList[sticker].stickerId === 5) {
-              stickerCount[5]++;
-            }
+            stickerCount.push(stickerList[sticker].stickerId);
           }
           schedule[scheduleInfo].stickerId = stickerCount;
           schedule[scheduleInfo].stickerTotalCount = stickerList.length;
