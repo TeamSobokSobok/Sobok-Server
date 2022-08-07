@@ -184,6 +184,16 @@ const deletePill = async (client, pillId) => {
   }
 };
 
+const deletePillByUserId = async (client, userId) => {
+  await client.query(
+    `
+    DELETE FROM pill
+    WHERE user_id = $1
+    `,
+    [userId],
+  );
+};
+
 module.exports = {
   addPill,
   getPillCount,
@@ -196,4 +206,5 @@ module.exports = {
   deletePill,
   stopPillByPillId,
   acceptSendPill,
+  deletePillByUserId,
 };

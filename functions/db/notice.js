@@ -57,5 +57,14 @@ const findSendGroup = async (client, memberId, senderId, section) => {
 // UPDATE
 
 // DELETE
+const deleteNoticeByUserId = async (client, userId) => {
+  await client.query(
+    `
+    DELETE FROM notice
+    WHERE user_id = $1 OR sender_id = $1
+    `,
+    [userId],
+  );
+};
 
-module.exports = { addNotice, findSenderName, findSendGroup };
+module.exports = { addNotice, findSenderName, findSendGroup, deleteNoticeByUserId };
