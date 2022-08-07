@@ -62,7 +62,7 @@ module.exports = {
         );
 
         for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
-          let stickerCount = [];
+          let stickerId = [];
           let stickerList = await stickerDB.findStickerListById(
             client,
             userId,
@@ -70,9 +70,13 @@ module.exports = {
           );
 
           for (let sticker = 0; sticker < stickerList.length; sticker++) {
-            stickerCount.push(stickerList[sticker].stickerId);
+            const stickerInfo = {
+              likeScheduleId: stickerList[sticker].id,
+              stickerId: stickerList[sticker].stickerId,
+            };
+            stickerId.push(stickerInfo);
           }
-          schedule[scheduleInfo].stickerId = stickerCount;
+          schedule[scheduleInfo].stickerId = stickerId;
           schedule[scheduleInfo].stickerTotalCount = stickerList.length;
         }
         myScheduleTime[data].scheduleList = schedule;
