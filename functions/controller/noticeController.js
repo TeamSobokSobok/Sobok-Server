@@ -219,12 +219,20 @@ const sendGroup = async (req, res) => {
 const getPillInfo = async (req, res) => {
   try {
     const { pillId } = req.params;
+    const { noticeId } = req.params;
+    const { user } = req.header;
 
-    const pillInfo = await noticeService.getPillInfo(pillId);
+    const pillInfo = await noticeService.getPillInfo(noticeId, pillId, user.id);
     if (pillInfo === returnType.NON_EXISTENT_PILL) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
+    }
+
+    if (pillInfo === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
     }
 
     return res.status(pillInfo.status).json(pillInfo);
