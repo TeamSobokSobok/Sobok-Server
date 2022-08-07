@@ -7,141 +7,144 @@ const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 
-/**
- * getNoticeList
- * 알림 리스트 전체 조회 서비스
- * @param userId - 알림 리스트 조회할 유저 아이디
- */
-const getNoticeList = async (userId) => {
-  let client;
-  const log = `noticeDB.getNoticeList | userId = ${userId}`;
-
-  try {
-    client = await db.connect(db);
-
-    const user = await userDB.findUserById(client, userId);
-    if (!user) return returnType.NON_EXISTENT_USER;
-
-    let calendarInfo = await groupDB.findCalendarInfo(client, userId);
-    calendarInfo.forEach((data) => {
-      data.pillId = null;
-      data.pillName = null;
-    });
-    let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
-
-    let infoList = [];
-    calendarInfo.forEach((info) => infoList.push(info));
-    pillInfo.forEach((info) => {
-      info.senderGroupId = null;
-      infoList.push(info);
-    });
-
-    infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
-
-    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {
-      username: user[0].username,
-      infoList: infoList,
-    });
-  } catch (error) {
-    console.error('getNoticeList error 발생: ' + error);
-  } finally {
-    client.release();
-  }
-};
-
-/**
- * 약 알림 상세조회 서비스
- * @param pillId - 해당 약 아이디
- */
-const getPillInfo = async (pillId) => {
-  let client;
-  const log = `pillDB.getPillInfo | pillId = ${pillId}`;
-
-  try {
-    client = await db.connect(log);
-
-    const pillInfo = await pillDB.getPillInfo(client, pillId);
-    if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
-
-    let scheduleTime = [];
-    pillInfo.forEach((info) => scheduleTime.push(info.scheduleTime));
-    pillInfo[0].scheduleTime = scheduleTime;
-
-    return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
-  } catch (error) {
-    console.error('getPillInfo error 발생: ' + error);
-  } finally {
-    client.release();
-  }
-};
-
-/**
- * 약 알림 수락 & 거절 서비스
- * @param pillId - 업데이트할 약 아이디
- */
-const updateSendPill = async (userId, pillId, acceptState) => {
-  let client;
-  const log = `pillDB.accept.acceptSendPill | pillId = ${pillId}`;
-
-  try {
-    client = await db.connect(log);
-    await client.query('BEGIN');
-
-    const sendPillInfo = await sendPillDB.getSendPillUser(client, pillId);
-    // 해당 약을 받은 유저가 아닐 때
-    if (sendPillInfo.userId !== userId) {
-      return returnType.NO_PILL_USER;
-    }
-
-    // 이미 처리된 약일 때
-    if (sendPillInfo.isOkay !== 'waiting') {
-      return returnType.ALREADY_COMPLETE;
-    }
-
-    const memberName = await noticeDB.findSenderName(client, userId, sendPillInfo.senderId);
-
-    let body;
-    if (acceptState === 'accept') body = `${memberName.memberName}님께 전송한 약이 수락되었습니다.`;
-    if (acceptState === 'refuse') body = `${memberName.memberName}님께 전송한 약이 거절되었습니다.`;
-
-    const deviceToken = await userDB.findDeviceTokenById(client, sendPillInfo.senderId);
-    const message = {
-      notification: {
-        title: '소복소복 알림',
-        body: body,
-      },
-      token: deviceToken.deviceToken,
-    };
-    admin.messaging().send(message);
-
-    const updateSendPill = await sendPillDB.updateSendPill(client, pillId, acceptState);
-    if (acceptState === 'refuse') {
-      await client.query('COMMIT');
-      return util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS, updateSendPill);
-    } else if (acceptState === 'accept') {
-      const pills = await pillDB.getPillCount(client, userId);
-      const pillCount = Number(pills.pillCount) + 1;
-      if (pillCount > 5) return returnType.PILL_COUNT_OVER;
-
-      await pillDB.acceptSendPill(client, userId, pillId);
-      await scheduleDB.acceptSendPill(client, pillId, userId);
-      await client.query('COMMIT');
-      return util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS, updateSendPill);
-    } else {
-      return returnType.WRONG_REQUEST_VALUE;
-    }
-  } catch (error) {
-    console.error('acceptSendPill error 발생: ' + error);
-    await client.query('ROLLBACK');
-  } finally {
-    client.release();
-  }
-};
-
 module.exports = {
-  getNoticeList,
-  getPillInfo,
-  updateSendPill,
+  /**
+   * getNoticeList
+   * 알림 리스트 전체 조회 서비스
+   * @param userId - 알림 리스트 조회할 유저 아이디
+   */
+  getNoticeList: async (userId) => {
+    let client;
+    const log = `noticeDB.getNoticeList | userId = ${userId}`;
+
+    try {
+      client = await db.connect(db);
+
+      const user = await userDB.findUserById(client, userId);
+      if (!user) return returnType.NON_EXISTENT_USER;
+
+      let calendarInfo = await groupDB.findCalendarInfo(client, userId);
+      calendarInfo.forEach((data) => {
+        data.pillId = null;
+        data.pillName = null;
+      });
+      let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
+
+      let infoList = [];
+      calendarInfo.forEach((info) => infoList.push(info));
+      pillInfo.forEach((info) => {
+        info.senderGroupId = null;
+        infoList.push(info);
+      });
+
+      infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
+
+      return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {
+        username: user[0].username,
+        infoList: infoList,
+      });
+    } catch (error) {
+      console.error('getNoticeList error 발생: ' + error);
+    } finally {
+      client.release();
+    }
+  },
+
+  /**
+   * 약 알림 상세조회 서비스
+   * @param pillId - 해당 약 아이디
+   */
+  getPillInfo: async (noticeId, pillId, userId) => {
+    let client;
+    const log = `pillDB.getPillInfo | pillId = ${pillId}`;
+
+    try {
+      client = await db.connect(log);
+
+      const getUser = await noticeDB.findReceiveUser(client, noticeId);
+      if (getUser.userId !== userId) return returnType.NO_PILL_USER;
+
+      const pillInfo = await pillDB.getPillInfo(client, pillId);
+      if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
+
+      let scheduleTime = [];
+      pillInfo.forEach((info) => scheduleTime.push(info.scheduleTime));
+      pillInfo[0].scheduleTime = scheduleTime;
+
+      return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
+    } catch (error) {
+      console.error('getPillInfo error 발생: ' + error);
+    } finally {
+      client.release();
+    }
+  },
+
+  /**
+   *
+   * 약 알림 수락 & 거절 서비스
+   * @param pillId - 업데이트할 약 아이디
+   */
+  updateSendPill: async (userId, pillId, acceptState) => {
+    let client;
+    const log = `pillDB.accept.acceptSendPill | pillId = ${pillId}`;
+
+    try {
+      client = await db.connect(log);
+      await client.query('BEGIN');
+
+      const sendPillInfo = await sendPillDB.getSendPillUser(client, pillId);
+      // 해당 약을 받은 유저가 아닐 때
+      if (sendPillInfo.userId !== userId) {
+        return returnType.NO_PILL_USER;
+      }
+
+      // 이미 처리된 약일 때
+      if (sendPillInfo.isOkay !== 'waiting') {
+        return returnType.ALREADY_COMPLETE;
+      }
+
+      const memberName = await noticeDB.findSenderName(client, userId, sendPillInfo.senderId);
+
+      let body;
+      if (acceptState === 'accept')
+        body = `${memberName.memberName}님께 전송한 약이 수락되었습니다.`;
+      if (acceptState === 'refuse')
+        body = `${memberName.memberName}님께 전송한 약이 거절되었습니다.`;
+
+      const deviceToken = await userDB.findDeviceTokenById(client, sendPillInfo.senderId);
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+      admin.messaging().send(message);
+
+      const updateSendPill = await sendPillDB.updateSendPill(client, pillId, acceptState);
+      if (acceptState === 'refuse') {
+        await client.query('COMMIT');
+        return util.success(statusCode.OK, responseMessage.PILL_REFUSE_SUCCESS, updateSendPill);
+      } else if (acceptState === 'accept') {
+        const pills = await pillDB.getPillCount(client, userId);
+        const pillCount = Number(pills.pillCount) + 1;
+        if (pillCount > 5) return returnType.PILL_COUNT_OVER;
+
+        await pillDB.acceptSendPill(client, userId, pillId);
+        await scheduleDB.acceptSendPill(client, pillId, userId);
+        await client.query('COMMIT');
+        return util.success(statusCode.OK, responseMessage.PILL_ACCEPT_SUCCESS, updateSendPill);
+      } else {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
+    } catch (error) {
+      console.error('acceptSendPill error 발생: ' + error);
+      await client.query('ROLLBACK');
+    } finally {
+      client.release();
+    }
+  },
+
   updateMemberName: async (user, groupId, memberName) => {
     let client;
     const req = `user = ${user}, groupId = ${groupId}, memberName = ${memberName}`;
