@@ -23,6 +23,7 @@ module.exports = {
   WRONG_USERNAME_CONVENTION: '닉네임 형식에 맞지 않습니다.',
   WRONG_EMAIL_CONVENTION: '이메일 형식에 맞지 않는 메일 주소입니다.',
   WRONG_PASSWORD_CONVENTION: '비밀번호 형식에 맞지 않는 메일 주소입니다.',
+  LOGOUT_SUCCESS: '로그아웃 성공',
 
   // 유저
   READ_PILL_LIST: '약 리스트 조회 성공',

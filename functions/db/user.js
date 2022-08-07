@@ -153,6 +153,24 @@ const findPillById = async (client, userId) => {
   }
 };
 
+const emptyDeviceTokenById = async (client, userId) => {
+  const now = dayjs().add(9, 'hour');
+  try {
+    const { rows } = await client.query(
+      `
+      UPDATE "user"
+      SET device_token = '', updated_at = $2
+      WHERE id = $1
+      RETURNING *
+      `,
+      [userId, now],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('userDB.emptyDeviceTokenById에서 오류 발생: ' + error);
+  }
+};
+
 module.exports = {
   addUser,
   findUserById,
@@ -164,4 +182,5 @@ module.exports = {
   findDeviceTokenById,
   updateUserNameById,
   findPillById,
+  emptyDeviceTokenById,
 };
