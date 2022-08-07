@@ -5,6 +5,7 @@ module.exports = functions
   .runWith({
     memory: '512MB',
   })
+  .region('asia-northeast3')
   .pubsub.schedule('* * * * *')
   .timeZone('Asia/Seoul')
   .onRun(async (_) => {

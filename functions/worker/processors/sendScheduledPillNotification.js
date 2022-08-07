@@ -6,9 +6,7 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const { scanTable } = require('../../lib/scanTable');
-const { sendPillDB, pillDB, userDB, scheduleDB } = require('../../db');
 const scheduleService = require('../../service/scheduleService');
-const { toPath } = require('lodash');
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Asia/Seoul'); //TODO: timezone +9 체크
@@ -24,8 +22,7 @@ const sendScheduledPillNotification = async function () {
     i: 1,
     totalScheduleCount: 0,
     totalSentCount: 0,
-  }; //TODO: add logging code
-
+  };
   for await (const rows of scanTable(
     scheduleClient,
     'schedule',
