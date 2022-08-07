@@ -38,7 +38,10 @@ const getNoticeList = async (userId) => {
 
     infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
 
-    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, { infoList: infoList });
+    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {
+      username: user[0].username,
+      infoList: infoList,
+    });
   } catch (error) {
     console.error('getNoticeList error 발생: ' + error);
   } finally {
