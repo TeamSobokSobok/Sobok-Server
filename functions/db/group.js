@@ -10,7 +10,7 @@ const addSendGroup = async (client, noticeId, memberName) => {
     INSERT INTO send_group
     (member_name, notice_id, is_send, is_okay, created_at, updated_at)
     VALUES
-    ($1, $2, true, 'wating', $3, $3)
+    ($1, $2, true, 'waiting', $3, $3)
     RETURNING *
     `,
     [memberName, noticeId, now],

@@ -104,6 +104,22 @@ const findUserNameById = async (client, userId) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findDeviceTokenById = async (client, userId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT device_token
+      FROM "user"
+      WHERE id = $1
+      `,
+      [userId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('userDB.findDeviceTokenById에서 오류 발생: ' + error);
+  }
+};
+
 const updateUserNameById = async (client, userId, username) => {
   try {
     const { rows } = await client.query(
@@ -131,7 +147,6 @@ const findPillById = async (client, userId) => {
       `,
       [userId],
     );
-
     return convertSnakeToCamel.keysToCamel(rows);
   } catch (error) {
     throw new Error('userDB.findPillById에서 오류 발생: ' + error);
@@ -146,6 +161,7 @@ module.exports = {
   setUserToken,
   findUserByName,
   findUserNameById,
+  findDeviceTokenById,
   updateUserNameById,
   findPillById,
 };

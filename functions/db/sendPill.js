@@ -85,27 +85,27 @@ const findSendPillInfo = async (client, userId) => {
       `,
       [userId],
     );
-    return convertSnakeToCamel.keysToCamel(rows)
+    return convertSnakeToCamel.keysToCamel(rows);
   } catch (error) {
     throw new Error('sendPillDB.findSendPillInfo에서 오류 발생: ' + error);
   }
-}
+};
 
 const getSendPillUser = async (client, pillId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT pill_id, is_okay, user_id
+      SELECT pill_id, is_okay, user_id, sender_id
       FROM send_pill as sp JOIN notice n on n.id = sp.notice_id
       WHERE pill_id = $1;
       `,
-      [pillId]
+      [pillId],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
     throw new Error('sendPillDB.getSendPillUser에서 오류 발생: ' + error);
   }
-}
+};
 
 // UPDATE
 const updateSendPillByPillId = async (client, pillId, isOkay) => {
@@ -135,7 +135,7 @@ const updateSendPill = async (client, pillId, acceptState) => {
   } catch (error) {
     throw new Error('sendPillDB.updateSendPill에서 오류 발생: ' + error);
   }
-}
+};
 // DELETE
 
 module.exports = {

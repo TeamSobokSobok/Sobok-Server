@@ -24,4 +24,5 @@ module.exports = {
 
   // 캘린더
   NO_MEMBER: -17, // 캘린더 공유가 안된 상황일 때
+  ALREADY_SEND_GROUP: -21,
 };
