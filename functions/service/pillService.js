@@ -31,7 +31,8 @@ module.exports = {
 
       // 현재 유저의 약 개수 반환
       const pills = await pillDB.getPillCount(client, userId);
-      const pillCount = Number(pills.count) + pillName.length;
+      const pillCount = Number(pills.pillCount) + pillName.length;
+      console.log(pills);
       if (pillCount > 5) return returnType.PILL_COUNT_OVER;
 
       // 약 추가 쿼리 실행
