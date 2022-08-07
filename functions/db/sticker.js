@@ -15,7 +15,7 @@ const findStickerListById = async (client, userId, scheduleId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT sticker_id
+      SELECT ls.id, sticker_id
       FROM like_schedule as ls JOIN schedule s on ls.schedule_id = s.id
       WHERE user_id = $1 AND s.id = $2
       `,
