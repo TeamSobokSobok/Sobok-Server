@@ -5,9 +5,9 @@ const returnType = require('../constants/returnType');
 const { nicknameVerify } = require('../lib/nicknameVerify');
 
 module.exports = {
-  signUp: async (socialId, email, username) => {
+  signUp: async (socialId, email, username, deviceToken) => {
     let client;
-    let req = `email = ${email}, username = ${username}, socialId = ${socialId}`;
+    let req = `email = ${email}, username = ${username}, socialId = ${socialId}, deviceToken = ${deviceToken}`;
 
     try {
       client = await db.connect(req);
@@ -23,7 +23,7 @@ module.exports = {
       }
 
       // 신규 사용자
-      let newUser = await userDB.addUser(client, email, username, socialId);
+      let newUser = await userDB.addUser(client, email, username, socialId, deviceToken);
       const { accesstoken } = jwtHandlers.sign(newUser);
       newUser.accesstoken = accesstoken;
       newUser.isNew = true;
@@ -36,7 +36,7 @@ module.exports = {
     }
   },
 
-  singIn: async (socialId) => {
+  singIn: async (socialId, deviceToken) => {
     let client;
     let req = `socialId = ${socialId}`;
 
@@ -50,9 +50,12 @@ module.exports = {
         return returnType.NON_EXISTENT_USER;
       }
 
+      console.log(findUser);
       // 회원가입 된 사용자
       let accesstoken = jwtHandlers.sign(findUser);
       accesstoken.isNew = false;
+
+      await userDB.updateDeviceToken(client, findUser.id, deviceToken);
 
       return accesstoken;
     } catch (error) {

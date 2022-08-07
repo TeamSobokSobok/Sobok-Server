@@ -17,15 +17,15 @@ const returnType = require('../constants/returnType');
 
 const signUp = async (req, res) => {
   try {
-    const { socialId, email, username } = req.body;
+    const { socialId, email, username, deviceToken } = req.body;
 
     // @err 1. 필요한 값이 없을 때
-    if (!socialId || !email || !username)
+    if (!socialId || !email || !username || !deviceToken)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const newUser = await authService.signUp(socialId, email, username);
+    const newUser = await authService.signUp(socialId, email, username, deviceToken);
 
     // @err 2. 이미 존재하는 socialId
     if (newUser === returnType.VALUE_ALREADY_EXIST) {
@@ -58,8 +58,8 @@ const signUp = async (req, res) => {
 };
 
 /**
- *  @로그인
- *  @route GET /auth/signin
+ *  @회원가입_로그인_분기처리
+ *  @route GET /auth/signin?socialId=&deviceToken=
  *  @access public
  *  @err 1. 필요한 값이 없을 때
  *       2. 신규 사용자일 때
@@ -67,15 +67,15 @@ const signUp = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { socialId } = req.query;
+    const { socialId, deviceToken } = req.query;
 
     //  @err 1. 필요한 값이 없을 때
-    if (!socialId)
+    if (!socialId || !deviceToken)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const user = await authService.singIn(socialId);
+    const user = await authService.singIn(socialId, deviceToken);
 
     // 2. 신규 사용자일 때
     if (user === returnType.NON_EXISTENT_USER) {

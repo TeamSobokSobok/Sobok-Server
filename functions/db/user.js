@@ -2,17 +2,17 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addUser = async (client, email, username, socialId) => {
+const addUser = async (client, email, username, socialId, deviceToken) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "user"
-    (email, username, social_id, created_at, updated_at)
+    (email, username, social_id, created_at, updated_at, device_token)
     VALUES
-    ($1, $2, $3, $4, $4)
-    RETURNING id, username, email, social_id, created_at, updated_at
+    ($1, $2, $3, $4, $4, $5)
+    RETURNING id, username, email, social_id, created_at, updated_at, device_token
     `,
-    [email, username, socialId, now],
+    [email, username, socialId, now, deviceToken],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -53,7 +53,7 @@ const findUserByEmail = async (client, email) => {
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
-const setUserToken = async (client, user, accessToken) => {
+const updateDeviceToken = async (client, userId, deviceToken) => {
   const now = dayjs().add(9, 'hour');
   const { rows: existingRows } = await client.query(
     `
@@ -61,21 +61,21 @@ const setUserToken = async (client, user, accessToken) => {
     WHERE id = $1
     
     `,
-    [user.id],
+    [userId],
   );
 
   if (existingRows.length === 0) return false;
 
-  const data = _.merge({}, convertSnakeToCamel.keysToCamel(existingRows[0]), { accessToken });
+  const data = _.merge({}, convertSnakeToCamel.keysToCamel(existingRows[0]), { deviceToken });
 
   const { rows } = await client.query(
     `
     UPDATE "user" 
-    SET access_token = $1, updated_at = $3
+    SET device_token = $1, updated_at = $3
     WHERE id = $2
     RETURNING * 
     `,
-    [data.accessToken, user.id, now],
+    [data.deviceToken, userId, now],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -158,7 +158,7 @@ module.exports = {
   findUserById,
   findUserBySocialId,
   findUserByEmail,
-  setUserToken,
+  updateDeviceToken,
   findUserByName,
   findUserNameById,
   findDeviceTokenById,
