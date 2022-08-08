@@ -35,7 +35,9 @@ const findSenderName = async (client, memberId, senderId) => {
   }
 };
 
-const findSendGroup = async (client, userId, senderId, section) => {
+const findSendGroup = async (client, memberId, senderId, section) => {
+  // memberId : 공유 요청을 받은 사람
+  // senderId : 공유 요청을 보낸 사람
   try {
     const { rows } = await client.query(
       `
@@ -44,16 +46,42 @@ const findSendGroup = async (client, userId, senderId, section) => {
       WHERE user_id = $1 AND sender_id = $2 AND section = $3
       `,
 
-      [userId, senderId, section],
+      [memberId, senderId, section],
     );
 
-    return convertSnakeToCamel.keysToCamel(rows);
+    return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
     throw new Error('noticeDB.findSendGroup에서 오류 발생: ' + error);
+  }
+};
+
+const findReceiveUser = async (client, noticeId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT user_id
+      FROM notice
+      WHERE id = $1
+      `,
+      [noticeId],
+    );
+
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('noticeDB.findReceiveUser에서 오류 발생: ' + error);
   }
 };
 // UPDATE
 
 // DELETE
+const deleteNoticeByUserId = async (client, userId) => {
+  await client.query(
+    `
+    DELETE FROM notice
+    WHERE user_id = $1 OR sender_id = $1
+    `,
+    [userId],
+  );
+};
 
-module.exports = { addNotice, findSenderName, findSendGroup };
+module.exports = { addNotice, findSenderName, findSendGroup, findReceiveUser, deleteNoticeByUserId };

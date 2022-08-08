@@ -129,7 +129,7 @@ const getPillInfo = async (client, pillId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT DISTINCT pill_name, take_interval, schedule_time, start_date, end_date
+      SELECT DISTINCT pill_name, take_interval, schedule_time, start_date, end_date, schedule_day, schedule_specific
       FROM pill JOIN schedule s on pill.id = s.pill_id
       WHERE pill_id = $1;
       `,
@@ -184,6 +184,16 @@ const deletePill = async (client, pillId) => {
   }
 };
 
+const deletePillByUserId = async (client, userId) => {
+  await client.query(
+    `
+    DELETE FROM pill
+    WHERE user_id = $1
+    `,
+    [userId],
+  );
+};
+
 module.exports = {
   addPill,
   getPillCount,
@@ -196,4 +206,5 @@ module.exports = {
   deletePill,
   stopPillByPillId,
   acceptSendPill,
+  deletePillByUserId,
 };

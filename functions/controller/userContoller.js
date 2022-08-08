@@ -71,16 +71,17 @@ module.exports = {
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   },
+
   updateUsername: async (req, res) => {
     try {
       const { user } = req.header;
       const { username } = req.body;
-      
+
       if (!user)
         return res
           .status(statusCode.UNAUTHORIZED)
           .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.TOKEN_EMPTY));
-          
+
       if (!username)
         return res
           .status(statusCode.BAD_REQUEST)
@@ -100,9 +101,8 @@ module.exports = {
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.UPDATE_NICKNAME));
-        
     } catch (error) {
-        functions.logger.error(
+      functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
         `[CONTENT] ${error}`,
       );
@@ -118,15 +118,16 @@ module.exports = {
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   },
+
   getPillList: async (req, res) => {
     try {
       const { user } = req.header;
-      
+
       if (!user)
         return res
           .status(statusCode.UNAUTHORIZED)
           .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
-          
+
       const data = await userService.getUserPillList(user.id);
 
       return res
@@ -147,23 +148,9 @@ module.exports = {
       return res
         .status(statusCode.INTERNAL_SERVER_ERROR)
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    } catch (error) {
-        functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      return res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   },
+
   getPill: async (req, res) => {
     try {
       const { user } = req.header;
@@ -175,12 +162,12 @@ module.exports = {
           .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
 
       const data = await userService.getUserPillInfo(user.id, pillId);
-      
+
       if (data === returnType.NON_EXISTENT_USER)
         return res
           .status(statusCode.NOT_FOUND)
           .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
-          
+
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.READ_PILL, data));

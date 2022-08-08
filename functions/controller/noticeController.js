@@ -64,7 +64,7 @@ const updateMemberName = async (req, res) => {
 };
 
 /**
- *  @그룹_수락상태_수정
+ *  @그룹_멤버_요청상태_수정
  *  @route PUT /group/:sendGroupId
  *  @access private
  *  @err 1. 필요한 값이 없을 때
@@ -154,7 +154,7 @@ const getMember = async (req, res) => {
 };
 
 /**
- *  @그룹_멤버_이름_수정
+ *  @그룹_멤버_요청하기
  *  @route POST /group
  *  @access private
  *  @err 1. 필요한 값이 없을 때
@@ -189,6 +189,13 @@ const sendGroup = async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_USER));
     }
 
+    // @err 4. 이미 요청된 사용자일 때
+    if (data === returnType.ALREADY_SEND_GROUP) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_SEND_GROUP));
+    }
+
     return res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, responseMessage.CREATED_SEND_GROUP, data));
@@ -219,12 +226,20 @@ const sendGroup = async (req, res) => {
 const getPillInfo = async (req, res) => {
   try {
     const { pillId } = req.params;
+    const { noticeId } = req.params;
+    const { user } = req.header;
 
-    const pillInfo = await noticeService.getPillInfo(pillId);
+    const pillInfo = await noticeService.getPillInfo(noticeId, pillId, user.id);
     if (pillInfo === returnType.NON_EXISTENT_PILL) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
+    }
+
+    if (pillInfo === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
     }
 
     return res.status(pillInfo.status).json(pillInfo);

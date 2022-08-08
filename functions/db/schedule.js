@@ -24,7 +24,7 @@ const updateSticker = async (client, likeScheduleId, stickerId) => {
     UPDATE like_schedule
     SET sticker_id = $1, updated_at = $3
     WHERE id = $2
-    RETURNING id as likeSchedule_id, schedule_id, sender_id, sticker_id, created_at, updated_at 
+    RETURNING id as like_schedule_id, schedule_id, sender_id, sticker_id, created_at, updated_at 
     
     `,
     [stickerId, likeScheduleId, now],

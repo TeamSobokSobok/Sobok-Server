@@ -31,7 +31,7 @@ module.exports = {
 
       const nicknameCheck = nicknameVerify(username);
       if (nicknameCheck) return returnType.WRONG_NICKNAME_CONVENTION;
-      
+
       const user = await userDB.findUserById(client, userId);
       if (!user) return returnType.NON_EXISTENT_USER;
 
@@ -61,7 +61,7 @@ module.exports = {
 
     try {
       client = await db.connect(log);
-      
+
       const user = await userDB.findUserById(client, userId);
       if (!user) return returnType.NON_EXISTENT_USER;
 
@@ -86,10 +86,10 @@ module.exports = {
 
     try {
       client = await db.connect(log);
-      
+
       const user = await userDB.findUserById(client, userId);
       if (!user) return returnType.NON_EXISTENT_USER;
-      
+
       const pillInfo = await scheduleDB.findScheduleByPillId(client, pillId);
       const pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId);
 

@@ -31,7 +31,7 @@ module.exports = {
 
       // 현재 유저의 약 개수 반환
       const pills = await pillDB.getPillCount(client, userId);
-      const pillCount = Number(pills.count) + pillName.length;
+      const pillCount = Number(pills.pillCount) + pillName.length;
       if (pillCount > 5) return returnType.PILL_COUNT_OVER;
 
       // 약 추가 쿼리 실행
@@ -95,7 +95,7 @@ module.exports = {
    * @param start 복용 시작 날짜
    * @param end 복용 종료 날짜
    */
-    const addMemberPill = async (
+  addMemberPill: async (
     pillName,
     userId,
     memberId,
@@ -105,9 +105,9 @@ module.exports = {
     time,
     start,
     end,
-    ) => {
-      let client;
-      const log = `pillDao.addPill | pillName = ${pillName}, userId = ${userId}, memberId = ${memberId}, takeInterval = ${takeInterval}, day = ${day}, specific = ${specific}, time = ${time}, start = ${start}, end = ${end}`;
+  ) => {
+    let client;
+    const log = `pillDao.addPill | pillName = ${pillName}, userId = ${userId}, memberId = ${memberId}, takeInterval = ${takeInterval}, day = ${day}, specific = ${specific}, time = ${time}, start = ${start}, end = ${end}`;
 
     try {
       client = await db.connect(log);
@@ -199,26 +199,6 @@ module.exports = {
     } catch (error) {
       console.error('addPill error 발생: ' + error);
       await client.query('ROLLBACK');
-    } finally {
-      client.release();
-    }
-  };
-
-  getPillCount: async (memberId) => {
-    let client;
-    const log = `pillDao.getPillCount | memberId = ${memberId}`;
-
-    try {
-      client = await db.connect(log);
-
-      const user = await userDB.findUserById(client, memberId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      const pillCount = await pillDB.getPillCount(client, memberId);
-
-      return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, pillCount);
-    } catch (error) {
-      console.error('getPillCount error 발생: ' + error);
     } finally {
       client.release();
     }
@@ -345,7 +325,7 @@ module.exports = {
       client.release();
     }
   },
-  
+
   /**
    * getPillCount
    * 현재 복용중인 약 개수 반환
@@ -357,10 +337,10 @@ module.exports = {
 
     try {
       client = await db.connect(log);
-      
+
       const user = await userDB.findUserById(client, memberId);
       if (!user) return returnType.NON_EXISTENT_USER;
-      
+
       const count = await pillDB.getPillCount(client, memberId);
 
       return util.success(statusCode.OK, responseMessage.PILL_COUNT_SUCCESS, {
@@ -402,7 +382,7 @@ module.exports = {
       client.release();
     }
   },
-  
+
   deletePill: async (userId, pillId) => {
     let client;
     const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;
