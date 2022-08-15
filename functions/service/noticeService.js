@@ -112,7 +112,7 @@ module.exports = {
         body = `${memberName.memberName}님께 전송한 약이 거절되었습니다.`;
 
       const deviceToken = await userDB.findDeviceTokenById(client, sendPillInfo.senderId);
-      let pushError;
+
       const message = {
         notification: {
           title: '소복소복 알림',
