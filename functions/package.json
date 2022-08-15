@@ -5,6 +5,7 @@
     "lint": "eslint .",
     "serve": "cross-env NODE_ENV=development firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
+    "cronschedules": "echo \"setInterval(() => worker(), 60000)\" | npm run shell",
     "start": "npm run shell",
     "deploy": "cross-env NODE_ENV=production firebase deploy --only functions",
     "logs": "firebase functions:log"
