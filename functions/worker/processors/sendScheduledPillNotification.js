@@ -1,4 +1,4 @@
-//TODO: schedule Table field 추가: schedule_date_time, sent_at
+//TODO: schedule Table field 추가: schedule_date_time, sent_at (default null), schedule_date_time 입력부분 테스트
 const _ = require('lodash');
 const functions = require('firebase-functions');
 const db = require('../../db/db');
@@ -7,9 +7,6 @@ const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const { scanTable } = require('../../lib/scanTable');
 const scheduleService = require('../../service/scheduleService');
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.tz.setDefault('Asia/Seoul'); //TODO: timezone +9 체크
 
 const sendScheduledPillNotification = async function () {
   const startTime = process.hrtime();
@@ -27,10 +24,8 @@ const sendScheduledPillNotification = async function () {
     scheduleClient,
     'schedule',
     {
-      after: dayjs(),
-      wheres: `sent_at IS NOT NULL AND schedule_date_time >= timestamp '${dayjs().startOf(
-        'date',
-      )}' AND schedule_date_time <= ${dayjs()}`,
+      after: `'${dayjs().startOf('day').add(9, 'hour')}'`,
+      wheres: `sent_at IS NULL AND schedule_date_time <= '${dayjs().add(9, 'hour')}'`,
     }, //TODO: query 최적화 - cacheable
     { fieldName: 'schedule_date_time', direction: 'ASC' },
     100,
@@ -60,6 +55,4 @@ const sendScheduledPillNotification = async function () {
   return;
 };
 
-module.exports = {
-  sendScheduledPillNotification,
-};
+module.exports = sendScheduledPillNotification
