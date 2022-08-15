@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-const processors = require('./processors');
+const { sendScheduledPillNotification } = require('./processors');
 
 module.exports = functions
   .runWith({
@@ -8,6 +8,7 @@ module.exports = functions
   .region('asia-northeast3')
   .pubsub.schedule('* * * * *')
   .timeZone('Asia/Seoul')
-  .onRun(async (_) => {
-    await processors.sendScheduledPillNotification();
+  .onRun(async (_) => {  
+    await sendScheduledPillNotification();
+    return null
   });
