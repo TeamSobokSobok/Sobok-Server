@@ -37,11 +37,11 @@ const updateScheduleSentAt = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
     UPDATE schedule
-    SET sent_at = $2, updated_at = $2
+    SET sent_at = $1, updated_at = $1
     WHERE id = $2
     RETURNING id as schedule_id, pill_id, user_id, schedule_date, schedule_time, is_check
     `,
-    [scheduleId, now],
+    [now, scheduleId],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
@@ -296,13 +296,15 @@ const addSchedule = async (
   end,
 ) => {
   try {
+    const schedule_date_time = dayjs(date+time, 'YYYY-MM-DDHH:mm:ss').format()
+
     const { rows } = await client.query(
       `
-      INSERT INTO "schedule" (pill_id, user_id, take_interval, schedule_date, schedule_day, schedule_specific, schedule_time, start_date, end_date, is_check)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO "schedule" (pill_id, user_id, take_interval, schedule_date, schedule_day, schedule_specific, schedule_time, start_date, end_date, is_check, schedule_date_time)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
       `,
-      [pillId, userId, takeInterval, date, day, specific, time, start, end, false],
+      [pillId, userId, takeInterval, date, day, specific, time, start, end, false, schedule_date_time],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
@@ -436,4 +438,5 @@ module.exports = {
   getMyCalendar,
   getMyScheduleTime,
   getMySchedule,
+  updateScheduleSentAt,
 };
