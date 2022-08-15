@@ -112,6 +112,7 @@ module.exports = {
         body = `${memberName.memberName}님께 전송한 약이 거절되었습니다.`;
 
       const deviceToken = await userDB.findDeviceTokenById(client, sendPillInfo.senderId);
+      let pushError;
       const message = {
         notification: {
           title: '소복소복 알림',
@@ -119,7 +120,12 @@ module.exports = {
         },
         token: deviceToken.deviceToken,
       };
-      admin.messaging().send(message);
+      admin
+        .messaging()
+        .send(message)
+        .catch(function (error) {
+          console.log('push notification: ' + error);
+        });
 
       const updateSendPill = await sendPillDB.updateSendPill(client, pillId, acceptState);
       if (acceptState === 'refuse') {
@@ -214,7 +220,12 @@ module.exports = {
         },
         token: deviceToken.deviceToken,
       };
-      admin.messaging().send(message);
+      admin
+        .messaging()
+        .send(message)
+        .catch(function (error) {
+          console.log('push notification: ' + error);
+        });
 
       return updateSendGroup;
     } catch (error) {
@@ -283,7 +294,12 @@ module.exports = {
         },
         token: deviceToken.deviceToken,
       };
-      admin.messaging().send(message);
+      admin
+        .messaging()
+        .send(message)
+        .catch(function (error) {
+          console.log('push notification: ' + error);
+        });
 
       return sendGroup;
     } catch (error) {

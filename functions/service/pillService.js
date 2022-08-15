@@ -192,7 +192,13 @@ module.exports = {
           },
           token: deviceToken.deviceToken,
         };
-        admin.messaging().send(message);
+        admin
+          .messaging()
+          .send(message)
+          .catch(function (error) {
+            console.log('push notification: ' + error);
+            return returnType.PUSH_ERROR;
+          });
       }
 
       return util.success(statusCode.CREATED, responseMessage.PILL_ADDITION_SUCCESS, newPill);
