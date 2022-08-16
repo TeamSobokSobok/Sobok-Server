@@ -45,7 +45,7 @@ module.exports = {
 
       const data = await userService.getUsername(username);
 
-      if (data) {
+      if (data.length !== 0) {
         return res
           .status(statusCode.CONFLICT)
           .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
@@ -53,7 +53,7 @@ module.exports = {
 
       return res
         .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME, data));
+        .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME));
     } catch (error) {
       functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
