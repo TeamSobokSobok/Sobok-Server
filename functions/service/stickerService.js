@@ -56,10 +56,10 @@ module.exports = {
 
       // 해당 스케줄 주인의 id와 유저 id로 공유 수락 여부를 확인
       const findScheduleUser = findScheduleByScheduleId.userId;
-      const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, findScheduleUser);
+      const findSendGroup = await groupDB.findSendGroupIsOkay(client, findScheduleUser, user.id);
 
       // 공유 요청이 수락되지 않았을 때
-      if (findSendGroup.length === 0) {
+      if (!findSendGroup) {
         return returnType.WRONG_REQUEST_VALUE;
       }
 
