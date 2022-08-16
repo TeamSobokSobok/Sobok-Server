@@ -127,7 +127,7 @@ module.exports = {
 
       return memberCalender;
     } catch (error) {
-      console.log('getMemberCalendar service ㅇㅔㄹㅓㅂㅏㄹㅅㅐㅇ' + error);
+      console.log('getMemberCalendar service error 발생:' + error);
     } finally {
       client.release();
     }
@@ -141,8 +141,8 @@ module.exports = {
 
       date = dayjs(date).format('YYYY-MM-DD');
 
-      // 캘린더 공유를 수락했는지 확인
-      const findSendGroup = await groupDB.findSendGroupIsOkay(client, user.id, memberId);
+      // 캘린더 공유를 수락했는지 확인(memberId: 공유 요청받은 사용자)
+      const findSendGroup = await groupDB.findSendGroupIsOkay(client, memberId, user.id);
       if (!findSendGroup) {
         return returnType.WRONG_REQUEST_VALUE;
       }
@@ -176,7 +176,7 @@ module.exports = {
             scheduleId,
             user.id,
           );
-          scheduleList[v].stickerId = stickerList;
+          scheduleList[v].stickerList = stickerList;
 
           // 약 스케줄에 대한 전체 스티커 리스트 조회
           let stickerTotalCount = await scheduleDB.findAllLikeScheduleByScheduleId(
@@ -197,7 +197,7 @@ module.exports = {
 
       return findmemberScheduleTime;
     } catch (error) {
-      console.log('getMemberSchedule service ㅇㅔㄹㅓㅂㅏㄹㅅㅐㅇ' + error);
+      console.log('getMemberSchedule service error 발생:' + error);
     } finally {
       client.release();
     }
@@ -227,7 +227,7 @@ module.exports = {
 
       return isCheckedSchedule;
     } catch (error) {
-      console.log('checkSchedule service 에러 발생' + error);
+      console.log('checkSchedule service error 발생:' + error);
     } finally {
       client.release();
     }
@@ -257,7 +257,7 @@ module.exports = {
 
       return isCheckedSchedule;
     } catch (error) {
-      console.log('unCheckSchedule service 에러 발생' + error);
+      console.log('unCheckSchedule service error 발생:' + error);
     } finally {
       client.release();
     }
