@@ -5,9 +5,9 @@ const returnType = require('../constants/returnType');
 const { nicknameVerify } = require('../lib/nicknameVerify');
 
 module.exports = {
-  signUp: async (socialId, email, username, deviceToken) => {
+  signUp: async (socialId, username, deviceToken) => {
     let client;
-    let req = `email = ${email}, username = ${username}, socialId = ${socialId}, deviceToken = ${deviceToken}`;
+    let req = `username = ${username}, socialId = ${socialId}, deviceToken = ${deviceToken}`;
 
     try {
       client = await db.connect(req);
@@ -19,7 +19,9 @@ module.exports = {
         return returnType.VALUE_ALREADY_EXIST;
       }
 
+      console.log(username);
       const checkUsername = await userDB.findUserByName(client, username);
+      console.log(checkUsername);
 
       if (checkUsername.length !== 0) {
         return returnType.NICKNAME_ALREADY_EXIST;
@@ -30,7 +32,7 @@ module.exports = {
       }
 
       // 신규 사용자
-      let newUser = await userDB.addUser(client, email, username, socialId, deviceToken);
+      let newUser = await userDB.addUser(client, username, socialId, deviceToken);
       const { accesstoken } = jwtHandlers.sign(newUser);
       newUser.accesstoken = accesstoken;
       newUser.isNew = true;
