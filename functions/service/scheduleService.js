@@ -1,8 +1,10 @@
 const dayjs = require('dayjs');
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
 const responseMessage = require('../constants/responseMessage');
 const returnType = require('../constants/returnType');
 const statusCode = require('../constants/statusCode');
-const { scheduleDB, groupDB, stickerDB } = require('../db');
+const { scheduleDB, groupDB, stickerDB, userDB, pillDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 
@@ -260,6 +262,57 @@ module.exports = {
       console.log('unCheckSchedule service error 발생:' + error);
     } finally {
       client.release();
+    }
+  },
+  sendScheduleNotification: async (schedule) => {
+    let userAndScheduleClient;
+    let pillClient;
+    const req = (domain, pk) => `${domain}Id = ${pk}`;
+
+    try {
+      [userAndScheduleClient, pillClient] = await Promise.all([
+        db.connect(req('user&schedule', schedule.userId)),
+        db.connect(req('pill', schedule.pillId)),
+      ]);
+
+      const [user, pill] = await Promise.all([
+        userDB.findUserById(userAndScheduleClient, schedule.userId),
+        pillDB.getPillById(pillClient, schedule.pillId),
+      ]);
+
+      if (!user[0] || !pill[0]) {
+        throw new Error ('user or pill must be defined in schedule')
+      }
+
+      const username = user[0].username;
+
+      let body = `${username}님 ${pill[0].pillName} 먹을 시간이에요!`; //TODO: 멘트 수정
+
+      const deviceToken = user[0].deviceToken;
+      
+      if (!deviceToken?.deviceToken) {
+        throw new Error('user device token not defined')
+      }
+
+      const message = {
+        notification: {
+          title: '소복소복 알림',
+          body: body,
+        },
+        token: deviceToken.deviceToken,
+      };
+
+      const result = await admin.messaging().send(message);
+      await scheduleDB.updateScheduleSentAt(userAndScheduleClient, schedule.id);
+
+      return result;
+    } catch (error) {
+      functions.logger.warn('sendScheduleNotification service 에러 발생' + error);
+      
+      return null;
+    } finally {
+      userAndScheduleClient.release();
+      pillClient.release();
     }
   },
 };
