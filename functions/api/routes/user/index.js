@@ -4,6 +4,7 @@ const { checkUser } = require('../../../middlewares/auth');
 const router = express.Router();
 
 router.get('/', checkUser, userContoller.getUsername);
+router.get('/info', checkUser, userContoller.getUserInfo)
 router.get('/pill', checkUser, userContoller.getPillList);
 router.get('/pill/:pillId', checkUser, userContoller.getPill);
 

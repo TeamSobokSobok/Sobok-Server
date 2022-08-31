@@ -34,6 +34,20 @@ module.exports = {
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   },
+  getUserInfo: async (req, res) => {
+    const user = req.header.user;
+
+    if (!user) {
+      return res.status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_AUTHENTICATED))
+    }
+
+    const data = { username: user.username }
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.READ_USER_INFO , data));
+  },
   checkUsername: async (req, res) => {
     try {
       const { username } = req.body;
