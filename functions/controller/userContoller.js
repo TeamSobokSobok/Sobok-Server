@@ -194,6 +194,11 @@ module.exports = {
       const { user } = req.header;
       const { memberId } = req.params;
 
+      if (!user)
+        return res
+          .status(statusCode.UNAUTHORIZED)
+          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+
       if (!memberId)
         return res
           .status(statusCode.BAD_REQUEST)
