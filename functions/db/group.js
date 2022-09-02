@@ -27,7 +27,7 @@ const findMember = async (client, userId) => {
     JOIN "notice" n
     ON sg.notice_id = n.id
     WHERE n.sender_id = $1 AND sg.is_okay = 'accept'
-    
+    ORDER BY group_id DESC
     `,
     [userId],
   );
