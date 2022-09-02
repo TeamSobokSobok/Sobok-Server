@@ -107,4 +107,25 @@ module.exports = {
       client.release();
     }
   },
+
+  isCalendarShare: async (userId, memberId) => {
+    let client;
+    const log = `userService.isCalendarShare | userId = ${userId}, memberId = ${memberId}`;
+
+    try {
+      client = await db.connect(log);
+      let isMember = false;
+
+      const isShare = await userDB.isShare(client, userId, memberId);
+      if (!isShare) {
+        return isMember;
+      }
+
+      return isShare.isOkay;
+    } catch (error) {
+      console.error('getUserPillInfo error 발생: ' + error);
+    } finally {
+      client.release();
+    }
+  },
 };
