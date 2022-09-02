@@ -180,7 +180,7 @@ module.exports = {
           },
           token: deviceToken.deviceToken,
         };
-        admin.messaging().send(message);
+        await admin.messaging().send(message);
       } else {
         let body = `${username[0].username}님께서 약을 보냈습니다.`;
 
@@ -192,7 +192,7 @@ module.exports = {
           },
           token: deviceToken.deviceToken,
         };
-        admin
+        await admin
           .messaging()
           .send(message)
           .catch(function (error) {
