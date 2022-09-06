@@ -288,6 +288,9 @@ module.exports = {
             if (!newSchedule) return returnType.DB_NOT_FOUND;
           }
         }
+
+        await client.query('COMMIT');
+        return util.success(statusCode.OK, responseMessage.PILL_MODIFY_SUCCESS);
       }
 
       if (pill[0].pillName !== pillName)
