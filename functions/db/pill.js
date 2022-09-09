@@ -110,7 +110,7 @@ const getPillCount = async (client, userId) => {
       `
       SELECT COUNT(user_id) as pill_count
       FROM "pill"
-      WHERE user_id = $1
+      WHERE user_id = $1 AND is_stop = false
       `,
       [userId],
     );
