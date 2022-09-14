@@ -19,9 +19,7 @@ module.exports = {
         return returnType.VALUE_ALREADY_EXIST;
       }
 
-      console.log(username);
       const checkUsername = await userDB.findUserByName(client, username);
-      console.log(checkUsername);
 
       if (checkUsername.length !== 0) {
         return returnType.NICKNAME_ALREADY_EXIST;

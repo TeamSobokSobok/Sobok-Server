@@ -165,8 +165,7 @@ const getMember = async (req, res) => {
 const sendGroup = async (req, res) => {
   try {
     const { user } = req.header;
-    const { memberId } = req.query;
-    const { memberName } = req.body;
+    const { memberId, memberName } = req.body;
 
     // @err 1. 필요한 값이 없을 때
     if (!memberId || !memberName)
