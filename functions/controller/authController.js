@@ -74,7 +74,8 @@ const signUp = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { socialId, deviceToken } = req.query;
+    const socialId = req.headers.socialid;
+    const deviceToken = req.headers.devicetoken;
 
     //  @err 1. 필요한 값이 없을 때
     if (!socialId || !deviceToken)
@@ -86,9 +87,12 @@ const signIn = async (req, res) => {
 
     // 2. 신규 사용자일 때
     if (user === returnType.NON_EXISTENT_USER) {
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.NOT_SIGNED_UP, { isNew: true }));
+      return res.status(statusCode.OK).send(
+        util.success(statusCode.OK, responseMessage.NOT_SIGNED_UP, {
+          accessToken: null,
+          isNew: true,
+        }),
+      );
     }
 
     return res

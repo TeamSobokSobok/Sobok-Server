@@ -182,6 +182,22 @@ const softDeleteUser = async (client, userId) => {
   }
 };
 
+const isShare = async (client, userId, memberId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      select user_id, sender_id, is_okay
+      from "notice" join send_group sg on notice.id = sg.notice_id
+      where user_id = $1 AND sender_id = $2 AND is_okay = 'accept' OR is_okay = 'waiting'
+      `,
+      [memberId, userId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('userDB.isShare에서 오류 발생: ' + error);
+  }
+};
+
 module.exports = {
   addUser,
   findUserById,
@@ -194,4 +210,5 @@ module.exports = {
   findPillById,
   emptyDeviceTokenById,
   softDeleteUser,
+  isShare,
 };

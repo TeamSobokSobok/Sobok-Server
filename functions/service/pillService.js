@@ -180,7 +180,7 @@ module.exports = {
           },
           token: deviceToken.deviceToken,
         };
-        admin.messaging().send(message);
+        await admin.messaging().send(message);
       } else {
         let body = `${username[0].username}님께서 약을 보냈습니다.`;
 
@@ -192,7 +192,7 @@ module.exports = {
           },
           token: deviceToken.deviceToken,
         };
-        admin
+        await admin
           .messaging()
           .send(message)
           .catch(function (error) {
@@ -288,6 +288,9 @@ module.exports = {
             if (!newSchedule) return returnType.DB_NOT_FOUND;
           }
         }
+
+        await client.query('COMMIT');
+        return util.success(statusCode.OK, responseMessage.PILL_MODIFY_SUCCESS);
       }
 
       if (pill[0].pillName !== pillName)

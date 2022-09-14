@@ -28,6 +28,7 @@ module.exports = {
   // 유저
   READ_PILL_LIST: '약 리스트 조회 성공',
   READ_PILL: '약 상세조회 성공',
+  READ_USER_INFO: '유저 정보 조회 성공',
 
   // 토큰
   TOKEN_EXPIRED: '토큰이 만료되었습니다.',
@@ -39,7 +40,9 @@ module.exports = {
   READ_USER_NAME: '유저 이름 불러오기 성공',
   UPDATE_MEMBER_NAME: '멤버 이름 수정 성공',
   CREATED_SEND_GROUP: '캘린더 공유 요청 성공',
+  READ_GROUP_STATUS: '공유 상태 조회 성공',
   ALREADY_SEND_GROUP: '이미 캘린더 공유 요청이 되었습니다.',
+  ALREADY_GROUP: '이미 캘린더가 공유된 상대입니다',
   UPDATE_SEND_GROUP: '캘린더 공유 수정 성공',
   ENABLE_SEND_GROUP: '자신에게 캘린더 공유 요청을 할 수 없습니다.',
   NO_MEMBER: '캘린더 공유가 되지 않은 상태입니다.',
@@ -56,7 +59,7 @@ module.exports = {
   PILL_ADDITION_SUCCESS: '약 추가 성공',
   PILL_COUNT_OVER: '약 추가 가능 개수 초과',
   PILL_TRANSMIT_SUCCESS: '약 전송 성공',
-  PILL_COUNT_SUCCESS: '약 추가 가능 개수 조회 성공',
+  PILL_COUNT_SUCCESS: '약 복용 개수 조회',
   PILL_MODIFY_SUCCESS: '약 수정 성공',
   PILL_STOP_SUCCESS: '약 중단 성공',
   PILL_DELETE_SUCCESS: '약 삭제 성공',
