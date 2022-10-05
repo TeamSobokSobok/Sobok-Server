@@ -337,6 +337,61 @@ const updateSendPill = async (req, res) => {
       .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 };
+/**
+ *  @그룹_삭제
+ *  @route DELETE /group/:noticeId
+ *  @access private
+ *  @err 1. 필요한 값이 없을 때
+ *       2. 존재하지 않는 그룹일 때
+ *       3. 권한이 없을 떼
+ */
+const deleteGroup = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { noticeId } = req.params;
+
+    // @err 1. 필요한 값이 없을 때
+    if (!noticeId)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+    const data = await noticeService.deleteGroup(user.id, Number(noticeId));
+
+    // @err 2. 존재하지 않는 그룹일 때
+    if (data === returnType.DB_NOT_FOUND) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.OUT_OF_VALUE));
+    }
+
+    // @err 3. 권한이 없을 떼
+    if (data === returnType.WRONG_REQUEST_VALUE) {
+      return res
+        .status(statusCode.FORBIDDEN)
+        .send(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
+    }
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.DELETE_SEND_GROUP));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
 
 module.exports = {
   updateMemberName,
@@ -346,4 +401,5 @@ module.exports = {
   getPillInfo,
   getNoticeList,
   updateSendPill,
+  deleteGroup,
 };
