@@ -259,7 +259,12 @@ module.exports = {
       client = await db.connect(req);
 
       const senderId = user.id;
-      console.log('senderId' + senderId);
+
+      // 요청이 5개 초과됐을 때
+      const groupCount = await noticeDB.findSendGroupCount(client, senderId, 'calendar');
+      if (groupCount.length >= 5) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
 
       // 자신한테 공유 요청했을 때
       if (Number(senderId) === Number(memberId)) {

@@ -42,8 +42,8 @@ const findSendGroup = async (client, memberId, senderId, section) => {
     const { rows } = await client.query(
       `
       SELECT *
-      FROM notice
-      WHERE user_id = $1 AND sender_id = $2 AND section = $3
+      FROM notice AS n JOIN send_group sg ON n.id = sg.notice_id
+      WHERE user_id = $1 AND sender_id = $2 AND section = $3 AND is_okay NOT IN ('refuse')
       `,
 
       [memberId, senderId, section],
@@ -71,6 +71,23 @@ const findReceiveUser = async (client, noticeId) => {
     throw new Error('noticeDB.findReceiveUser에서 오류 발생: ' + error);
   }
 };
+
+const findSendGroupCount = async (client, senderId, section) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT sg.id AS sender_group_id, notice_id, section, is_okay, is_send
+      FROM notice AS n JOIN send_group sg ON n.id = sg.notice_id
+      WHERE n.sender_id = $1 AND section = $2 AND is_okay NOT IN ('refuse')
+      `,
+      [senderId, section],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('group.findSendGroup 오류 발생: ' + error);
+  }
+};
+
 // UPDATE
 
 // DELETE
@@ -84,4 +101,11 @@ const deleteNoticeByUserId = async (client, userId) => {
   );
 };
 
-module.exports = { addNotice, findSenderName, findSendGroup, findReceiveUser, deleteNoticeByUserId };
+module.exports = {
+  addNotice,
+  findSenderName,
+  findSendGroup,
+  findReceiveUser,
+  deleteNoticeByUserId,
+  findSendGroupCount,
+};
