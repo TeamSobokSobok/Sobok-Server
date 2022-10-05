@@ -175,7 +175,7 @@ const sendGroup = async (req, res) => {
 
     const data = await noticeService.sendGroup(user, memberId, memberName);
 
-    // @err 2. 자신한테 공유 요청했을 때
+    // @err 2. 잘못된 공유 요청했을 때
     if (data === returnType.WRONG_REQUEST_VALUE) {
       return res
         .status(statusCode.BAD_REQUEST)
