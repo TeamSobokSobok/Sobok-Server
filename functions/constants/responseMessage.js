@@ -46,6 +46,7 @@ module.exports = {
   UPDATE_SEND_GROUP: '캘린더 공유 수정 성공',
   ENABLE_SEND_GROUP: '캘린더 공유 요청을 할 수 없습니다.',
   NO_MEMBER: '캘린더 공유가 되지 않은 상태입니다.',
+  DELETE_SEND_GROUP: '그룹 공유 삭제 성공',
 
   // 스케줄
   READ_MY_CALENDAR: '내 캘린더 조회 성공',

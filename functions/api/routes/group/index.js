@@ -12,5 +12,6 @@ router.put('/:sendGroupId', checkUser, noticeController.updateIsOkay);
 
 // 그룹 멤버 이름 수정하기
 router.put('/:groupId/name', checkUser, noticeController.updateMemberName);
+router.delete('/:noticeId', checkUser, noticeController.deleteGroup);
 
 module.exports = router;

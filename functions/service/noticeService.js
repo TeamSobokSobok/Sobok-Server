@@ -261,7 +261,7 @@ module.exports = {
       const senderId = user.id;
 
       // 요청이 5개 초과됐을 때
-      const groupCount = await noticeDB.findSendGroupCount(client, senderId, 'calendar');
+      const groupCount = await noticeDB.findSendGroupBySenderId(client, senderId, 'calendar');
       if (groupCount.length >= 5) {
         return returnType.WRONG_REQUEST_VALUE;
       }
@@ -309,6 +309,29 @@ module.exports = {
       return sendGroup;
     } catch (error) {
       console.log(error);
+    } finally {
+      client.release();
+    }
+  },
+  deleteGroup: async (userId, noticeId) => {
+    let client;
+    const req = `noticeDB.deleteGroup | userId = ${userId}, noticeId = ${noticeId}`;
+
+    try {
+      client = await db.connect(req);
+
+      const findNotice = await noticeDB.findNoticeByNoticeId(client, noticeId);
+      if (findNotice.length === 0) {
+        return returnType.DB_NOT_FOUND;
+      }
+
+      if (findNotice[0].senderId !== userId) {
+        return returnType.WRONG_REQUEST_VALUE;
+      }
+
+      await noticeDB.deleteGroupByNoticeId(client, userId, noticeId, 'calendar');
+    } catch (error) {
+      console.error('getNoticeList error 발생: ' + error);
     } finally {
       client.release();
     }
