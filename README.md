@@ -3,10 +3,9 @@
 # 소복소복<img src="https://user-images.githubusercontent.com/68781598/149136866-31b58e24-59f2-437b-8338-87111dd8a479.png" align=left width=100>
 
 > 소중한 사람과 함께하는 복약 체크 서비스 💊
-
-<br />
 ### 👉 [API 명세서 링크](https://www.notion.so/baejiann120/API-6280231150ca40eeb2de46beb5292931)
 
+<br />
 
 ## 💭 프로젝트 설명
 
