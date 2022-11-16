@@ -281,7 +281,7 @@ module.exports = {
       ]);
 
       if (!user[0] || !pill[0]) {
-        throw new Error ('user or pill must be defined in schedule')
+        throw new Error('user or pill must be defined in schedule');
       }
 
       const username = user[0].username;
@@ -289,9 +289,9 @@ module.exports = {
       let body = `${username}님 ${pill[0].pillName} 먹을 시간이에요!`; //TODO: 멘트 수정
 
       const deviceToken = user[0].deviceToken;
-      
-      if (!deviceToken?.deviceToken) {
-        throw new Error('user device token not defined')
+
+      if (!deviceToken) {
+        throw new Error('user device token not defined');
       }
 
       const message = {
@@ -299,7 +299,7 @@ module.exports = {
           title: '소복소복 알림',
           body: body,
         },
-        token: deviceToken.deviceToken,
+        token: deviceToken,
       };
 
       const result = await admin.messaging().send(message);
@@ -308,7 +308,7 @@ module.exports = {
       return result;
     } catch (error) {
       functions.logger.warn('sendScheduleNotification service 에러 발생' + error);
-      
+
       return null;
     } finally {
       userAndScheduleClient.release();
