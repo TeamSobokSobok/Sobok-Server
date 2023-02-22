@@ -19,7 +19,7 @@ const returnType = require('../constants/returnType');
  *       6. 서버 에러
  */
 
-updateUsername: async (req, res) => {
+const updateUsername = async (req, res) => {
   try {
     const { user } = req.header;
     const { username } = req.body;
@@ -36,13 +36,14 @@ updateUsername: async (req, res) => {
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
+    const data = await userService.updateUsername(user.id, username);
+
     // err 3.
     if (data === returnType.WRONG_NICKNAME_CONVENTION)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.WRONG_USERNAME_CONVENTION));
 
-    const data = await userService.updateUsername(user.id, username);
     // err 4.
     if (data === returnType.NICKNAME_ALREADY_EXIST)
       return res
@@ -78,6 +79,7 @@ updateUsername: async (req, res) => {
 };
 
 module.exports = {
+  updateUsername,
   getUsername: async (req, res) => {
     try {
       const { username } = req.query;
