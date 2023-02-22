@@ -3,129 +3,134 @@ const { userDB, scheduleDB } = require('../db');
 const db = require('../db/db');
 const { nicknameVerify } = require('../lib/nicknameVerify');
 
-module.exports = {
-  getUsername: async (username) => {
-    let client;
-    const req = `username = ${username}`;
+/**
+ * updateUsername
+ * 유저 닉네임 업데이트 로직
+ * @param userId - 닉네임을 변경할 유저 아이디
+ * @param username - 변경할 닉네임
+ */
+updateUsername: async (userId, username) => {
+  let client;
+  const log = `userDB.updateUsername | userId = ${userId}, username = ${username}`;
 
-    try {
-      client = await db.connect(req);
+  try {
+    client = await db.connect(log);
+    await client.query('BEGIN');
 
-      const findUsername = await userDB.findUserByName(client, username);
+    const nicknameCheck = nicknameVerify(username);
+    if (nicknameCheck) return returnType.WRONG_NICKNAME_CONVENTION;
 
-      return findUsername;
-    } catch (error) {
-      console.log(error);
-    } finally {
-      client.release();
-    }
-  },
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
 
-  updateUsername: async (userId, username) => {
-    let client;
-    const log = `userDB.updateUsername | userId = ${userId}, username = ${username}`;
+    const checkUsername = await userDB.findUserByName(client, username);
+    if (checkUsername.length !== 0) return returnType.NICKNAME_ALREADY_EXIST;
 
-    try {
-      client = await db.connect(log);
-      await client.query('BEGIN');
+    const updateUsername = await userDB.updateUserNameById(client, userId, username);
+    await client.query('COMMIT');
 
-      const nicknameCheck = nicknameVerify(username);
-      if (nicknameCheck) return returnType.WRONG_NICKNAME_CONVENTION;
+    return updateUsername;
+  } catch (error) {
+    console.log(error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+},
+  (module.exports = {
+    getUsername: async (username) => {
+      let client;
+      const req = `username = ${username}`;
 
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
+      try {
+        client = await db.connect(req);
 
-      const checkUsername = await userDB.findUserByName(client, username);
-      if (checkUsername.length !== 0) return returnType.NICKNAME_ALREADY_EXIST;
+        const findUsername = await userDB.findUserByName(client, username);
 
-      const updateUsername = await userDB.updateUserNameById(client, userId, username);
-      await client.query('COMMIT');
-
-      return updateUsername;
-    } catch (error) {
-      console.log(error);
-      await client.query('ROLLBACK');
-    } finally {
-      client.release();
-    }
-  },
-
-  /**
-   * 해당 유저 약 리스트 조회 서비스
-   * getUserPillList
-   * @param userId
-   */
-  getUserPillList: async (userId) => {
-    let client;
-    const log = `userDB.getUserPillList | userId = ${userId}`;
-
-    try {
-      client = await db.connect(log);
-
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      const pillList = await userDB.findPillById(client, userId);
-      return pillList;
-    } catch (error) {
-      console.error('getUserPillList error 발생: ' + error);
-    } finally {
-      client.release();
-    }
-  },
-
-  /**
-   * 해당 유저 약 상세조회 서비스
-   * getUserPillInfo
-   * @param userId
-   * @param pillId
-   */
-  getUserPillInfo: async (userId, pillId) => {
-    let client;
-    const log = `scheduleDB.getUserPillInfo | userId = ${userId}, pillId = ${pillId}`;
-
-    try {
-      client = await db.connect(log);
-
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      const pillInfo = await scheduleDB.findScheduleByPillId(client, pillId);
-      const pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId);
-
-      let timeList = [];
-      pillTime.forEach((time) => {
-        timeList.push(time.scheduleTime);
-      });
-
-      pillInfo[0].time = timeList;
-
-      return pillInfo;
-    } catch (error) {
-      console.error('getUserPillInfo error 발생: ' + error);
-    } finally {
-      client.release();
-    }
-  },
-
-  isCalendarShare: async (userId, memberId) => {
-    let client;
-    const log = `userService.isCalendarShare | userId = ${userId}, memberId = ${memberId}`;
-
-    try {
-      client = await db.connect(log);
-      let isMember = false;
-
-      const isShare = await userDB.isShare(client, userId, memberId);
-      if (!isShare) {
-        return isMember;
+        return findUsername;
+      } catch (error) {
+        console.log(error);
+      } finally {
+        client.release();
       }
+    },
 
-      return isShare.isOkay;
-    } catch (error) {
-      console.error('getUserPillInfo error 발생: ' + error);
-    } finally {
-      client.release();
-    }
-  },
-};
+    /**
+     * 해당 유저 약 리스트 조회 서비스
+     * getUserPillList
+     * @param userId
+     */
+    getUserPillList: async (userId) => {
+      let client;
+      const log = `userDB.getUserPillList | userId = ${userId}`;
+
+      try {
+        client = await db.connect(log);
+
+        const user = await userDB.findUserById(client, userId);
+        if (!user) return returnType.NON_EXISTENT_USER;
+
+        const pillList = await userDB.findPillById(client, userId);
+        return pillList;
+      } catch (error) {
+        console.error('getUserPillList error 발생: ' + error);
+      } finally {
+        client.release();
+      }
+    },
+
+    /**
+     * 해당 유저 약 상세조회 서비스
+     * getUserPillInfo
+     * @param userId
+     * @param pillId
+     */
+    getUserPillInfo: async (userId, pillId) => {
+      let client;
+      const log = `scheduleDB.getUserPillInfo | userId = ${userId}, pillId = ${pillId}`;
+
+      try {
+        client = await db.connect(log);
+
+        const user = await userDB.findUserById(client, userId);
+        if (!user) return returnType.NON_EXISTENT_USER;
+
+        const pillInfo = await scheduleDB.findScheduleByPillId(client, pillId);
+        const pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId);
+
+        let timeList = [];
+        pillTime.forEach((time) => {
+          timeList.push(time.scheduleTime);
+        });
+
+        pillInfo[0].time = timeList;
+
+        return pillInfo;
+      } catch (error) {
+        console.error('getUserPillInfo error 발생: ' + error);
+      } finally {
+        client.release();
+      }
+    },
+
+    isCalendarShare: async (userId, memberId) => {
+      let client;
+      const log = `userService.isCalendarShare | userId = ${userId}, memberId = ${memberId}`;
+
+      try {
+        client = await db.connect(log);
+        let isMember = false;
+
+        const isShare = await userDB.isShare(client, userId, memberId);
+        if (!isShare) {
+          return isMember;
+        }
+
+        return isShare.isOkay;
+      } catch (error) {
+        console.error('getUserPillInfo error 발생: ' + error);
+      } finally {
+        client.release();
+      }
+    },
+  });

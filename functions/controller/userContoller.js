@@ -7,6 +7,76 @@ const slackAPI = require('../middlewares/slackAPI');
 const { userService } = require('../service');
 const returnType = require('../constants/returnType');
 
+/**
+ *  @닉네임_수정
+ *  @route PUT /user/nickname
+ *  @access public
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. request body에 해당 값이 없는 경우
+ *       3. 닉네임의 형식에 맞지 않는 경우
+ *       4. 이미 사용중인 닉네임일 경우
+ *       5. 해당 유저가 존재하지 않을 경우
+ *       6. 서버 에러
+ */
+
+updateUsername: async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { username } = req.body;
+
+    // err 1.
+    if (!user)
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+
+    // err 2.
+    if (!username)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+    // err 3.
+    if (data === returnType.WRONG_NICKNAME_CONVENTION)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.WRONG_USERNAME_CONVENTION));
+
+    const data = await userService.updateUsername(user.id, username);
+    // err 4.
+    if (data === returnType.NICKNAME_ALREADY_EXIST)
+      return res
+        .status(statusCode.CONFLICT)
+        .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
+
+    // err 5.
+    if (data === returnType.NON_EXISTENT_USER)
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.UPDATE_NICKNAME));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    // err 6.
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   getUsername: async (req, res) => {
     try {
@@ -38,15 +108,16 @@ module.exports = {
     const user = req.header.user;
 
     if (!user) {
-      return res.status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_AUTHENTICATED))
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_AUTHENTICATED));
     }
 
-    const data = { username: user.username }
+    const data = { username: user.username };
 
     return res
       .status(statusCode.OK)
-      .send(util.success(statusCode.OK, responseMessage.READ_USER_INFO , data));
+      .send(util.success(statusCode.OK, responseMessage.READ_USER_INFO, data));
   },
   checkUsername: async (req, res) => {
     try {
@@ -68,53 +139,6 @@ module.exports = {
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME));
-    } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      return res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-  },
-
-  updateUsername: async (req, res) => {
-    try {
-      const { user } = req.header;
-      const { username } = req.body;
-
-      if (!user)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.TOKEN_EMPTY));
-
-      if (!username)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
-      const data = await userService.updateUsername(user.id, username);
-      if (data === returnType.NICKNAME_ALREADY_EXIST)
-        return res
-          .status(statusCode.CONFLICT)
-          .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
-
-      if (data === returnType.WRONG_NICKNAME_CONVENTION)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.WRONG_USERNAME_CONVENTION));
-
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.UPDATE_NICKNAME));
     } catch (error) {
       functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
