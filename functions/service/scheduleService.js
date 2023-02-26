@@ -286,7 +286,7 @@ module.exports = {
 
       const username = user[0].username;
 
-      let body = `${username}님 ${pill[0].pillName} 먹을 시간이에요!`; //TODO: 멘트 수정
+      let body = `소중한 ${username}님 ${pill[0].pillName} 드실 시간이에요\n약을 먹은 후, 앱에서 체크 버튼을 눌러주세요`;
 
       const deviceToken = user[0].deviceToken;
 
@@ -296,7 +296,7 @@ module.exports = {
 
       const message = {
         notification: {
-          title: '소복소복 알림',
+          title: pill[0].pillName,
           body: body,
         },
         token: deviceToken,
