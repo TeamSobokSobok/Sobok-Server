@@ -51,18 +51,16 @@ module.exports = {
 
       // 스케줄 추가 서비스
       for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
-        for (let time = 0; time < timeList.length; time++) {
-          await scheduleDB.addSchedule(
-            client,
-            newPill[pillCount].id,
-            userId,
-            start,
-            end,
-            dateList,
-            day,
-            timeList[time],
-          );
-        }
+        await scheduleDB.addSchedule(
+          client,
+          newPill[pillCount].id,
+          userId,
+          start,
+          end,
+          dateList,
+          day,
+          timeList,
+        );
       }
 
       await client.query('COMMIT');
