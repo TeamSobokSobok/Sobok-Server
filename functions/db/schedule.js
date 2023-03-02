@@ -296,7 +296,7 @@ const addSchedule = async (
   end,
 ) => {
   try {
-    const schedule_date_time = dayjs(date+time, 'YYYY-MM-DDHH:mm:ss').format()
+    const schedule_date_time = dayjs(date + time, 'YYYY-MM-DDHH:mm:ss').format();
 
     const { rows } = await client.query(
       `
@@ -304,7 +304,19 @@ const addSchedule = async (
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
       `,
-      [pillId, userId, takeInterval, date, day, specific, time, start, end, false, schedule_date_time],
+      [
+        pillId,
+        userId,
+        takeInterval,
+        date,
+        day,
+        specific,
+        time,
+        start,
+        end,
+        false,
+        schedule_date_time,
+      ],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {

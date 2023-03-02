@@ -141,6 +141,48 @@ const getPillInfo = async (client, pillId) => {
   }
 };
 
+/**
+ * getPillUser
+ * 해당 약의 유저 조회
+ * @param pillId 약 아이디
+ */
+const getPillUser = async (client, pillId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT user_id
+      FROM pill
+      WHERE id = $1
+      `,
+      [pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('pillDB.getPillUser에서 오류 발생: ' + error);
+  }
+};
+
+/**
+ * getPillDetail
+ * 해당 약의 상세정보 조회
+ * @param pillId 약 아이디
+ */
+const getPillDetail = async (client, pillId) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT DISTINCT pill_name, schedule_day, start_date, end_date, schedule_time
+      FROM pill LEFT JOIN schedule ON pill.id = schedule.pill_id
+      WHERE pill.id = $1;
+      `,
+      [pillId],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('pillDB.getPillDetail에서 오류 발생: ' + error);
+  }
+};
+
 // UPDATE
 /**
  * acceptSendPill
@@ -200,6 +242,8 @@ module.exports = {
   getPillInfo,
   getPillById,
   getPillCountById,
+  getPillUser,
+  getPillDetail,
   acceptPillByPillId,
   updatePillNameByPillId,
   getUserIdByPillId,
