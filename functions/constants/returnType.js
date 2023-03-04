@@ -21,6 +21,7 @@ module.exports = {
   NON_EXISTENT_PILL: -18, // 존재 하지 않는 약
   NO_PILL_USER: -19, // 해당 약의 유저가 아닐 때
   ALREADY_COMPLETE: -20, // 이미 처리된 약일 때
+  ALREADY_STOP_PILL: -22, // 이미 중단된 약일 때
 
   // 캘린더
   NO_MEMBER: -17, // 캘린더 공유가 안된 상황일 때
