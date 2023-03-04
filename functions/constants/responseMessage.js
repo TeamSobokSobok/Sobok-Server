@@ -29,6 +29,7 @@ module.exports = {
   READ_PILL_LIST: '약 리스트 조회 성공',
   READ_PILL: '약 상세조회 성공',
   READ_USER_INFO: '유저 정보 조회 성공',
+  NO_PILL_USER: '해당 약에 접근 권한이 없습니다.',
 
   // 토큰
   TOKEN_EXPIRED: '토큰이 만료되었습니다.',

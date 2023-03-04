@@ -1,5 +1,6 @@
+const dayjs = require('dayjs');
 const returnType = require('../constants/returnType');
-const { userDB, scheduleDB } = require('../db');
+const { userDB, scheduleDB, pillDB } = require('../db');
 const db = require('../db/db');
 const { nicknameVerify } = require('../lib/nicknameVerify');
 
@@ -97,17 +98,25 @@ module.exports = {
       const user = await userDB.findUserById(client, userId);
       if (!user) return returnType.NON_EXISTENT_USER;
 
-      const pillInfo = await scheduleDB.findScheduleByPillId(client, pillId);
-      const pillTime = await scheduleDB.findScheduleTimeByPillId(client, pillId);
+      const pillUserCheck = await pillDB.getPillUser(client, pillId);
+      console.log(pillUserCheck);
+      if (pillUserCheck.userId !== user.id || pillUserCheck.length === 0)
+        return returnType.NO_PILL_USER;
+
+      const pillInformation = await pillDB.getPillDetail(client, pillId);
 
       let timeList = [];
-      pillTime.forEach((time) => {
-        timeList.push(time.scheduleTime);
+      pillInformation.forEach((pill) => {
+        timeList.push(pill.scheduleTime);
       });
 
-      pillInfo[0].time = timeList;
-
-      return pillInfo;
+      return {
+        pillName: pillInformation[0].pillName,
+        scheduleDay: pillInformation[0].scheduleDay,
+        startDate: dayjs(pillInformation[0].startDate).format('YYYY-MM-DD'),
+        endDate: dayjs(pillInformation[0].endDate).format('YYYY-MM-DD'),
+        scheduleTime: timeList,
+      };
     } catch (error) {
       console.error('getUserPillInfo error 발생: ' + error);
     } finally {
