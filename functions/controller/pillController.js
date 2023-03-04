@@ -258,32 +258,41 @@ const pillScheduleModify = async (req, res) => {
 };
 
 /**
- * DELETE ~/pill/:pillId
- * 해당 약 삭제
- * @private
+ *  @약_삭제
+ *  @route POST /pill/:pillId
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 해당 유저가 존재하지 않을 경우
+ *       3. 해당 약에 접근 권한이 없는 경우
+ *       4. 서버 에러
  */
+
 const deletePill = async (req, res) => {
   try {
     const { user } = req.header;
     const { pillId } = req.params;
 
-    if (!user || !pillId) {
+    // err 1.
+    if (!user) {
       return res
-        .status(statusCode.BAD_REQUEST)
-        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
     }
 
     const deletePill = await pillService.deletePill(user.id, Number(pillId));
+
+    // err 2.
     if (deletePill === returnType.NON_EXISTENT_USER) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
     }
 
+    // err 3.
     if (deletePill === returnType.NO_PILL_USER) {
       return res
-        .status(statusCode.FORBIDDEN)
-        .json(util.fail(statusCode.FORBIDDEN, responseMessage.PILL_UNAUTHORIZED));
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.PILL_UNAUTHORIZED));
     }
 
     return res.status(deletePill.status).json(deletePill);
