@@ -8,50 +8,60 @@ const { functions } = require('lodash');
 const slackAPI = require('../middlewares/slackAPI');
 
 /**
- * POST ~/pill
- * 약 추가하기
- * @private
+ *  @약_추가
+ *  @route POST /pill
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. request body에 해당 값이 없는 경우
+ *       3. 약 이름이 10자가 초과되는 경우
+ *       4. 약이 5개가 초과되는 경우
+ *       5. 해당 유저가 존재하지 않을 경우
+ *       6. 서버 에러
  */
+
 const addPill = async (req, res) => {
   try {
     const { user } = req.header;
-    const { pillName, takeInterval, day, specific, time, start, end } = req.body;
+    const { pillName, day, timeList, start, end } = req.body;
 
-    // 유저 정보가 헤더에 없는 경우
+    // err 1.
     if (!user) {
       return res
         .status(statusCode.FORBIDDEN)
         .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
     }
 
-    // 필요한 값이 없는 경우
-    if (!pillName || !takeInterval || !time || !start || !end) {
+    // err 2.
+    if (!pillName || !day || !timeList || !start || !end) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
 
+    // err 3.
+    pillName.forEach((name) => {
+      if (name.length > 10 || name.length === 0) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_NAME));
+      }
+    });
+
     // 약 추가 서비스
-    const newPill = await pillService.addPill(
-      pillName,
-      user.id,
-      takeInterval,
-      day,
-      specific,
-      time,
-      start,
-      end,
-    );
+    const newPill = await pillService.addPill(pillName, user.id, day, timeList, start, end);
+
+    // err 4.
     if (newPill === returnType.PILL_COUNT_OVER) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.PILL_COUNT_OVER));
     }
 
-    if (newPill === returnType.DB_NOT_FOUND) {
+    // err 5.
+    if (newPill === returnType.NON_EXISTENT_USER) {
       return res
-        .status(statusCode.DB_ERROR)
-        .json(util.fail(statusCode.DB_ERROR, responseMessage.DB_ERROR));
+        .status(statusCode.NOT_FOUND)
+        .json(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
     }
 
     return res.status(newPill.status).json(newPill);
