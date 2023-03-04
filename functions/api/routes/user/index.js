@@ -5,7 +5,11 @@ const router = express.Router();
 
 router.get('/', checkUser, userContoller.getUsername);
 router.get('/info', checkUser, userContoller.getUserInfo);
+
+// 내 약 리스트 조회
 router.get('/pill', checkUser, userContoller.getPillList);
+
+// 내 약 상세조회
 router.get('/pill/:pillId', checkUser, userContoller.getPillInformation);
 router.get('/share/:memberId', checkUser, userContoller.isCalendarShare);
 
