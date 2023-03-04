@@ -315,39 +315,57 @@ const deletePill = async (req, res) => {
 };
 
 /**
- * PUT ~/pill/stop/:pillId
- * 해당 복약중단
- * @private
+ *  @약_중단
+ *  @route POST /pill/stop/:pillId
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 해당 유저가 존재하지 않을 경우
+ *       3. 해당 약이 없는 경우
+ *       4. 해당 약에 접근 권한이 없는 경우
+ *       5. 이미 중단된 약일 경우
+ *       6. 서버 에러
  */
+
 const stopPill = async (req, res) => {
   try {
     const { user } = req.header;
     const { pillId } = req.params;
-    const { date } = req.query;
 
-    if (!user || !pillId) {
+    // err 1.
+    if (!user) {
       return res
-        .status(statusCode.BAD_REQUEST)
-        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_AUTHENTICATED));
     }
 
-    const stopPill = await pillService.stopPill(user.id, pillId, date);
+    const stopPill = await pillService.stopPill(user.id, pillId);
+
+    // err 2.
     if (stopPill === returnType.NON_EXISTENT_USER) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
     }
 
+    // err 3.
     if (stopPill === returnType.NON_EXISTENT_PILL) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
     }
 
+    // err 4.
     if (stopPill === returnType.NO_PILL_USER) {
       return res
-        .status(statusCode.FORBIDDEN)
-        .json(util.fail(statusCode.FORBIDDEN, responseMessage.PILL_UNAUTHORIZED));
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.PILL_UNAUTHORIZED));
+    }
+
+    // err 5.
+    if (stopPill === returnType.ALREADY_STOP_PILL) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_PILL_STOP));
     }
 
     return res.status(stopPill.status).json(stopPill);

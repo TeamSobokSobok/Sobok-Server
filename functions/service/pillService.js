@@ -108,6 +108,50 @@ const deletePill = async (userId, pillId) => {
   }
 };
 
+/**
+ * stopPill
+ * 약 중단 서비스
+ * @param userId 해당 약을 중단하는 유저 아이디
+ * @param pillId 중단할 약 아이디
+ */
+
+const stopPill = async (userId, pillId) => {
+  let client;
+  const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;
+
+  try {
+    client = await db.connect(log);
+    await client.query('BEGIN');
+
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    const pill = await pillDB.getPillById(client, pillId);
+
+    if (pill.length === 0) return returnType.NON_EXISTENT_PILL;
+
+    if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
+
+    if (pill[0].isStop === true) return returnType.ALREADY_STOP_PILL;
+
+    await pillDB.stopPillByPillId(client, pillId);
+
+    // 현재 날짜
+    let nowDate = new Date();
+    nowDate = dayjs(nowDate).format('YYYY-MM-DD');
+    await scheduleDB.deleteScheduleByDate(client, pillId, nowDate);
+
+    await client.query('COMMIT');
+
+    return util.success(statusCode.OK, responseMessage.PILL_STOP_SUCCESS);
+  } catch (error) {
+    console.error('stopPill error 발생: ' + error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   addPill,
   /**
@@ -389,35 +433,6 @@ module.exports = {
       client.release();
     }
   },
-
-  stopPill: async (userId, pillId, date) => {
-    let client;
-    const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}, date = ${date}`;
-
-    try {
-      client = await db.connect(log);
-      await client.query('BEGIN');
-
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      const pill = await pillDB.getPillById(client, pillId);
-      if (!pill) return returnType.NON_EXISTENT_PILL;
-
-      if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
-
-      await pillDB.stopPillByPillId(client, pillId);
-      await scheduleDB.deleteScheduleByDate(client, pillId, date);
-
-      await client.query('COMMIT');
-
-      return util.success(statusCode.OK, responseMessage.PILL_STOP_SUCCESS);
-    } catch (error) {
-      console.error('stopPill error 발생: ' + error);
-      await client.query('ROLLBACK');
-    } finally {
-      client.release();
-    }
-  },
+  stopPill,
   deletePill,
 };
