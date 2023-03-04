@@ -22,7 +22,7 @@ const slackAPI = require('../middlewares/slackAPI');
 const addPill = async (req, res) => {
   try {
     const { user } = req.header;
-    const { pillName, day, timeList, start, end } = req.body;
+    const { pillName, day, timeList, startDate, endDate } = req.body;
 
     // err 1.
     if (!user) {
@@ -32,7 +32,7 @@ const addPill = async (req, res) => {
     }
 
     // err 2.
-    if (!pillName || !day || !timeList || !start || !end) {
+    if (!pillName || !day || !timeList || !startDate || !endDate) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
@@ -48,7 +48,7 @@ const addPill = async (req, res) => {
     });
 
     // 약 추가 서비스
-    const newPill = await pillService.addPill(pillName, user.id, day, timeList, start, end);
+    const newPill = await pillService.addPill(pillName, user.id, day, timeList, startDate, endDate);
 
     // err 4.
     if (newPill === returnType.PILL_COUNT_OVER) {
@@ -186,52 +186,70 @@ const getMemberPillCount = async (req, res) => {
 };
 
 /**
- * PUT ~/pill/:pillId
- * 해당 약 일정 수정
- * @private
+ *  @약_정보수정
+ *  @route PUT /pill/:pillId
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. request body값에 해당 값이 없는 경우
+ *       3. 약 이름 길이가 10자 이상인 경우
+ *       4. 해당 유저가 존재하지 않을 경우
+ *       5. 해당 약이 존재하지 않을 경우
+ *       6. 해당 약에 접근 권한이 없는 경우
+ *       7. 서버 에러
  */
+
 const pillScheduleModify = async (req, res) => {
   try {
     const { user } = req.header;
     const { pillId } = req.params;
-    const { start, end, cycle, day, specific, time, pillName, date } = req.body;
+    const { pillName, day, timeList, startDate, endDate } = req.body;
 
-    if (!user || !pillId) {
+    // err 1.
+    if (!user) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+    }
+
+    // err 2.
+    if (!pillName || !day || !timeList) {
       return res
         .status(statusCode.BAD_REQUEST)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
     }
 
-    const pillModify = await pillService.pillInfoModify(
+    // err 3.
+    if (pillName.length > 10) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL_NAME));
+    }
+
+    const pillModify = await pillService.pillInformationModify(
       user.id,
       pillId,
       pillName,
-      start,
-      end,
-      cycle,
+      startDate,
+      endDate,
       day,
-      specific,
-      time,
-      date,
+      timeList,
     );
 
-    if (!pillName || !time || !date)
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
+    // err 4.
     if (pillModify === returnType.NON_EXISTENT_USER) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
     }
 
+    // err 5.
     if (pillModify === returnType.NON_EXISTENT_PILL) {
       return res
         .status(statusCode.UNAUTHORIZED)
         .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
     }
 
+    // err 6.
     if (pillModify === returnType.NO_PILL_USER) {
       return res
         .status(statusCode.FORBIDDEN)

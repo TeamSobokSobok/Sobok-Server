@@ -75,33 +75,72 @@ const addPill = async (pillName, userId, day, timeList, start, end) => {
 };
 
 /**
- * deletePill
- * 약 삭제 서비스
- * @param userId 해당 약을 삭제하는 유저 아이디
- * @param pillId 삭제할 약 아이디
+ * pillInformationModify
+ * 현재 복용중인 약 스케줄 변경 서비스
+ * @param userId 해당 약 유저 아이디
+ * @param pillId 정보를 변경할 약 아이디
+ * @param pillName 약 변경을 원하는 이름
+ * @param start 약 복용 시작 날짜
+ * @param end 약 복용 중단 날짜
+ * @param day 요일
+ * @param timeList 변경을 원하는 시간목록
  */
 
-const deletePill = async (userId, pillId) => {
+const pillInformationModify = async (
+  userId,
+  pillId,
+  pillName,
+  startDate,
+  endDate,
+  day,
+  timeList,
+) => {
   let client;
-  const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;
+  const log = `pillDB.pillShceduleModify | userId = ${userId}, pillId = ${pillId}, pillName = ${pillName}, startDate = ${startDate}, endDate = ${endDate}, day = ${day}, timeList = ${timeList}`;
 
   try {
     client = await db.connect(log);
     await client.query('BEGIN');
 
     const user = await userDB.findUserById(client, userId);
-    if (!user) return returnType.NON_EXISTENT_USER;
+    if (user.length === 0) return returnType.NON_EXISTENT_USER;
 
     const pill = await pillDB.getPillById(client, pillId);
-    console.log(pill);
-    if (pill.length === 0 || pill[0].userId !== userId) return returnType.NO_PILL_USER;
+    if (pill.length === 0) return returnType.NON_EXISTENT_PILL;
 
-    await pillDB.deletePill(client, pillId);
+    if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
+
+    // 현재 날짜
+    let nowDate = new Date();
+    nowDate = dayjs(nowDate).format('YYYY-MM-DD');
+
+    // 현재 날짜부터 약 스케줄 삭제
+    await scheduleDB.deleteScheduleByDate(client, pillId, nowDate);
+
+    // 약이 추가될 날짜
+    const dateList = dateCalcurator(nowDate, endDate, day);
+
+    // 약 이름 변경
+    await pillDB.updatePillNameByPillId(client, pillId, pillName);
+
+    console.log(startDate);
+    console.log(endDate);
+    // 약 스케줄 추가
+    await scheduleDB.addSchedule(
+      client,
+      pillId,
+      userId,
+      startDate,
+      endDate,
+      dateList,
+      day,
+      timeList,
+    );
+
     await client.query('COMMIT');
-
-    return util.success(statusCode.OK, responseMessage.PILL_DELETE_SUCCESS);
+    return util.success(statusCode.OK, responseMessage.PILL_MODIFY_SUCCESS);
   } catch (error) {
-    console.error('deletePill error 발생: ' + error);
+    console.log('pillScheduleModify error 발생: ' + error);
     await client.query('ROLLBACK');
   } finally {
     client.release();
@@ -146,6 +185,40 @@ const stopPill = async (userId, pillId) => {
     return util.success(statusCode.OK, responseMessage.PILL_STOP_SUCCESS);
   } catch (error) {
     console.error('stopPill error 발생: ' + error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * deletePill
+ * 약 삭제 서비스
+ * @param userId 해당 약을 삭제하는 유저 아이디
+ * @param pillId 삭제할 약 아이디
+ */
+
+const deletePill = async (userId, pillId) => {
+  let client;
+  const log = `pillDB.deletePillByPillId | userId = ${userId}, pillId = ${pillId}`;
+
+  try {
+    client = await db.connect(log);
+    await client.query('BEGIN');
+
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    const pill = await pillDB.getPillById(client, pillId);
+    console.log(pill);
+    if (pill.length === 0 || pill[0].userId !== userId) return returnType.NO_PILL_USER;
+
+    await pillDB.deletePill(client, pillId);
+    await client.query('COMMIT');
+
+    return util.success(statusCode.OK, responseMessage.PILL_DELETE_SUCCESS);
+  } catch (error) {
+    console.error('deletePill error 발생: ' + error);
     await client.query('ROLLBACK');
   } finally {
     client.release();
@@ -283,131 +356,6 @@ module.exports = {
   },
 
   /**
-   * pillScheduleModify
-   * 현재 복용중인 약 스케줄 변경 서비스
-   * @param userId 해당 약 유저 아이디
-   * @param pillId 정보를 변경할 약 아이디
-   * @param date 변경을 원하는 날짜
-   * @param time 변경을 원하는 시간
-   * @param pillName 약 변경을 원하는 이름
-   * @param start 약 복용 시작 날짜
-   * @param end 약 복용 중단 날짜
-   * @param cycle 약 복용 주기
-   * @param day 요일
-   * @param specific 특정 주기
-   */
-  pillInfoModify: async (
-    userId,
-    pillId,
-    pillName,
-    start,
-    end,
-    cycle,
-    day,
-    specific,
-    time,
-    date,
-  ) => {
-    let client;
-    const log = `pillDB.pillShceduleModify | userId = ${userId}, pillId = ${pillId}, pillName = ${pillName}, start = ${start}, end = ${end}, cycle = ${cycle}, day = ${day}, specific = ${specific}, time = ${time}, date = ${date}`;
-
-    try {
-      client = await db.connect(log);
-      await client.query('BEGIN');
-
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      const pill = await pillDB.getPillById(client, pillId);
-      if (pill.length === 0) return returnType.NON_EXISTENT_PILL;
-
-      if (pill[0].userId !== userId) return returnType.NO_PILL_USER;
-
-      const pillSchedule = await scheduleDB.findScheduleByPillId(client, pillId);
-      const scheduleStart = dayjs(pillSchedule[0].startDate);
-      const scheduleEnd = dayjs(pillSchedule[0].endDate);
-
-      // 총 날짜 수 계산
-      const term = termCalcurator(start, end);
-
-      // 약이 추가될 날짜
-      const dateList = dateCalcurator(term, start, cycle, day, specific);
-      if (
-        scheduleStart.format('YYYY-MM-DD') !== start ||
-        scheduleEnd.format('YYYY-MM-DD') !== end ||
-        pillSchedule[0].takeInterval !== cycle ||
-        pillSchedule[0].scheduleDay !== day ||
-        pillSchedule[0].scheduleSpecific !== specific
-      ) {
-        await pillDB.deletePill(client, pillId);
-        const newPill = await pillDB.addPill(client, pillName, userId, pill[0].color);
-
-        // 스케줄 추가 서비스
-        for (let date = 0; date < dateList.length; date++) {
-          for (let timeList = 0; timeList < time.length; timeList++) {
-            let newSchedule = await scheduleDB.addSchedule(
-              client,
-              newPill.id,
-              userId,
-              cycle,
-              dateList[date],
-              day,
-              specific,
-              time[timeList],
-              start,
-              end,
-            );
-            if (!newSchedule) return returnType.DB_NOT_FOUND;
-          }
-        }
-
-        await client.query('COMMIT');
-        return util.success(statusCode.OK, responseMessage.PILL_MODIFY_SUCCESS);
-      }
-
-      if (pill[0].pillName !== pillName)
-        await pillDB.updatePillNameByPillId(client, pillId, pillName);
-
-      // 총 날짜 수 계산
-      const timeTerm = termCalcurator(date, end);
-
-      // 약이 추가될 날짜
-      const timeDateList = dateCalcurator(timeTerm, date, cycle, day, specific);
-
-      const scheduleTime = await scheduleDB.findScheduleTimeByPillId(client, pillId);
-
-      if (scheduleTime[0] !== time) {
-        await scheduleDB.deleteScheduleByDate(client, pillId, date);
-        for (let date = 0; date < timeDateList.length; date++) {
-          for (let timeList = 0; timeList < time.length; timeList++) {
-            let newSchedule = await scheduleDB.addSchedule(
-              client,
-              Number(pillId),
-              userId,
-              cycle,
-              timeDateList[date],
-              day,
-              specific,
-              time[timeList],
-              start,
-              end,
-            );
-            if (!newSchedule) return returnType.DB_NOT_FOUND;
-          }
-        }
-      }
-
-      await client.query('COMMIT');
-      return util.success(statusCode.OK, responseMessage.PILL_MODIFY_SUCCESS);
-    } catch (error) {
-      console.log('pillScheduleModify error 발생: ' + error);
-      await client.query('ROLLBACK');
-    } finally {
-      client.release();
-    }
-  },
-
-  /**
    * getPillCount
    * 현재 복용중인 약 개수 반환
    * @param memberId 약 개수를 조회할 유저 아이디
@@ -433,6 +381,7 @@ module.exports = {
       client.release();
     }
   },
+  pillInformationModify,
   stopPill,
   deletePill,
 };
