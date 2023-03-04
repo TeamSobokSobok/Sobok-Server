@@ -8,7 +8,7 @@ const { functions } = require('lodash');
 const slackAPI = require('../middlewares/slackAPI');
 
 /**
- *  @닉네임_수정
+ *  @약_추가
  *  @route POST /pill
  *  @access private
  *  @err 1. 유저 인증과정에 문제가 생긴 경우
@@ -31,16 +31,12 @@ const addPill = async (req, res) => {
         .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
     }
 
-    console.log(pillName, day, timeList, start, end);
-
     // err 2.
-    // if (!pillName || day || !timeList || !start || !end) {
-    //   return res
-    //     .status(statusCode.BAD_REQUEST)
-    //     .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-    // }
-
-    console.log(pillName, day, timeList, start, end);
+    if (!pillName || !day || !timeList || !start || !end) {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
 
     // err 3.
     pillName.forEach((name) => {

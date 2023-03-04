@@ -28,8 +28,6 @@ const dateCalcurator = (start, end, day) => {
     startDate = startDate.add(1, 'day');
   }
 
-  console.log(dateList);
-
   return dateList;
 };
 
