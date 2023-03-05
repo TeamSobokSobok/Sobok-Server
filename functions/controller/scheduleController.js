@@ -12,8 +12,8 @@ const returnType = require('../constants/returnType');
  *  @access private
  *  @err 1. 유저 인증과정에 문제가 생긴 경우
  *       2. 조회할 달 데이터가 안넘어온 경우
- *       2. 해당 유저가 존재하지 않을 경우
- *       3. 서버 에러
+ *       3. 해당 유저가 존재하지 않을 경우
+ *       4. 서버 에러
  */
 
 const getMyCalendar = async (req, res) => {
@@ -34,6 +34,13 @@ const getMyCalendar = async (req, res) => {
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
     const myCalendar = await scheduleService.getMyCalendar(user.id, date);
+
+    // err 3.
+    if (myCalendar === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+    }
 
     return res.status(myCalendar.status).json(myCalendar);
   } catch (error) {

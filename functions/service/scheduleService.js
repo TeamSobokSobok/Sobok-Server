@@ -20,6 +20,12 @@ const getMyCalendar = async (userId, date) => {
   try {
     client = await db.connect(log);
 
+    const user = await userDB.findUserById(client, userId);
+
+    if (user.length === 0 || user[0].isDeleted === true) {
+      return returnType.NON_EXISTENT_USER;
+    }
+
     // 조회할 달의 시작 날짜
     const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
 
