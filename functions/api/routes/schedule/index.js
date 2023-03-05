@@ -5,6 +5,7 @@ const router = express.Router();
 
 // 캘린더 가져오기
 router.get('/calendar', checkUser, scheduleController.getMyCalendar);
+
 router.get('/:memberId/calendar', checkUser, scheduleController.getMemberCalendar);
 router.get('/detail', checkUser, scheduleController.getMySchedule);
 router.get('/:memberId/detail', checkUser, scheduleController.getMemberSchedule);

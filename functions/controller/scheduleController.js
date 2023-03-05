@@ -7,26 +7,33 @@ const { scheduleService } = require('../service');
 const returnType = require('../constants/returnType');
 
 /**
- * GET ~/schedule
- * 내 캘린더 조회
- * @private
+ *  @홈_캘린더_조회
+ *  @route GET ~/schedule/calendar
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 조회할 달 데이터가 안넘어온 경우
+ *       2. 해당 유저가 존재하지 않을 경우
+ *       3. 서버 에러
  */
+
 const getMyCalendar = async (req, res) => {
   try {
     const { user } = req.header;
     const { date } = req.query;
 
+    // err 1.
+    if (!user)
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+
+    // err 2.
     if (!date)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    if (!user)
-      return res
-        .status(statusCode.UNAUTHORIZED)
-        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
-
-    const myCalendar = await scheduleService.getMyCalendar(date, user.id);
+    const myCalendar = await scheduleService.getMyCalendar(user.id, date);
 
     return res.status(myCalendar.status).json(myCalendar);
   } catch (error) {

@@ -2,6 +2,74 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
+// CREATE
+/**
+ * addSchedule
+ * 사용자 약 주기 추가 쿼리
+ * @param pillId 해당 약 아이디
+ * @param userId 해당 약을 추가하는 유저 아이디
+ * @param startDate 복용 시작 날짜
+ * @param endDate 복용 종료 날짜
+ * @param dateList 약 복용 날짜 리스트
+ * @param scheduleDay 특정 요일 ex) 월, 수, 금
+ * @param scheduleTime 시간 리스트
+ * @returns 추가된 약의 pillName
+ */
+const addSchedule = async (
+  client,
+  pillId,
+  userId,
+  startDate,
+  endDate,
+  dateList,
+  scheduleDay,
+  scheduleTime,
+) => {
+  try {
+    const { rows } = await client.query(
+      `
+      CALL add_pill($1, $2, $3, $4, $5, $6, $7)
+      `,
+      [pillId, userId, startDate, endDate, dateList, scheduleDay, scheduleTime],
+    );
+    return convertSnakeToCamel.keysToCamel(rows[0]);
+  } catch (error) {
+    throw new Error('scheduleDao.addSchedule에서 오류 발생: ' + error);
+  }
+};
+
+// READ
+/**
+ * getMyCalendar
+ * 내 캘린더 조회 쿼리
+ * @param userId - 해당 약 사용자 아이디
+ * @param startDate - 해당 월 시작일
+ * @param endDate - 해당 월 종료일
+ */
+const getMyCalendar = async (client, userId, startDate, endDate) => {
+  try {
+    const { rows } = await client.query(
+      `
+      SELECT schedule_date
+          , count(schedule_date) as schedule_count
+          , count(case when is_check=true THEN  1 END ) as is_check_count
+      FROM schedule
+      WHERE user_id = $1 AND schedule_date BETWEEN $2 AND $3
+      GROUP BY schedule_date
+      ORDER BY schedule_date 
+      `,
+      [userId, startDate, endDate],
+    );
+    return convertSnakeToCamel.keysToCamel(rows);
+  } catch (error) {
+    throw new Error('scheduleDB.getMyCalendar에서 오류 발생: ' + error);
+  }
+};
+
+// UPDATE
+
+// DELETE
+
 const addLikeSchedule = async (client, scheduleId, senderId, stickerId) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
@@ -266,72 +334,6 @@ const findLikeScheduleBySenderId = async (client, scheduleId, senderId) => {
     [scheduleId, senderId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
-};
-
-// CREATE
-/**
- * addSchedule
- * 사용자 약 주기 추가 쿼리
- * @param pillId 해당 약 아이디
- * @param userId 해당 약을 추가하는 유저 아이디
- * @param takeInterval 복용 간격 선택 ex) 매일, 특정 요일, 특정 간격
- * @param date 약 복용 날짜
- * @param day 특정 요일 ex) 월, 수, 금
- * @param specific 특정 간격 ex) 1week
- * @param time 시간 리스트
- * @param start 복용 시작 날짜
- * @param end 복용 종료 날짜
- * @returns 추가된 약의 pillName
- */
-const addSchedule = async (
-  client,
-  pillId,
-  userId,
-  startDate,
-  endDate,
-  dateList,
-  scheduleDay,
-  scheduleTime,
-) => {
-  try {
-    const { rows } = await client.query(
-      `
-      CALL add_pill($1, $2, $3, $4, $5, $6, $7)
-      `,
-      [pillId, userId, startDate, endDate, dateList, scheduleDay, scheduleTime],
-    );
-    return convertSnakeToCamel.keysToCamel(rows[0]);
-  } catch (error) {
-    throw new Error('scheduleDao.addSchedule에서 오류 발생: ' + error);
-  }
-};
-
-// READ
-/**
- * getMyCalendar
- * 내 캘린더 조회 쿼리
- * @param userId - 해당 약 사용자 아이디
- * @param startMonth - 해당 월 시작일
- * @param endMonth - 해당 월 종료일
- */
-const getMyCalendar = async (client, userId, startMonth, endMonth) => {
-  try {
-    const { rows } = await client.query(
-      `
-      SELECT schedule_date
-          , count(schedule_date) as schedule_count
-          , count(case when is_check=true THEN  1 END ) as is_check_count
-      FROM schedule
-      WHERE user_id = $1 AND schedule_date BETWEEN $2 AND $3
-      GROUP BY schedule_date
-      ORDER BY schedule_date 
-      `,
-      [userId, startMonth, endMonth],
-    );
-    return convertSnakeToCamel.keysToCamel(rows);
-  } catch (error) {
-    throw new Error('scheduleDB.getMyCalendar에서 오류 발생: ' + error);
-  }
 };
 
 /**
