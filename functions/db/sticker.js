@@ -1,18 +1,9 @@
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-//READ
-const findStickerList = async (client) => {
-  const { rows } = await client.query(
-    `
-    SELECT id as sticker_id, sticker_img 
-    FROM sticker
-    
-    `,
-  );
-  return convertSnakeToCamel.keysToCamel(rows);
-};
+// CREATE
 
+// READ
 const findStickerListById = async (client, userId, scheduleId) => {
   try {
     const { rows } = await client.query(
@@ -30,7 +21,21 @@ const findStickerListById = async (client, userId, scheduleId) => {
   }
 };
 
-//DELETE
+// UPDATE
+
+// DELETE
+
+const findStickerList = async (client) => {
+  const { rows } = await client.query(
+    `
+    SELECT id as sticker_id, sticker_img 
+    FROM sticker
+    
+    `,
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 const deleteStickerByUserId = async (client, userId) => {
   await client.query(
     `

@@ -51,57 +51,65 @@ const getMyCalendar = async (userId, date) => {
   }
 };
 
-module.exports = {
-  getMyCalendar,
-  /**
-   * 해당 일정 복약 스케줄 조회
-   * @param userId - 유저 아이디
-   * @param date - 조회를 원하는 날짜
-   */
-  getMySchedule: async (userId, date) => {
-    let client;
-    const log = `scheduleDB.getMySchedule | userId = ${userId}, date = ${date}`;
+/**
+ * 해당 일정 복약 스케줄 조회
+ * @param userId - 유저 아이디
+ * @param date - 조회를 원하는 날짜
+ */
+const getMySchedule = async (userId, date) => {
+  let client;
+  const log = `scheduleDB.getMySchedule | userId = ${userId}, date = ${date}`;
 
-    try {
-      client = await db.connect(db);
+  try {
+    client = await db.connect(log);
 
-      const myScheduleTime = await scheduleDB.getMyScheduleTime(client, userId, date);
-      for (let data = 0; data < myScheduleTime.length; data++) {
-        let schedule = await scheduleDB.getMySchedule(
+    const user = await userDB.findUserById(client, userId);
+
+    if (user.length === 0 || user[0].isDeleted === true) {
+      return returnType.NON_EXISTENT_USER;
+    }
+
+    const myScheduleTime = await scheduleDB.getMyScheduleTime(client, userId, date);
+    for (let data = 0; data < myScheduleTime.length; data++) {
+      let schedule = await scheduleDB.getMySchedule(
+        client,
+        userId,
+        date,
+        myScheduleTime[data].scheduleTime,
+      );
+
+      for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
+        let stickerId = [];
+        let stickerList = await stickerDB.findStickerListById(
           client,
           userId,
-          date,
-          myScheduleTime[data].scheduleTime,
+          schedule[scheduleInfo].scheduleId,
         );
 
-        for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
-          let stickerId = [];
-          let stickerList = await stickerDB.findStickerListById(
-            client,
-            userId,
-            schedule[scheduleInfo].scheduleId,
-          );
-
-          for (let sticker = 0; sticker < stickerList.length; sticker++) {
-            const stickerInfo = {
-              likeScheduleId: stickerList[sticker].id,
-              stickerId: stickerList[sticker].stickerId,
-            };
-            stickerId.push(stickerInfo);
-          }
-          schedule[scheduleInfo].stickerId = stickerId;
-          schedule[scheduleInfo].stickerTotalCount = stickerList.length;
+        for (let sticker = 0; sticker < stickerList.length; sticker++) {
+          const stickerInfo = {
+            likeScheduleId: stickerList[sticker].id,
+            stickerId: stickerList[sticker].stickerId,
+          };
+          stickerId.push(stickerInfo);
         }
-        myScheduleTime[data].scheduleList = schedule;
+        schedule[scheduleInfo].stickerId = stickerId;
+        schedule[scheduleInfo].stickerTotalCount = stickerList.length;
       }
-
-      return util.success(statusCode.OK, responseMessage.READ_MY_SCHEDULE, myScheduleTime);
-    } catch (error) {
-      console.log('getMySchedule error 발생: ' + error);
-    } finally {
-      client.release();
+      myScheduleTime[data].scheduleList = schedule;
     }
-  },
+
+    return util.success(statusCode.OK, responseMessage.READ_MY_SCHEDULE, myScheduleTime);
+  } catch (error) {
+    console.log('getMySchedule error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = {
+  getMyCalendar,
+  getMySchedule,
   getMemberCalendar: async (user, memberId, date) => {
     let client;
     const req = `user = ${user}, memberId = ${memberId}, date = ${date}`;

@@ -62,26 +62,40 @@ const getMyCalendar = async (req, res) => {
 };
 
 /**
- * GET ~/schedule/detail
- * 해당 날짜 스케줄 조회
- * @private
+ *  @홈_날짜_상세스케줄_조회
+ *  @route GET ~/schedule/detail
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 조회할 날짜 데이터가 안넘어온 경우
+ *       3. 해당 유저가 존재하지 않을 경우
+ *       4. 서버 에러
  */
+
 const getMySchedule = async (req, res) => {
   try {
     const { user } = req.header;
     const { date } = req.query;
 
+    // err 1.
+    if (!user)
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+
+    // err 2.
     if (!date)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    if (!user)
-      return res
-        .status(statusCode.UNAUTHORIZED)
-        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
-
     const mySchedule = await scheduleService.getMySchedule(user.id, date);
+
+    // err 3.
+    if (mySchedule === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+    }
 
     return res.status(mySchedule.status).json(mySchedule);
   } catch (error) {
