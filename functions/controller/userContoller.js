@@ -78,7 +78,118 @@ const updateUsername = async (req, res) => {
   }
 };
 
+/**
+ *  @유저_약_목록조회
+ *  @route GET /user/pill
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 해당 유저가 존재하지 않을 경우
+ *       3. 서버 에러
+ */
+
+const getPillList = async (req, res) => {
+  try {
+    const { user } = req.header;
+
+    // err 1.
+    if (!user) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+    }
+
+    const data = await userService.getUserPillList(user.id);
+
+    // err 2.
+    if (data === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+    }
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.READ_PILL_LIST, data));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
+/**
+ *  @유저_약_상세조회
+ *  @route GET /user/pill/:pillId
+ *  @access private
+ *  @err 1. 유저 인증과정에 문제가 생긴 경우
+ *       2. 해당 유저가 존재하지 않을 경우
+ *       3. 해당 약의 유저가 아닐 경우
+ *       4. 서버 에러
+ */
+
+const getPillInformation = async (req, res) => {
+  try {
+    const { user } = req.header;
+    const { pillId } = req.params;
+
+    // err 1.
+    if (!user) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
+    }
+
+    const data = await userService.getUserPillInfo(user.id, pillId);
+
+    // err 2.
+    if (data === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+    }
+
+    // err 3.
+    if (data === returnType.NO_PILL_USER) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_PILL_USER));
+    }
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.READ_PILL, data));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
+  getPillList,
+  getPillInformation,
   updateUsername,
   getUsername: async (req, res) => {
     try {
@@ -141,76 +252,6 @@ module.exports = {
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME));
-    } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      return res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-  },
-
-  getPillList: async (req, res) => {
-    try {
-      const { user } = req.header;
-
-      if (!user)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
-
-      const data = await userService.getUserPillList(user.id);
-
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.READ_PILL_LIST, data));
-    } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      return res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-  },
-
-  getPill: async (req, res) => {
-    try {
-      const { user } = req.header;
-      const { pillId } = req.params;
-
-      if (!user)
-        return res
-          .status(statusCode.UNAUTHORIZED)
-          .send(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_USER));
-
-      const data = await userService.getUserPillInfo(user.id, pillId);
-
-      if (data === returnType.NON_EXISTENT_USER)
-        return res
-          .status(statusCode.NOT_FOUND)
-          .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
-
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.READ_PILL, data));
     } catch (error) {
       functions.logger.error(
         `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,

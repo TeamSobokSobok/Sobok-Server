@@ -8,89 +8,108 @@ const { scheduleDB, groupDB, stickerDB, userDB, pillDB } = require('../db');
 const db = require('../db/db');
 const util = require('../lib/util');
 
-module.exports = {
-  /**
-   * 내 캘린더 전체 조회
-   * @param date - 현재 날짜
-   * @param userId - 해당 유저 아이디
-   */
-  getMyCalendar: async (date, userId) => {
-    let client;
-    const log = `scheduleDB.getMyCalendar | date = ${date}`;
+/**
+ * 내 캘린더 전체 조회
+ * @param userId - 해당 유저 아이디
+ * @param date - 현재 날짜
+ */
+const getMyCalendar = async (userId, date) => {
+  let client;
+  const log = `scheduleDB.getMyCalendar | date = ${date}`;
 
-    try {
-      client = await db.connect(log);
+  try {
+    client = await db.connect(log);
 
-      const startMonth = dayjs(date).startOf('month').format('YYYY-MM-DD');
-      const endMonth = dayjs(date).endOf('month').format('YYYY-MM-DD');
+    const user = await userDB.findUserById(client, userId);
 
-      const myCalender = await scheduleDB.getMyCalendar(client, userId, startMonth, endMonth);
-      myCalender.forEach((data) => {
-        if (data.scheduleCount === data.isCheckCount) {
-          data.isComplete = 'done';
-        } else if (data.scheduleCount > data.isCheckCount && Number(data.isCheckCount) > 0) {
-          data.isComplete = 'doing';
-        } else if (Number(data.isCheckCount) === 0) {
-          data.isComplete = 'none';
-        }
-      });
-
-      return util.success(statusCode.OK, responseMessage.READ_MY_CALENDAR, myCalender);
-    } catch (error) {
-      console.error('getMyCalendar error 발생: ' + error);
-    } finally {
-      client.release();
+    if (user.length === 0 || user[0].isDeleted === true) {
+      return returnType.NON_EXISTENT_USER;
     }
-  },
-  /**
-   * 해당 일정 복약 스케줄 조회
-   * @param userId - 유저 아이디
-   * @param date - 조회를 원하는 날짜
-   */
-  getMySchedule: async (userId, date) => {
-    let client;
-    const log = `scheduleDB.getMySchedule | userId = ${userId}, date = ${date}`;
 
-    try {
-      client = await db.connect(db);
+    // 조회할 달의 시작 날짜
+    const startDate = dayjs(date).startOf('month').format('YYYY-MM-DD');
 
-      const myScheduleTime = await scheduleDB.getMyScheduleTime(client, userId, date);
-      for (let data = 0; data < myScheduleTime.length; data++) {
-        let schedule = await scheduleDB.getMySchedule(
+    // 조회할 달의 마지막 날짜
+    const endDate = dayjs(date).endOf('month').format('YYYY-MM-DD');
+
+    const myCalender = await scheduleDB.getMyCalendar(client, userId, startDate, endDate);
+    myCalender.forEach((data) => {
+      if (data.scheduleCount === data.isCheckCount) {
+        data.isComplete = 'done';
+      } else if (data.scheduleCount > data.isCheckCount && Number(data.isCheckCount) > 0) {
+        data.isComplete = 'doing';
+      } else if (Number(data.isCheckCount) === 0) {
+        data.isComplete = 'none';
+      }
+    });
+
+    return util.success(statusCode.OK, responseMessage.READ_MY_CALENDAR, myCalender);
+  } catch (error) {
+    console.error('getMyCalendar error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * 해당 일정 복약 스케줄 조회
+ * @param userId - 유저 아이디
+ * @param date - 조회를 원하는 날짜
+ */
+const getMySchedule = async (userId, date) => {
+  let client;
+  const log = `scheduleDB.getMySchedule | userId = ${userId}, date = ${date}`;
+
+  try {
+    client = await db.connect(log);
+
+    const user = await userDB.findUserById(client, userId);
+
+    if (user.length === 0 || user[0].isDeleted === true) {
+      return returnType.NON_EXISTENT_USER;
+    }
+
+    const myScheduleTime = await scheduleDB.getMyScheduleTime(client, userId, date);
+    for (let data = 0; data < myScheduleTime.length; data++) {
+      let schedule = await scheduleDB.getMySchedule(
+        client,
+        userId,
+        date,
+        myScheduleTime[data].scheduleTime,
+      );
+
+      for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
+        let stickerId = [];
+        let stickerList = await stickerDB.findStickerListById(
           client,
           userId,
-          date,
-          myScheduleTime[data].scheduleTime,
+          schedule[scheduleInfo].scheduleId,
         );
 
-        for (let scheduleInfo = 0; scheduleInfo < schedule.length; scheduleInfo++) {
-          let stickerId = [];
-          let stickerList = await stickerDB.findStickerListById(
-            client,
-            userId,
-            schedule[scheduleInfo].scheduleId,
-          );
-
-          for (let sticker = 0; sticker < stickerList.length; sticker++) {
-            const stickerInfo = {
-              likeScheduleId: stickerList[sticker].id,
-              stickerId: stickerList[sticker].stickerId,
-            };
-            stickerId.push(stickerInfo);
-          }
-          schedule[scheduleInfo].stickerId = stickerId;
-          schedule[scheduleInfo].stickerTotalCount = stickerList.length;
+        for (let sticker = 0; sticker < stickerList.length; sticker++) {
+          const stickerInfo = {
+            likeScheduleId: stickerList[sticker].id,
+            stickerId: stickerList[sticker].stickerId,
+          };
+          stickerId.push(stickerInfo);
         }
-        myScheduleTime[data].scheduleList = schedule;
+        schedule[scheduleInfo].stickerId = stickerId;
+        schedule[scheduleInfo].stickerTotalCount = stickerList.length;
       }
-
-      return util.success(statusCode.OK, responseMessage.READ_MY_SCHEDULE, myScheduleTime);
-    } catch (error) {
-      console.log('getMySchedule error 발생: ' + error);
-    } finally {
-      client.release();
+      myScheduleTime[data].scheduleList = schedule;
     }
-  },
+
+    return util.success(statusCode.OK, responseMessage.READ_MY_SCHEDULE, myScheduleTime);
+  } catch (error) {
+    console.log('getMySchedule error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = {
+  getMyCalendar,
+  getMySchedule,
   getMemberCalendar: async (user, memberId, date) => {
     let client;
     const req = `user = ${user}, memberId = ${memberId}, date = ${date}`;
