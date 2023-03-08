@@ -289,7 +289,7 @@ module.exports = {
       dayjs.locale('ko');
       const time = dayjs(schedule.schedule_date_time).add(9, 'hour').format('A HH:mm');
 
-      let body = `소중한 ${username}님 약 드실 시간이에요\n다 드시면 앱에서 체크 버튼을 눌러주세요`;
+      let body = `${time} ${pill[0].pillName} 드실 시간이에요`;
 
       const deviceToken = user[0].deviceToken;
 
@@ -299,7 +299,7 @@ module.exports = {
 
       const message = {
         notification: {
-          title: `[${pill[0].pillName}] ${time}`,
+          title: `${pill[0].pillName}`,
           body: body,
         },
         token: deviceToken,
