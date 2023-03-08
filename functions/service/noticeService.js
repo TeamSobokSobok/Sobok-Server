@@ -7,49 +7,51 @@ const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
 
+/**
+ * getNoticeList
+ * 알림 리스트 전체 조회 서비스
+ * @param userId - 알림 리스트 조회할 유저 아이디
+ */
+const getNoticeList = async (userId) => {
+  let client;
+  const log = `noticeDB.getNoticeList | userId = ${userId}`;
+
+  try {
+    client = await db.connect(log);
+
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    let calendarInfo = await groupDB.findCalendarInfo(client, userId);
+    calendarInfo.forEach((data) => {
+      data.pillId = null;
+      data.pillName = null;
+    });
+
+    let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
+
+    let infoList = [];
+    calendarInfo.forEach((info) => infoList.push(info));
+    pillInfo.forEach((info) => {
+      info.senderGroupId = null;
+      infoList.push(info);
+    });
+
+    infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
+
+    return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {
+      username: user[0].username,
+      infoList: infoList,
+    });
+  } catch (error) {
+    console.error('getNoticeList error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
-  /**
-   * getNoticeList
-   * 알림 리스트 전체 조회 서비스
-   * @param userId - 알림 리스트 조회할 유저 아이디
-   */
-  getNoticeList: async (userId) => {
-    let client;
-    const log = `noticeDB.getNoticeList | userId = ${userId}`;
-
-    try {
-      client = await db.connect(db);
-
-      const user = await userDB.findUserById(client, userId);
-      if (!user) return returnType.NON_EXISTENT_USER;
-
-      let calendarInfo = await groupDB.findCalendarInfo(client, userId);
-      calendarInfo.forEach((data) => {
-        data.pillId = null;
-        data.pillName = null;
-      });
-      let pillInfo = await sendPillDB.findSendPillInfo(client, userId);
-
-      let infoList = [];
-      calendarInfo.forEach((info) => infoList.push(info));
-      pillInfo.forEach((info) => {
-        info.senderGroupId = null;
-        infoList.push(info);
-      });
-
-      infoList = infoList.sort((first, second) => first.createdAt - second.createdAt).reverse();
-
-      return util.success(statusCode.OK, responseMessage.NOTICE_GET_SUCCESS, {
-        username: user[0].username,
-        infoList: infoList,
-      });
-    } catch (error) {
-      console.error('getNoticeList error 발생: ' + error);
-    } finally {
-      client.release();
-    }
-  },
-
+  getNoticeList,
   /**
    * 약 알림 상세조회 서비스
    * @param pillId - 해당 약 아이디

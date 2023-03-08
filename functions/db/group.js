@@ -79,7 +79,7 @@ const findCalendarInfo = async (client, userId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT sg.id as sender_group_id, notice_id, section, is_okay, is_send, n.created_at as created_at, username as sender_name
+      SELECT sg.id as sender_group_id, notice_id, section, is_okay, is_send, sg.created_at as created_at, username as sender_name
       FROM notice as n JOIN send_group sg on n.id = sg.notice_id JOIN "user" u on u.id = n.sender_id
       WHERE n.user_id = $1
       `,

@@ -79,7 +79,7 @@ const findSendPillInfo = async (client, userId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT notice_id, section, is_okay, is_send, n.created_at as created_at, username as sender_name, pill_name, pill_id
+      SELECT notice_id, section, is_okay, is_send, sp.created_at as created_at, username as sender_name, pill_name, pill_id
       FROM notice as n JOIN send_pill sp on n.id = sp.notice_id JOIN "user" u on u.id = n.sender_id JOIN pill p on p.id = sp.pill_id
       WHERE n.user_id = $1
       `,
