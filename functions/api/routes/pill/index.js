@@ -9,6 +9,8 @@ router.get('/:memberId/count', pillController.getMemberPillCount);
 
 // 약 추가 관련 router
 router.post('/', checkUser, pillController.addPill);
+
+// 멤버 약 추가 관련 router
 router.post('/member/:memberId', checkUser, pillController.addMemberPill);
 
 // 약 정보 수정 관련 router

@@ -15,13 +15,13 @@ const dayjs = require('dayjs');
  * @param userId 해당 약을 추가하는 유저 아이디
  * @param day 특정 요일 ex) 월, 수, 금
  * @param timeList 시간 리스트
- * @param start 복용 시작 날짜
- * @param end 복용 종료 날짜
+ * @param startDate 복용 시작 날짜
+ * @param endDate 복용 종료 날짜
  */
 
-const addPill = async (pillName, userId, day, timeList, start, end) => {
+const addPill = async (pillName, userId, day, timeList, startDate, endDate) => {
   let client;
-  const log = `pillDao.addPill | pillName = ${pillName}, userId = ${userId}, day = ${day}, timeList = ${timeList}, start = ${start}, end = ${end}`;
+  const log = `pillDao.addPill | pillName = ${pillName}, userId = ${userId}, day = ${day}, timeList = ${timeList}, startDate = ${startDate}, endDate = ${endDate}`;
 
   try {
     client = await db.connect(log);
@@ -47,7 +47,7 @@ const addPill = async (pillName, userId, day, timeList, start, end) => {
     }
 
     // 약이 추가될 날짜
-    const dateList = dateCalcurator(start, end, day);
+    const dateList = dateCalcurator(startDate, endDate, day);
 
     // 스케줄 추가 서비스
     for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
@@ -55,8 +55,8 @@ const addPill = async (pillName, userId, day, timeList, start, end) => {
         client,
         newPill[pillCount].id,
         userId,
-        start,
-        end,
+        startDate,
+        endDate,
         dateList,
         day,
         timeList,
@@ -68,6 +68,109 @@ const addPill = async (pillName, userId, day, timeList, start, end) => {
     return util.success(statusCode.CREATED, responseMessage.PILL_ADDITION_SUCCESS, newPill);
   } catch (error) {
     console.error('addPill error 발생: ' + error);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * addMemberPill
+ * 멤버 약 추가 및 스케줄 생성 서비스
+ * @param memberId - 약을 전송할 멤버의 유저 아이디
+ * @param pillName - 추가할 약의 이름
+ * @param userId 해당 약을 전송하는 유저 아이디
+ * @param day 특정 요일 ex) 월, 수, 금
+ * @param timeList 시간 리스트
+ * @param startDate 복용 시작 날짜
+ * @param endDate 복용 종료 날짜
+ */
+const addMemberPill = async (memberId, pillName, userId, day, timeList, startDate, endDate) => {
+  let client;
+  const log = `pillDao.addPill | memberId = ${memberId}, pillName = ${pillName}, day = ${day}, timeList = ${timeList}, startDate = ${startDate}, endDate = ${endDate}`;
+
+  try {
+    client = await db.connect(log);
+    await client.query('BEGIN');
+
+    // 현재 유저의 약 개수 반환
+    const pills = await pillDB.getPillCount(client, memberId);
+    const pillCount = Number(pills.count) + pillName.length;
+    if (pillCount > 5) return returnType.PILL_COUNT_OVER;
+
+    // 유저 검증
+    const user = await userDB.findUserById(client, userId);
+    if (user.length === 0 || user.isDeleted === true) return returnType.NON_EXISTENT_USER;
+
+    // 캘린더 공유 상황 확인
+    const checkUser = await groupDB.findSendGroupIsOkay(client, memberId, userId);
+    if (!checkUser || checkUser.isOkay !== 'accept') return returnType.NO_MEMBER;
+
+    // 약 전송 알림 추가
+    const newNotice = await noticeDB.addNotice(client, memberId, userId, 'pill');
+
+    // 약 추가 쿼리 실행
+    let newPill = [];
+    for (let nameLoop = 0; nameLoop < pillName.length; nameLoop++) {
+      // 랜덤 컬러 생성
+      const color = Math.floor(Math.random() * 5 + 1);
+
+      newPill.push(await pillDB.addPill(client, pillName[nameLoop], null, color));
+    }
+    if (!newPill) return returnType.DB_NOT_FOUND;
+
+    // 약이 추가될 날짜
+    const dateList = dateCalcurator(startDate, endDate, day);
+
+    // 스케줄 추가 서비스
+    for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
+      await scheduleDB.addSchedule(
+        client,
+        newPill[pillCount].id,
+        null,
+        startDate,
+        endDate,
+        dateList,
+        day,
+        timeList,
+      );
+
+      await sendPillDB.addSendPill(client, newPill[pillCount].id, newNotice.id);
+    }
+
+    await client.query('COMMIT');
+
+    // 양 방향성 캘린더 공유인지 확인
+    const groupCheck = await groupDB.findSendGroupIsOkay(client, userId, memberId);
+    const username = await userDB.findUserById(client, userId);
+    let body;
+
+    // 푸시알림 전송
+    if (groupCheck) {
+      body = `${groupCheck.memberName}님께서 약을 보냈습니다.`;
+    } else {
+      body = `${username[0].username}님께서 약을 보냈습니다.`;
+    }
+
+    const deviceToken = await userDB.findDeviceTokenById(client, memberId);
+    const message = {
+      notification: {
+        title: '소복소복 알림',
+        body: body,
+      },
+      token: deviceToken.deviceToken,
+    };
+
+    await admin
+      .messaging()
+      .send(message)
+      .catch(function (error) {
+        console.log('push notification ' + error);
+      });
+
+    return util.success(statusCode.CREATED, responseMessage.PILL_ADDITION_SUCCESS, newPill);
+  } catch (error) {
+    console.error('addMemberPill error 발생: ' + error);
     await client.query('ROLLBACK');
   } finally {
     client.release();
@@ -123,8 +226,6 @@ const pillInformationModify = async (
     // 약 이름 변경
     await pillDB.updatePillNameByPillId(client, pillId, pillName);
 
-    console.log(startDate);
-    console.log(endDate);
     // 약 스케줄 추가
     await scheduleDB.addSchedule(
       client,
@@ -227,134 +328,7 @@ const deletePill = async (userId, pillId) => {
 
 module.exports = {
   addPill,
-  /**
-   * addMemberPill
-   * 약 추가 및 스케줄 생성 서비스
-   * @param pillName - 추가할 약의 이름
-   * @param userId - 사용자 아이디
-   * @param memberId - 약 전송을 받을 사용자 아이디
-   * @param takeInterval 복용 간격 선택 ex) 매일, 특정 요일, 특정 간격
-   * @param day 특정 요일 ex) 월, 수, 금
-   * @param specific 특정 간격 ex) 1week
-   * @param time 시간 리스트
-   * @param start 복용 시작 날짜
-   * @param end 복용 종료 날짜
-   */
-  addMemberPill: async (
-    pillName,
-    userId,
-    memberId,
-    takeInterval,
-    day,
-    specific,
-    time,
-    start,
-    end,
-  ) => {
-    let client;
-    const log = `pillDao.addPill | pillName = ${pillName}, userId = ${userId}, memberId = ${memberId}, takeInterval = ${takeInterval}, day = ${day}, specific = ${specific}, time = ${time}, start = ${start}, end = ${end}`;
-
-    try {
-      client = await db.connect(log);
-      await client.query('BEGIN');
-
-      // 캘린더 공유 상황 확인
-      const checkUser = await groupDB.findSendGroupIsOkay(client, memberId, userId);
-      if (!checkUser || checkUser.isOkay !== 'accept') return returnType.NO_MEMBER;
-
-      // 현재 유저의 약 개수 반환
-      const pills = await pillDB.getPillCount(client, memberId);
-      const pillCount = Number(pills.count) + pillName.length;
-      if (pillCount > 5) return returnType.PILL_COUNT_OVER;
-
-      // 약 전송 알림 추가
-      const newNotice = await noticeDB.addNotice(client, memberId, userId, 'pill');
-
-      // 약 추가 쿼리 실행
-      let newPill = [];
-      for (let nameLoop = 0; nameLoop < pillName.length; nameLoop++) {
-        // 랜덤 컬러 생성
-        const color = Math.floor(Math.random() * 5 + 1);
-
-        newPill.push(await pillDB.addPill(client, pillName[nameLoop], null, color));
-      }
-      if (!newPill) return returnType.DB_NOT_FOUND;
-
-      // 총 날짜 수 계산
-      const term = termCalcurator(start, end);
-
-      // 약이 추가될 날짜
-      const dateList = dateCalcurator(term, start, takeInterval, day, specific);
-
-      // 스케줄 추가 서비스
-      for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
-        for (let date = 0; date < dateList.length; date++) {
-          for (let timeList = 0; timeList < time.length; timeList++) {
-            let newSchedule = await scheduleDB.addSchedule(
-              client,
-              newPill[pillCount].id,
-              null,
-              takeInterval,
-              dateList[date],
-              day,
-              specific,
-              time[timeList],
-              start,
-              end,
-            );
-            if (!newSchedule) return returnType.DB_NOT_FOUND;
-          }
-        }
-
-        await sendPillDB.addSendPill(client, newPill[pillCount].id, newNotice.id);
-      }
-
-      await client.query('COMMIT');
-
-      // 양 방향성 캘린더 공유인지 확인
-      const groupCheck = await groupDB.findSendGroupIsOkay(client, userId, memberId);
-      const username = await userDB.findUserById(client, userId);
-      if (groupCheck) {
-        let body = `${groupCheck.memberName}님께서 약을 보냈습니다.`;
-
-        const deviceToken = await userDB.findDeviceTokenById(client, memberId);
-        const message = {
-          notification: {
-            title: '소복소복 알림',
-            body: body,
-          },
-          token: deviceToken.deviceToken,
-        };
-        await admin.messaging().send(message);
-      } else {
-        let body = `${username[0].username}님께서 약을 보냈습니다.`;
-
-        const deviceToken = await userDB.findDeviceTokenById(client, memberId);
-        const message = {
-          notification: {
-            title: '소복소복 알림',
-            body: body,
-          },
-          token: deviceToken.deviceToken,
-        };
-        await admin
-          .messaging()
-          .send(message)
-          .catch(function (error) {
-            console.log('push notification: ' + error);
-            return returnType.PUSH_ERROR;
-          });
-      }
-
-      return util.success(statusCode.CREATED, responseMessage.PILL_ADDITION_SUCCESS, newPill);
-    } catch (error) {
-      console.error('addPill error 발생: ' + error);
-      await client.query('ROLLBACK');
-    } finally {
-      client.release();
-    }
-  },
-
+  addMemberPill,
   /**
    * getPillCount
    * 현재 복용중인 약 개수 반환
