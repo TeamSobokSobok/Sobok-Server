@@ -144,7 +144,7 @@ const logout = async (req, res) => {
 
 /**
  *  @탈퇴하기
- *  @route DELETE /auth/user
+ *  @route POST /auth/user/leave
  *  @access public
  *  @err 1. 필요한 값이 없을 때
  *       2. 이미 존재하는 socialId
@@ -154,8 +154,9 @@ const logout = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { user } = req.header;
+    const { text } = req.body;
 
-    await authService.deleteUser(user);
+    await authService.deleteUser(user, text);
 
     return res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.DELETE_USER));
   } catch (error) {

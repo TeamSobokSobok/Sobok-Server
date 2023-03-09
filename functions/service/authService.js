@@ -87,14 +87,14 @@ module.exports = {
     }
   },
 
-  deleteUser: async (user) => {
+  deleteUser: async (user, text) => {
     let client;
     let req = `user = ${user}`;
 
     try {
       client = await db.connect(req);
 
-      await userDB.softDeleteUser(client, user.id);
+      await userDB.softDeleteUser(client, user.id, text);
       await noticeDB.deleteNoticeByUserId(client, user.id);
       await pillDB.deletePillByUserId(client, user.id);
       await stickerDB.deleteStickerByUserId(client, user.id);

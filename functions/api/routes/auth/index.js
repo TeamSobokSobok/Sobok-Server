@@ -5,9 +5,8 @@ var router = express.Router();
 
 router.post('/signup', authController.signUp);
 router.post('/logout', checkUser, authController.logout);
+router.post('/user/leave', checkUser, authController.deleteUser);
 
 router.get('/signin', authController.signIn);
-
-router.delete('/user', checkUser, authController.deleteUser);
 
 module.exports = router;
