@@ -159,13 +159,13 @@ const emptyDeviceTokenById = async (client, userId) => {
   }
 };
 
-const softDeleteUser = async (client, userId) => {
+const softDeleteUser = async (client, userId, text) => {
   const now = dayjs().add(9, 'hour');
   try {
     const { rows } = await client.query(
       `
       UPDATE "user"
-      SET username = '탈퇴한사용자'
+      SET username = '탈퇴한사용자: $3'
         , social_id = ''
         , device_token = ''
         , is_deleted = TRUE
@@ -174,7 +174,7 @@ const softDeleteUser = async (client, userId) => {
       WHERE id = $1
       RETURNING *
       `,
-      [userId, now],
+      [userId, now, text],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
