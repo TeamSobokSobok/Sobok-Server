@@ -27,7 +27,7 @@ const findMember = async (client, userId) => {
     JOIN "notice" n
     ON sg.notice_id = n.id
     WHERE n.sender_id = $1 AND sg.is_okay = 'accept'
-    
+    ORDER BY sg.updated_at
     `,
     [userId],
   );
@@ -93,16 +93,15 @@ const findCalendarInfo = async (client, userId) => {
 
 // UPDATE
 const updateMemberName = async (client, memberName, groupId) => {
-  const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     UPDATE send_group
-    SET member_name = $1, updated_at = $2
-    WHERE id = $3
+    SET member_name = $1
+    WHERE id = $2
     RETURNING id as group_id, member_name 
     
     `,
-    [memberName, now, groupId],
+    [memberName, groupId],
   );
   return convertSnakeToCamel.keysToCamel(rows);
 };
