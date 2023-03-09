@@ -50,37 +50,42 @@ const getNoticeList = async (userId) => {
   }
 };
 
+/**
+ * 약 알림 상세조회 서비스
+ * @param pillId - 해당 약 아이디
+ * @param userId - 유저 아이디
+ */
+const getPillInfo = async (noticeId, pillId, userId) => {
+  let client;
+  const log = `pillDB.getPillInfo | pillId = ${pillId}`;
+
+  try {
+    client = await db.connect(log);
+
+    const user = await userDB.findUserById(client, userId);
+    if (!user) return returnType.NON_EXISTENT_USER;
+
+    const getUser = await noticeDB.findReceiveUser(client, noticeId);
+    if (getUser.userId !== userId) return returnType.NO_PILL_USER;
+
+    const pillInfo = await pillDB.getPillInfo(client, pillId);
+    if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
+
+    let scheduleTime = [];
+    pillInfo.forEach((info) => scheduleTime.push(info.scheduleTime));
+    pillInfo[0].scheduleTime = scheduleTime;
+
+    return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
+  } catch (error) {
+    console.error('getPillInfo error 발생: ' + error);
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   getNoticeList,
-  /**
-   * 약 알림 상세조회 서비스
-   * @param pillId - 해당 약 아이디
-   */
-  getPillInfo: async (noticeId, pillId, userId) => {
-    let client;
-    const log = `pillDB.getPillInfo | pillId = ${pillId}`;
-
-    try {
-      client = await db.connect(log);
-
-      const getUser = await noticeDB.findReceiveUser(client, noticeId);
-      if (getUser.userId !== userId) return returnType.NO_PILL_USER;
-
-      const pillInfo = await pillDB.getPillInfo(client, pillId);
-      if (!pillInfo[0]) return returnType.NON_EXISTENT_PILL;
-
-      let scheduleTime = [];
-      pillInfo.forEach((info) => scheduleTime.push(info.scheduleTime));
-      pillInfo[0].scheduleTime = scheduleTime;
-
-      return util.success(statusCode.OK, responseMessage.PILL_GET_SUCCESS, pillInfo[0]);
-    } catch (error) {
-      console.error('getPillInfo error 발생: ' + error);
-    } finally {
-      client.release();
-    }
-  },
-
+  getPillInfo,
   /**
    *
    * 약 알림 수락 & 거절 서비스

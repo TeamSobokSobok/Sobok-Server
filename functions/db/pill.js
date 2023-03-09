@@ -129,7 +129,7 @@ const getPillInfo = async (client, pillId) => {
   try {
     const { rows } = await client.query(
       `
-      SELECT DISTINCT pill_name, take_interval, schedule_time, start_date, end_date, schedule_day, schedule_specific
+      SELECT DISTINCT pill_name, schedule_time, start_date, end_date, schedule_day
       FROM pill JOIN schedule s on pill.id = s.pill_id
       WHERE pill_id = $1;
       `,

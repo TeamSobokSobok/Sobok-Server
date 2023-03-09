@@ -44,6 +44,54 @@ const getNoticeList = async (req, res) => {
 };
 
 /**
+ *  @약_알림_상세조회
+ *  @route GET /notice/list/:pillId
+ *  @access private
+ * @err 1. 유저 인증과정에 문제가 생긴 경우
+ *      2. 존재하지 않는 유저일 경우
+ *      3. 이미 처리된 약일 경우
+ *      4. 존재하지 않는 약일 경우
+ *      5. 서버 에러
+ */
+const getPillInfo = async (req, res) => {
+  try {
+    const { pillId } = req.params;
+    const { noticeId } = req.params;
+    const { user } = req.header;
+
+    // err 1.
+    if (!user) {
+      return res
+        .status(statusCode.UNAUTHORIZED)
+        .json(util.fail(statusCode.UNAUTHORIZED, responseMessage.NO_AUTHENTICATED));
+    }
+
+    const pillInfo = await noticeService.getPillInfo(noticeId, pillId, user.id);
+
+    // err 2.
+    if (pillInfo === returnType.NON_EXISTENT_USER) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .json(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER));
+    }
+
+    // err 4.
+    if (pillInfo === returnType.NON_EXISTENT_PILL) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .json(util.fail(statusCode.NOT_FOUND, responseMessage.NO_PILL));
+    }
+
+    return res.status(pillInfo.status).json(pillInfo);
+  } catch (error) {
+    console.log('getPillInfo Controller 에러: ' + error);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
+/**
  *  @그룹_멤버_이름_수정
  *  @route PUT /group/:groupId/name
  *  @access private
@@ -250,40 +298,6 @@ const sendGroup = async (req, res) => {
     return res
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-  }
-};
-
-/**
- *  @약_알림_상세조회
- *  @route GET /notice/list/:pillId
- *  @access private
- *  @err 1. 해당 약이 존재하지 않을 경우
- */
-const getPillInfo = async (req, res) => {
-  try {
-    const { pillId } = req.params;
-    const { noticeId } = req.params;
-    const { user } = req.header;
-
-    const pillInfo = await noticeService.getPillInfo(noticeId, pillId, user.id);
-    if (pillInfo === returnType.NON_EXISTENT_PILL) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json(util.fail(statusCode.BAD_REQUEST, responseMessage.NO_PILL));
-    }
-
-    if (pillInfo === returnType.NO_PILL_USER) {
-      return res
-        .status(statusCode.FORBIDDEN)
-        .json(util.fail(statusCode.FORBIDDEN, responseMessage.NO_AUTHENTICATED));
-    }
-
-    return res.status(pillInfo.status).json(pillInfo);
-  } catch (error) {
-    console.log('getPillInfo Controller 에러: ' + error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 };
 
