@@ -165,7 +165,7 @@ const softDeleteUser = async (client, userId, text) => {
     const { rows } = await client.query(
       `
       UPDATE "user"
-      SET username = '탈퇴한사용자: $3'
+      SET username = '탈퇴한사용자: ${text}'
         , social_id = ''
         , device_token = ''
         , is_deleted = TRUE
@@ -174,7 +174,7 @@ const softDeleteUser = async (client, userId, text) => {
       WHERE id = $1
       RETURNING *
       `,
-      [userId, now, text],
+      [userId, now],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
