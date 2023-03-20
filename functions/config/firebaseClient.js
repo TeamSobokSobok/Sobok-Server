@@ -2,13 +2,13 @@ const { initializeApp } = require('firebase/app');
 const { getAuth } = require('firebase/auth');
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDabqXXI9ihGEyaIatHy2PFLLxXLbbHAjY',
-  authDomain: 'sobok-76d0a.firebaseapp.com',
-  projectId: 'sobok-76d0a',
-  storageBucket: 'sobok-76d0a.appspot.com',
-  messagingSenderId: '883944213656',
-  appId: '1:883944213656:web:21e962650a0baa7a1c94ed',
-  measurementId: 'G-L2H4PVL2B5',
+  apiKey: 'AIzaSyAF8yzRwU-k3yWppNxcc8jA3iEdw_n0Uck',
+  authDomain: 'soboksobok-564b3.firebaseapp.com',
+  projectId: 'soboksobok-564b3',
+  storageBucket: 'soboksobok-564b3.appspot.com',
+  messagingSenderId: '979941539519',
+  appId: '1:979941539519:web:4b465dce43afe76707900a',
+  measurementId: 'G-28YMMZB5Y6',
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
