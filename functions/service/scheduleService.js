@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+require('dayjs/locale/ko');
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const responseMessage = require('../constants/responseMessage');
@@ -303,10 +304,9 @@ module.exports = {
         throw new Error('user or pill must be defined in schedule');
       }
 
-      const username = user[0].username;
-
       dayjs.locale('ko');
-      const time = dayjs(schedule.schedule_date_time).add(9, 'hour').format('A HH:mm');
+      console.log(schedule.scheduleDateTime);
+      const time = dayjs(schedule.scheduleDateTime).format('A h:mm');
 
       let body = `${time} ${pill[0].pillName} 드실 시간이에요`;
 
