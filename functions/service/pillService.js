@@ -48,6 +48,11 @@ const addPill = async (pillName, userId, day, timeList, startDate, endDate) => {
 
     // 약이 추가될 날짜
     const dateList = dateCalcurator(startDate, endDate, day);
+    const dateTimeList = dateList.reduce(
+      (pV, date) =>
+        pV.push(...timeList.map((time) => dayjs(date + time, 'YYYY-MM-DDHH:mm:ss').format())),
+      [],
+    );
 
     // 스케줄 추가 서비스
     for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
@@ -60,6 +65,7 @@ const addPill = async (pillName, userId, day, timeList, startDate, endDate) => {
         dateList,
         day,
         timeList,
+        dateTimeList,
       );
     }
 

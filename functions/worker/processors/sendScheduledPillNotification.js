@@ -16,7 +16,7 @@ const sendScheduledPillNotification = async function () {
   functions.logger.log(`32351 : sendScheduledPillNotification 작업이 시작되었습니다.`);
 
   const totalResult = {
-    i: 1,
+    i: 0,
     totalScheduleCount: 0,
     totalSentCount: 0,
   };
@@ -55,4 +55,4 @@ const sendScheduledPillNotification = async function () {
   return;
 };
 
-module.exports = sendScheduledPillNotification
+module.exports = sendScheduledPillNotification;
