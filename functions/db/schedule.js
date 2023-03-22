@@ -362,6 +362,17 @@ const deleteScheduleByDate = async (client, pillId, date) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const deleteAfterScheduleByDate = async (client, pillId, date) => {
+  const { rows } = await client.query(
+    `
+    DELETE FROM schedule
+    WHERE pill_id = $1 AND schedule_date >= $2
+    `,
+    [pillId, date],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 const findAllLikeScheduleByScheduleId = async (client, scheduleId) => {
   const { rows } = await client.query(
     `
@@ -426,6 +437,7 @@ module.exports = {
   updateScheduleIsCheck,
   findMyLikeScheduleByScheduleId,
   deleteScheduleByDate,
+  deleteAfterScheduleByDate,
   findAllLikeScheduleByScheduleId,
   findLikeScheduleBySenderId,
   acceptSendPill,

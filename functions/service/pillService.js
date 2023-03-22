@@ -226,7 +226,7 @@ const pillInformationModify = async (
     nowDate = dayjs(nowDate).format('YYYY-MM-DD');
 
     // 현재 날짜부터 약 스케줄 삭제
-    await scheduleDB.deleteScheduleByDate(client, pillId, nowDate);
+    await scheduleDB.deleteAfterScheduleByDate(client, pillId, nowDate);
 
     // 약이 추가될 날짜
     const dateList = dateCalcurator(nowDate, endDate, day);
