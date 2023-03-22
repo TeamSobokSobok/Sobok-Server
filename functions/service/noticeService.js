@@ -6,6 +6,7 @@ const returnType = require('../constants/returnType');
 const util = require('../lib/util');
 const statusCode = require('../constants/statusCode');
 const responseMessage = require('../constants/responseMessage');
+const dayjs = require('dayjs');
 
 /**
  * getNoticeList
@@ -33,6 +34,8 @@ const getNoticeList = async (userId) => {
     let infoList = [];
     calendarInfo.forEach((info) => infoList.push(info));
     pillInfo.forEach((info) => {
+      let koreanTime = dayjs(info.createdAt).add(9, 'hour');
+      info.createdAt = koreanTime;
       info.senderGroupId = null;
       infoList.push(info);
     });
