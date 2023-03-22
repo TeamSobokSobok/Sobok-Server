@@ -355,7 +355,7 @@ const deleteScheduleByDate = async (client, pillId, date) => {
   const { rows } = await client.query(
     `
     DELETE FROM schedule
-    WHERE pill_id = $1 AND schedule_date >= $2
+    WHERE pill_id = $1 AND schedule_date <= $2
     `,
     [pillId, date],
   );
