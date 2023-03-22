@@ -43,7 +43,7 @@ module.exports = {
     }
   },
 
-  singIn: async (socialId, deviceToken) => {
+  singIn: async (socialId, deviceToken, deviceOS) => {
     let client;
     let req = `socialId = ${socialId}`;
 
@@ -57,12 +57,12 @@ module.exports = {
         return returnType.NON_EXISTENT_USER;
       }
 
-      console.log(findUser);
       // 회원가입 된 사용자
       let accesstoken = jwtHandlers.sign(findUser);
       accesstoken.isNew = false;
 
       await userDB.updateDeviceToken(client, findUser.id, deviceToken);
+      await userDB.updateDeviceOS(client, findUser.id, deviceOS);
 
       return accesstoken;
     } catch (error) {

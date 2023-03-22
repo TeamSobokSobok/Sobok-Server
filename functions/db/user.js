@@ -68,6 +68,33 @@ const updateDeviceToken = async (client, userId, deviceToken) => {
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
 
+const updateDeviceOS = async (client, userId, deviceOS) => {
+  const now = dayjs().add(9, 'hour');
+  const { rows: existingRows } = await client.query(
+    `
+    SELECT * FROM "user"
+    WHERE id = $1
+    
+    `,
+    [userId],
+  );
+
+  if (existingRows.length === 0) return false;
+
+  const data = _.merge({}, convertSnakeToCamel.keysToCamel(existingRows[0]), { deviceOS });
+
+  const { rows } = await client.query(
+    `
+    UPDATE "user" 
+    SET device_os = $1, updated_at = $3
+    WHERE id = $2
+    RETURNING * 
+    `,
+    [data.deviceOS, userId, now],
+  );
+  return convertSnakeToCamel.keysToCamel(rows[0]);
+};
+
 const findUserByName = async (client, username) => {
   const { rows } = await client.query(
     `
@@ -203,6 +230,7 @@ module.exports = {
   findUserById,
   findUserBySocialId,
   updateDeviceToken,
+  updateDeviceOS,
   findUserByName,
   findUserNameById,
   findDeviceTokenById,
