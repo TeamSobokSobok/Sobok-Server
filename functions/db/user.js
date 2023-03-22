@@ -108,6 +108,19 @@ const findUserByName = async (client, username) => {
   return convertSnakeToCamel.keysToCamel(rows);
 };
 
+const findUserInfoByName = async (client, username) => {
+  const { rows } = await client.query(
+    `
+    SELECT id as member_id, username as member_name, device_os
+    FROM "user"
+    WHERE username = $1
+
+    `,
+    [username],
+  );
+  return convertSnakeToCamel.keysToCamel(rows);
+};
+
 const findUserNameById = async (client, userId) => {
   const { rows } = await client.query(
     `
@@ -239,4 +252,5 @@ module.exports = {
   emptyDeviceTokenById,
   softDeleteUser,
   isShare,
+  findUserInfoByName,
 };

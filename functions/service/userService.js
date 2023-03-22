@@ -109,14 +109,24 @@ module.exports = {
   getUserPillList,
   getUserPillInfo,
   updateUsername,
-  getUsername: async (username) => {
+  getUsername: async (userId, username) => {
     let client;
     const req = `username = ${username}`;
 
     try {
       client = await db.connect(req);
 
-      const findUsername = await userDB.findUserByName(client, username);
+      const findUsername = await userDB.findUserInfoByName(client, username);
+
+      if (findUsername.length === 0) {
+        return findUsername;
+      }
+
+      if (findUsername[0].memberId === userId) {
+        findUsername[0].selfCheck = true;
+      } else {
+        findUsername[0].selfCheck = false;
+      }
 
       return findUsername;
     } catch (error) {

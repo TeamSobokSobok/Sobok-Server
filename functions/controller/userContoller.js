@@ -194,8 +194,9 @@ module.exports = {
   getUsername: async (req, res) => {
     try {
       const { username } = req.query;
+      const { user } = req.header;
 
-      const data = await userService.getUsername(username);
+      const data = await userService.getUsername(user.id, username);
 
       return res
         .status(statusCode.OK)
