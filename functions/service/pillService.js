@@ -7,6 +7,9 @@ const responseMessage = require('../constants/responseMessage');
 const { termCalcurator, dateCalcurator } = require('../lib/dateCalcurater');
 const returnType = require('../constants/returnType');
 const dayjs = require('dayjs');
+const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
+
+dayjs.extend(isSameOrBefore);
 
 /**
  * addPill
@@ -55,6 +58,11 @@ const addPill = async (pillName, userId, day, timeList, startDate, endDate) => {
         ),
       );
     }, []);
+    const sentAtList = dateTimeList.map((dateTime) =>
+      dayjs(dateTime).isSameOrBefore(dayjs().add(9, 'hour'))
+        ? dayjs().add(9, 'hour').format()
+        : null,
+    );
 
     // 스케줄 추가 서비스
     for (let pillCount = 0; pillCount < newPill.length; pillCount++) {
@@ -68,6 +76,7 @@ const addPill = async (pillName, userId, day, timeList, startDate, endDate) => {
         day,
         timeList,
         dateTimeList,
+        sentAtList,
       );
     }
 

@@ -25,13 +25,24 @@ const addSchedule = async (
   scheduleDay,
   scheduleTime,
   scheduleDateTime,
+  sentAt,
 ) => {
   try {
     const { rows } = await client.query(
       `
-      CALL add_pill($1, $2, $3, $4, $5, $6, $7, $8)
+      CALL add_pill($1, $2, $3, $4, $5, $6, $7, $8, $9)
       `,
-      [pillId, userId, startDate, endDate, dateList, scheduleDay, scheduleTime, scheduleDateTime],
+      [
+        pillId,
+        userId,
+        startDate,
+        endDate,
+        dateList,
+        scheduleDay,
+        scheduleTime,
+        scheduleDateTime,
+        sentAt,
+      ],
     );
     return convertSnakeToCamel.keysToCamel(rows[0]);
   } catch (error) {
