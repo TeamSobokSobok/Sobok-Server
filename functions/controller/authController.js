@@ -77,15 +77,15 @@ const signIn = async (req, res) => {
   try {
     const socialId = req.headers.socialid;
     const deviceToken = req.headers.devicetoken;
-    const device = req.query;
+    const deviceOS = req.query;
 
     //  @err 1. 필요한 값이 없을 때
-    if (!socialId || !deviceToken || !device)
+    if (!socialId || !deviceToken || !deviceOS)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const user = await authService.singIn(socialId, deviceToken, device);
+    const user = await authService.singIn(socialId, deviceToken, deviceOS);
 
     // 2. 신규 사용자일 때
     if (user === returnType.NON_EXISTENT_USER) {
