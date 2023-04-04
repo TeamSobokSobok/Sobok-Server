@@ -79,6 +79,8 @@ const signIn = async (req, res) => {
     const deviceToken = req.headers.devicetoken;
     const deviceOS = req.query;
 
+    console.log(deviceOS);
+
     //  @err 1. 필요한 값이 없을 때
     if (!socialId || !deviceToken || !deviceOS)
       return res

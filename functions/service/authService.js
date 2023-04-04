@@ -68,7 +68,7 @@ module.exports = {
       accesstoken.isNew = false;
 
       await userDB.updateDeviceToken(client, findUser.id, deviceToken);
-      await userDB.updateDeviceOS(client, findUser.id, deviceOS.device);
+      await userDB.updateDeviceOS(client, findUser.id, deviceOS.deviceOS);
 
       return accesstoken;
     } catch (error) {
