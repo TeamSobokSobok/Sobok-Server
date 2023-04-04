@@ -18,14 +18,15 @@ const returnType = require('../constants/returnType');
 const signUp = async (req, res) => {
   try {
     const { socialId, username, deviceToken } = req.body;
+    const deviceOS = req.query;
 
     // @err 1. 필요한 값이 없을 때
-    if (!socialId || !username || !deviceToken)
+    if (!socialId || !username || !deviceToken || !deviceOS)
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
 
-    const newUser = await authService.signUp(socialId, username, deviceToken);
+    const newUser = await authService.signUp(socialId, username, deviceToken, deviceOS);
 
     // @err 2. 이미 존재하는 socialId
     if (newUser === returnType.VALUE_ALREADY_EXIST) {

@@ -5,9 +5,9 @@ const returnType = require('../constants/returnType');
 const { nicknameVerify } = require('../lib/nicknameVerify');
 
 module.exports = {
-  signUp: async (socialId, username, deviceToken) => {
+  signUp: async (socialId, username, deviceToken, deviceOS) => {
     let client;
-    let req = `username = ${username}, socialId = ${socialId}, deviceToken = ${deviceToken}`;
+    let req = `username = ${username}, socialId = ${socialId}, deviceToken = ${deviceToken}, deviceOS = ${deviceOS}`;
 
     try {
       client = await db.connect(req);
@@ -30,7 +30,13 @@ module.exports = {
       }
 
       // 신규 사용자
-      let newUser = await userDB.addUser(client, username, socialId, deviceToken);
+      let newUser = await userDB.addUser(
+        client,
+        username,
+        socialId,
+        deviceToken,
+        deviceOS.deviceOS,
+      );
       const { accesstoken } = jwtHandlers.sign(newUser);
       newUser.accesstoken = accesstoken;
       newUser.isNew = true;
@@ -62,7 +68,7 @@ module.exports = {
       accesstoken.isNew = false;
 
       await userDB.updateDeviceToken(client, findUser.id, deviceToken);
-      await userDB.updateDeviceOS(client, findUser.id, deviceOS);
+      await userDB.updateDeviceOS(client, findUser.id, deviceOS.device);
 
       return accesstoken;
     } catch (error) {

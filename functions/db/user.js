@@ -2,17 +2,17 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const convertSnakeToCamel = require('../lib/convertSnakeToCamel');
 
-const addUser = async (client, username, socialId, deviceToken) => {
+const addUser = async (client, username, socialId, deviceToken, deviceOS) => {
   const now = dayjs().add(9, 'hour');
   const { rows } = await client.query(
     `
     INSERT INTO "user"
-    (username, social_id, created_at, updated_at, device_token)
+    (username, social_id, created_at, updated_at, device_token, device_os)
     VALUES
-    ($1, $2, $3, $3, $4)
+    ($1, $2, $3, $3, $4, $5)
     RETURNING id, username, social_id, created_at, updated_at, device_token
     `,
-    [username, socialId, now, deviceToken],
+    [username, socialId, now, deviceToken, deviceOS],
   );
   return convertSnakeToCamel.keysToCamel(rows[0]);
 };
