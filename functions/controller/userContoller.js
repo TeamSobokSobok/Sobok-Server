@@ -18,7 +18,6 @@ const returnType = require('../constants/returnType');
  *       5. 해당 유저가 존재하지 않을 경우
  *       6. 서버 에러
  */
-
 const updateUsername = async (req, res) => {
   try {
     const { user } = req.header;
@@ -86,7 +85,6 @@ const updateUsername = async (req, res) => {
  *       2. 해당 유저가 존재하지 않을 경우
  *       3. 서버 에러
  */
-
 const getPillList = async (req, res) => {
   try {
     const { user } = req.header;
@@ -137,7 +135,6 @@ const getPillList = async (req, res) => {
  *       3. 해당 약의 유저가 아닐 경우
  *       4. 서버 에러
  */
-
 const getPillInformation = async (req, res) => {
   try {
     const { user } = req.header;
@@ -187,10 +184,57 @@ const getPillInformation = async (req, res) => {
   }
 };
 
+/**
+ *  @닉네임_중복체크
+ *  @route POST /user/name
+ *  @access public
+ *  @err 1. request body에 해당 값이 없는 경우
+ *       2. 이미 사용중인 닉네임일 경우
+ */
+const checkUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    // err1.
+    if (!username)
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+
+    const data = await userService.checkUsername(username);
+
+    // err2.
+    if (data === returnType.NICKNAME_ALREADY_EXIST)
+      return res
+        .status(statusCode.CONFLICT)
+        .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
+
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME));
+  } catch (error) {
+    functions.logger.error(
+      `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
+      `[CONTENT] ${error}`,
+    );
+    console.log(error);
+
+    const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
+      req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
+    } ${JSON.stringify(error)}`;
+    slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
+
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+};
+
 module.exports = {
   getPillList,
   getPillInformation,
   updateUsername,
+  checkUsername,
   getUsername: async (req, res) => {
     try {
       const { username } = req.query;
@@ -233,44 +277,6 @@ module.exports = {
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, responseMessage.READ_USER_INFO, data));
   },
-  checkUsername: async (req, res) => {
-    try {
-      const { username } = req.body;
-
-      if (!username)
-        return res
-          .status(statusCode.BAD_REQUEST)
-          .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
-
-      const data = await userService.getUsername(username);
-
-      if (data.length !== 0) {
-        return res
-          .status(statusCode.CONFLICT)
-          .send(util.fail(statusCode.CONFLICT, responseMessage.ALREADY_NICKNAME));
-      }
-
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, responseMessage.USEABLE_NICKNAME));
-    } catch (error) {
-      functions.logger.error(
-        `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl}`,
-        `[CONTENT] ${error}`,
-      );
-      console.log(error);
-
-      const slackMessage = `[ERROR] [${req.method.toUpperCase()}] ${req.originalUrl} ${
-        req.header.user ? `uid:${req.header.user.id}` : 'req.user 없음'
-      } ${JSON.stringify(error)}`;
-      slackAPI.sendMessageToSlack(slackMessage, slackAPI.DEV_WEB_HOOK_ERROR_MONITORING);
-
-      return res
-        .status(statusCode.INTERNAL_SERVER_ERROR)
-        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-  },
-
   isCalendarShare: async (req, res) => {
     try {
       const { user } = req.header;

@@ -105,10 +105,33 @@ const updateUsername = async (userId, username) => {
   }
 };
 
+/**
+ * checkUsername
+ * 닉네임 중복 체크 로직
+ * @param username - 닉네임
+ */
+const checkUsername = async (username) => {
+  let client;
+
+  try {
+    client = await db.connect();
+
+    const checkUsername = await userDB.findUserByName(client, username);
+    if (checkUsername.length !== 0) return returnType.NICKNAME_ALREADY_EXIST;
+
+    return username;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   getUserPillList,
   getUserPillInfo,
   updateUsername,
+  checkUsername,
   getUsername: async (userId, username) => {
     let client;
     const req = `username = ${username}`;
